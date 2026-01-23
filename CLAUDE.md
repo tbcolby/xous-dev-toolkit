@@ -175,14 +175,8 @@ log = "0.4.14"
 log-server = { package = "xous-api-log", version = "0.1.68" }
 xous-names = { package = "xous-api-names", version = "0.9.70" }
 
-# Graphics
+# Graphics (IMPORTANT: do NOT add ux-api or blitstr2 directly — use gam re-exports)
 gam = { path = "../../services/gam" }
-ux-api = { path = "../../libs/ux-api" }
-blitstr2 = { path = "../../libs/blitstr2" }
-
-# Input/UI
-modals = { path = "../../services/modals" }
-locales = { path = "../../locales" }
 
 # Timing
 ticktimer-server = { package = "xous-api-ticktimer", version = "0.9.68" }
@@ -191,18 +185,32 @@ ticktimer-server = { package = "xous-api-ticktimer", version = "0.9.68" }
 num-derive = { version = "0.4.2", default-features = false }
 num-traits = { version = "0.2.14", default-features = false }
 
-# Optional: Networking
-# net = { path = "../../services/net" }
-# dns = { path = "../../services/dns" }
-# tls = { path = "../../libs/tls" }
-
 # Optional: Storage
 # pddb = { path = "../../services/pddb" }
 
-# Optional: Hardware
-# com = { path = "../../services/com" }
-# trng = { path = "../../services/trng" }
+# Optional: Input/UI modals
+# modals = { path = "../../services/modals" }
+
+# Optional: Networking (just use std::net — it routes through net service automatically)
+# No crate dependency needed for std::net::TcpListener, TcpStream, UdpSocket
+
+# Optional: HTTP client
+# ureq = { version = "2.9.4", default-features = false, features = ["json"] }
+# tls = { path = "../../libs/tls" }
 ```
+
+### Graphics Import Pattern
+
+**IMPORTANT**: Do NOT depend on `ux-api` or `blitstr2` directly. These require feature flags
+(`precursor`/`hosted`/`renode`) that the xtask build system manages. Instead, access all types
+through `gam`'s re-exports:
+
+```rust
+use gam::{Gam, GlyphStyle, UxRegistration};  // Core GAM types + blitstr2::GlyphStyle
+use gam::menu::*;  // Re-exports ux_api::minigfx::* (Point, Rectangle, DrawStyle, TextView, etc.)
+```
+
+Note: `Point` uses `isize` coordinates (not `i16`).
 
 ## Graphics API
 
@@ -217,7 +225,7 @@ num-traits = { version = "0.2.14", default-features = false }
 All drawing uses 1-bit color: `PixelColor::Dark` (black) or `PixelColor::Light` (white).
 
 ```rust
-use ux_api::minigfx::*;
+use gam::menu::*;  // Point, Rectangle, DrawStyle, PixelColor, etc.
 
 // Style for filled shapes
 let filled_dark = DrawStyle::new(PixelColor::Dark, PixelColor::Dark, 1);
@@ -257,8 +265,8 @@ gam.redraw()?;
 ### Text Rendering
 
 ```rust
-use gam::TextView;
-use blitstr2::GlyphStyle;
+use gam::{GlyphStyle, Gam};
+use gam::menu::*;  // TextView, TextBounds, Rectangle, Point
 
 let mut tv = TextView::new(
     gid,
@@ -369,6 +377,29 @@ let confirmed = modals.alert_builder("Delete item?")
 ```
 
 ## Networking
+
+### TCP/UDP (std::net — no extra crate needed)
+
+Xous hooks the standard library's networking into the net service via IPC. Apps can use
+`std::net::TcpListener`, `TcpStream`, and `UdpSocket` directly:
+
+```rust
+use std::net::TcpListener;
+use std::io::Read;
+
+let listener = TcpListener::bind("0.0.0.0:7878").unwrap();
+match listener.accept() {
+    Ok((mut stream, addr)) => {
+        let mut buf = vec![0u8; 4096];
+        let n = stream.read(&mut buf).unwrap_or(0);
+        // process buf[..n]
+    }
+    Err(e) => log::error!("Accept failed: {:?}", e),
+}
+```
+
+No `net` crate dependency is needed. The net service (with smoltcp TCP/IP stack) handles
+routing automatically when an app calls any `std::net` function.
 
 ### HTTP Client (ureq + custom TLS)
 
@@ -671,6 +702,7 @@ let greeting = t!("myapp.greeting", locales::LANG);
 | App | Complexity | Demonstrates |
 |-----|-----------|--------------|
 | `apps/hello/` | Minimal | TextView, basic lifecycle |
+| `apps/flashcards/` | Medium | PDDB storage, state machine, TCP import, multi-screen UI |
 | `apps/ball/` | Medium | Framebuffer drawing, animation, sensors, modals |
 | `apps/repl/` | Medium | Text input, command handling |
 | `apps/mtxchat/` | Complex | Networking, TLS, background threads, PDDB |
@@ -737,16 +769,35 @@ Function: `F1`, `F2`, `F3`, `F4`
 ### Keyboard Hold Timing (Critical!)
 The keyboard service has a **500ms hold threshold**. If a key is held (press-to-release) for >= 500ms of *emulated time*, the `hold` character variant is produced instead of the base character. Many navigation keys have `hold: None`, meaning they produce **nothing** when held too long.
 
-**Impact**: With Renode running, even small wall-clock delays between Press/Release can exceed 500ms emulated time (CPU runs fast when idle). Keys like Home, Up, Down, Left, Right all have `hold: None` and will be silently dropped.
+**Impact**: With Renode running, even small wall-clock delays between Press/Release can exceed 500ms emulated time (CPU runs fast when idle). Keys like Home, Up, Down, Left, Right all have `hold: None` and will be silently dropped. Character keys produce hold variants (a→@, etc).
 
-**Solution**: Keep press-to-release timing minimal (< 50ms wall-clock works when CPU is busy, but may fail when idle). The most reliable approach:
+**Solution - `timed_key` (RELIABLE)**: Pause emulation, press key, advance exactly 1ms of emulated time, release, resume. This guarantees the hold time is 1ms (well under 500ms):
 ```python
-# Press and release with minimal gap
-sock.sendall(f'sysbus.keyboard Press {key}\n'.encode())
-time.sleep(0.05)  # 50ms wall-clock
-sock.sendall(f'sysbus.keyboard Release {key}\n'.encode())
-time.sleep(0.3)   # wait between different keys
+def timed_key(sock, key, after=1.0):
+    """Press key with exactly 1ms emulated hold time."""
+    sock.sendall(b'pause\n')
+    time.sleep(0.2)
+    sock.sendall(f'sysbus.keyboard Press {key}\n'.encode())
+    time.sleep(0.1)
+    sock.sendall(b'emulation RunFor "0:0:0.001"\n')
+    time.sleep(0.3)
+    sock.sendall(f'sysbus.keyboard Release {key}\n'.encode())
+    time.sleep(0.1)
+    sock.sendall(b'start\n')
+    time.sleep(after)
 ```
+
+**Solution - `InjectLine` (for text input)**: Bypasses hold timing entirely. Characters are injected directly into the keyboard peripheral's UART_CHAR register:
+```python
+def inject_line(sock, text):
+    """Inject string + CR. CR (0x0D) acts as submit in dialogs."""
+    sock.sendall(f'sysbus.keyboard InjectLine "{text}"\n'.encode())
+    time.sleep(0.5)
+```
+
+**When to use which:**
+- `timed_key`: Navigation keys (Home, Down, Up, Space, Return), all character keys in non-text contexts
+- `inject_line`: PIN entry, text input fields. The trailing CR acts as submit/confirm.
 
 ### Xous Keyboard Character Codes
 Apps receiving rawkeys get these Unicode chars from the keyboard:
@@ -765,18 +816,56 @@ Apps receiving rawkeys get these Unicode chars from the keyboard:
 - **App submenu**: Main menu → "Switch to App..." → navigate to app → Home to select
 
 ### PDDB Initialization
-- First boot shows format dialog. PIN for Renode keybox is `a` (single character).
-- Format takes ~5 minutes emulated time on a blank image.
-- **Pre-formatted backup**: After formatting, save `tools/pddb-images/renode.bin` as
-  `renode-formatted.bin`. To skip re-init, copy the formatted version back before launching.
-- `allow_mainmenu` is set to true automatically after PDDB mount completes.
+- First boot with blank flash shows format dialog (radio: Okay/Cancel + [Okay] button)
+- PIN for Renode keybox is `a` (single character)
+- Format takes ~6 minutes emulated time on a blank image
+
+**Full init sequence (blank flash):**
+```python
+# 1. Wait 60s for boot + format dialog
+# 2. Confirm format: navigate to [Okay] button, then submit
+timed_key('Down')       # Okay radio → Cancel radio
+timed_key('Down')       # Cancel radio → [Okay] button
+inject_line("")         # CR submits at button position
+
+# 3. Set PIN
+inject_line("a")        # Types 'a' + CR submits
+
+# 4. Dismiss "press any key" notification
+inject_line("")         # CR dismisses
+
+# 5. Confirm PIN
+inject_line("a")        # Types 'a' + CR submits
+
+# 6. Wait ~6 min for format to complete
+# 7. Unlock with PIN
+inject_line("a")        # Types 'a' + CR submits
+
+# 8. Wait 45s for PDDB mount
+```
+
+**Radio dialog key insight**: Submit (CR or Home) only fires when cursor is at the [Okay] button (index >= items.len()). Pressing Enter while a radio option is focused does NOTHING.
+
+**Quick unlock (pre-formatted):** Just `inject_line("a")` after 45s boot wait.
+
+**Pre-formatted backup**: After formatting, the `renode.bin` file retains the formatted state across runs (it's a backing file). To reset, overwrite with 128MB of 0xFF.
+
+**Automation script**: `xous-dev-toolkit/scripts/renode_capture.py` handles the full sequence.
+```bash
+# Full init + flashcards screenshots:
+python3 scripts/renode_capture.py --init --app flashcards
+
+# Quick capture (PDDB already formatted):
+python3 scripts/renode_capture.py --app flashcards
+```
 
 ### Important Notes
 - **Screenshot extraction**: TakeScreenshot returns iTerm2 inline image protocol (base64 PNG).
   Extract with: `re.search(r'inline=1:([A-Za-z0-9+/=\s]+)', response)`
-- **Emulation speed**: Variable; CPU idle = faster emulated time, CPU busy = slower.
-  500ms hold threshold may trigger differently depending on system load.
-- **InjectKey limitation**: Only passes bottom 8 bits of char value. Cannot inject Unicode
-  chars like '∴' (U+2234). Use matrix Press/Release for non-ASCII keys.
+- **InjectLine vs InjectKey**: `InjectLine` adds string + '\r'. `InjectString` adds string only.
+  `InjectKey` adds single char. All bypass hold timing. The INJECT interrupt must be enabled
+  by the keyboard driver (it is in standard Xous builds).
+- **renode.bin persistence**: The flash backing file retains state across Renode runs.
+  Once formatted, subsequent boots go straight to PIN prompt (no re-format needed).
 - **GDB available**: Port 3333 for SoC, port 3334 for EC
 - **Disk image**: Flash backing file at `tools/pddb-images/renode.bin` (128 MiB, not in git)

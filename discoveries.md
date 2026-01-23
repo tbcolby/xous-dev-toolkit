@@ -2,8 +2,15 @@
 
 Notes accumulated while developing Precursor apps. Update this as you learn new things.
 
-## Confirmed Patterns
+## Confirmed Patterns (Updated 2026-01-23 from Flashcards app build)
 
+- **Do NOT depend on `ux-api` or `blitstr2` directly** — they require platform feature flags.
+  Use `gam::menu::*` (re-exports `ux_api::minigfx::*`) and `gam::GlyphStyle` instead.
+- `Point` coordinates are `isize`, not `i16` (important for layout arithmetic)
+- `std::net::TcpListener`/`TcpStream`/`UdpSocket` work directly in apps — no `net` crate needed.
+  Xous routes std::net calls to the net service via IPC automatically.
+- PDDB `get()` returns a `PddbKey` implementing Read/Write/Seek — always Seek(Start(0)) before reading
+- PDDB feature flags (precursor/hosted/renode) are handled by `cargo xtask`, not by app Cargo.toml
 - GAM rate limits redraws to ~30fps (33ms minimum between flushes)
 - `GamObjectList` is preferred over individual draw calls for atomicity
 - Server names must be globally unique across all running processes
@@ -40,12 +47,15 @@ Notes accumulated while developing Precursor apps. Update this as you learn new 
 - InjectKey path only passes bottom 8 bits of characters (can't inject Unicode like '∴')
 - PDDB first-boot blocks UI until init complete - but format only takes ~5 min on blank image
 - Renode keyboard timing is CPU-load-dependent: idle CPU = faster emulated time = easier to trigger hold
+- **Solution**: Use `pause → Press → emulation RunFor "0:0:0.001" → Release → start` to hold key for exactly 1ms emulated time (well under 500ms threshold). This works reliably for all keys.
+- For text input (PIN entry): `sysbus.keyboard InjectLine "text"` injects characters + CR without hold timing issues. CR (0x0D) acts as submit in PIN/text dialogs.
+- Radio dialog navigation: Down key moves cursor between options; submit only fires when cursor is at [Okay] button (index >= items.len()). Sequence: Down, Down, then CR to confirm.
 
 ## Renode PDDB Setup
 
 - Renode keybox PIN is `a` (single character, hardcoded in `emulation/renode-keybox.bin`)
 - Blank 128 MiB image at `tools/pddb-images/renode.bin` (create with `\xff` fill)
-- First boot: format dialog → PIN "a" twice → ~5 min format → mount → ready
+- First boot: format dialog (Down,Down,CR to confirm) → InjectLine "a" → InjectLine "" (dismiss) → InjectLine "a" (confirm) → ~6 min format → InjectLine "a" (unlock) → mount → ready
 - Pre-formatted backup: `tools/pddb-images/renode-formatted.bin`
 - Copy formatted version to `renode.bin` to skip re-initialization on subsequent runs
 
@@ -64,3 +74,13 @@ Notes accumulated while developing Precursor apps. Update this as you learn new 
 - `cargo xtask renode-image <app>` builds the full image with the specified app
 - Apps must be registered in: workspace `Cargo.toml` members + `apps/manifest.json`
 - Renode provides full system emulation including network (but GUI doesn't work on macOS ARM64)
+
+## Completed Apps
+
+### Flashcards (App #1) — 2026-01-23
+- **Repo**: https://github.com/tbcolby/precursor-flashcards
+- **Features**: Multi-deck PDDB storage, TCP import (port 7878), state machine UI
+- **Key deps**: `gam`, `pddb` (no direct ux-api/blitstr2)
+- **Build**: `cargo xtask renode-image flashcards` — compiles clean (0 warnings)
+- **Import format**: TSV with `#name:` header, pushed via `cat deck.tsv | nc <ip> 7878`
+- **Lessons learned**: gam::menu::* for graphics types, Point is isize, std::net just works
