@@ -1,0 +1,66 @@
+# Discoveries & API Notes
+
+Notes accumulated while developing Precursor apps. Update this as you learn new things.
+
+## Confirmed Patterns
+
+- GAM rate limits redraws to ~30fps (33ms minimum between flushes)
+- `GamObjectList` is preferred over individual draw calls for atomicity
+- Server names must be globally unique across all running processes
+- `main() -> !` pattern is mandatory; use `xous::terminate_process(0)` to exit
+- Apps must handle `FocusChange` to avoid wasting CPU when backgrounded
+- TLS certificate trust is interactive - first connection to new host prompts user
+
+## API Quirks
+
+- `APP_NAME` in UxRegistration must match `context_name` in `apps/manifest.json`
+- `SERVER_NAME` for xous-names registration is separate from `APP_NAME` (convention: `_AppName_`)
+- Modal radiobuttons: Enter at item index just selects payload; Enter at items.len() confirms
+- Menu key is '∴' (U+2234) - used for BOTH opening menu AND selecting items in menu
+- `allow_mainmenu` is set to true automatically after PDDB mount (not PIN entry per se)
+- Menu uses rawkeys with '∴' to select, '↑'/'↓' to navigate — NOT Enter!
+- Arrow keys produce Unicode arrows: '→' (U+2192), '←' (U+2190), '↑' (U+2191), '↓' (U+2193)
+- Do NOT use Apple PUA codes (\u{F700}-\u{F7FF}) for arrow keys in Xous apps
+
+## Keyboard Hold Timing (Critical for Renode)
+
+- Keyboard service has 500ms hold threshold (configurable, default 500ms)
+- If press-to-release emulated time >= 500ms, the `hold` variant is produced
+- Keys with `hold: None` (arrows, Home, Space) produce NOTHING when held — silently dropped!
+- Keys with `hold: Some(x)` produce the hold character (e.g. 'h' hold → '+', 'a' hold → '@')
+- Enter key has same character for all variants (0x0D) — always works regardless of timing
+- Renode keyboard C# has two shift scan code sets:
+  - `ShiftLeft`/`ShiftRight` → (3,0)/(3,9) — WRONG for Xous
+  - `ShiftL`/`ShiftR` → (8,5)/(8,9) — CORRECT for Xous keyboard service
+
+## Things That Don't Work As Expected
+
+- Renode GUI ("XWT") does not work on macOS ARM64 portable package - use `--disable-xwt`
+- Keyboard peripheral Reset desyncs the keyboard service's shift/hold/layer state
+- InjectKey path only passes bottom 8 bits of characters (can't inject Unicode like '∴')
+- PDDB first-boot blocks UI until init complete - but format only takes ~5 min on blank image
+- Renode keyboard timing is CPU-load-dependent: idle CPU = faster emulated time = easier to trigger hold
+
+## Renode PDDB Setup
+
+- Renode keybox PIN is `a` (single character, hardcoded in `emulation/renode-keybox.bin`)
+- Blank 128 MiB image at `tools/pddb-images/renode.bin` (create with `\xff` fill)
+- First boot: format dialog → PIN "a" twice → ~5 min format → mount → ready
+- Pre-formatted backup: `tools/pddb-images/renode-formatted.bin`
+- Copy formatted version to `renode.bin` to skip re-initialization on subsequent runs
+
+## Performance Notes
+
+- 100MHz CPU means JSON parsing is noticeable; prefer small payloads
+- PDDB sync is expensive; batch writes before calling sync()
+- Network latency compounds with TLS handshake overhead
+
+## Toolchain Notes
+
+- Target triple: `riscv32imac-unknown-xous-elf` (userspace), `riscv32imac-unknown-none-elf` (kernel)
+- Does NOT use Rust nightly - uses stable Rust with a custom sysroot
+- Custom sysroot from `betrusted-io/rust` GitHub releases (match your stable Rust version)
+- Install sysroot to: `~/.rustup/toolchains/stable-<host>/lib/rustlib/riscv32imac-unknown-xous-elf/`
+- `cargo xtask renode-image <app>` builds the full image with the specified app
+- Apps must be registered in: workspace `Cargo.toml` members + `apps/manifest.json`
+- Renode provides full system emulation including network (but GUI doesn't work on macOS ARM64)
