@@ -84,3 +84,22 @@ Notes accumulated while developing Precursor apps. Update this as you learn new 
 - **Build**: `cargo xtask renode-image flashcards` — compiles clean (0 warnings)
 - **Import format**: TSV with `#name:` header, pushed via `cat deck.tsv | nc <ip> 7878`
 - **Lessons learned**: gam::menu::* for graphics types, Point is isize, std::net just works
+
+### Timers (App #2) — 2026-01-23
+- **Repo**: https://github.com/tbcolby/precursor-timers
+- **Features**: Pomodoro (25/5/15 min cycles), Stopwatch (centisecond + laps), Countdown collection
+- **Key deps**: `gam`, `pddb`, `modals`, `llio`, `ticktimer-server`, `timer-core` (custom lib)
+- **Build**: `cargo xtask renode-image timers` — compiles clean (0 warnings)
+- **Library crate**: `timer-core` at `libs/timer-core/` — pure Rust, 7 unit tests, host-testable
+- **Lessons learned**:
+  - `std::thread::spawn` works in Xous for background threads
+  - Pump thread pattern: separate SID/CID, `try_receive_message` returns `Result<Option<MessageEnvelope>>`
+  - Non-blocking receive + sleep loop for controllable pump intervals
+  - Must stop pump on FocusChange::Background, restart on Foreground
+  - `AppMode` enum should derive `Copy` to avoid move issues in match arms
+  - Borrow checker: extract data from `&mut self.field` before calling other `&mut self` methods
+  - PDDB binary serialization: manual `to_le_bytes`/`from_le_bytes` works well for small structs
+  - Modals text input: `alert_builder("prompt").field(None, None).build()` → `.first().content`
+  - LLIO vibration: `Llio::new(&xns)` then `llio.vibe(llio::VibePattern::Double)`
+  - Progress bars: two overlapping rectangles (outline + fill, width = fraction * total)
+  - Renode automation: `inject_line("")` is more reliable than `timed_key('Return')` for Enter key in app rawkeys context

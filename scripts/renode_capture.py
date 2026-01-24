@@ -280,6 +280,62 @@ def reset_flash(xous_root=XOUS_ROOT):
             f.write(chunk)
 
 
+def capture_timers(ctl, screenshot_dir):
+    """Capture all timers app screenshots."""
+    def ss(name):
+        return ctl.screenshot(os.path.join(screenshot_dir, name))
+
+    def enter(after=3.0):
+        """Send Enter key via inject_line (CR), which reliably produces '\\r'."""
+        ctl.inject_line("")
+        time.sleep(after)
+
+    print("\n=== Timers Screenshots ===", flush=True)
+
+    # 1. Mode select screen (initial state, cursor on Pomodoro)
+    print("  mode_select...", flush=True)
+    time.sleep(2)
+    ss("mode_select.png")
+
+    # 2. Pomodoro (cursor already on Pomodoro, Enter to select)
+    print("  pomodoro...", flush=True)
+    enter()  # Enter Pomodoro mode
+    enter()  # Start timer
+    time.sleep(3)
+    ss("pomodoro.png")
+
+    # 3. Settings (press 's' from Pomodoro)
+    print("  settings...", flush=True)
+    ctl.timed_key('S', after=3.0)
+    ss("settings.png")
+    ctl.timed_key('Q', after=3.0)  # Back to Pomodoro
+    ctl.timed_key('Q', after=3.0)  # Back to mode select
+
+    # 4. Stopwatch (Down once to Stopwatch, Enter to select)
+    print("  stopwatch...", flush=True)
+    ctl.timed_key('Down', after=2.0)
+    enter()  # Enter Stopwatch mode
+    enter()  # Start stopwatch
+    time.sleep(3)
+    ctl.timed_key('L', after=2.0)  # Lap 1
+    time.sleep(2)
+    ctl.timed_key('L', after=2.0)  # Lap 2
+    time.sleep(1)
+    ss("stopwatch.png")
+    enter()  # Pause
+    ctl.timed_key('Q', after=3.0)  # Back to mode select
+
+    # 5. Countdown list (Down twice to Countdown, Enter)
+    print("  countdown_list...", flush=True)
+    ctl.timed_key('Down', after=1.0)
+    ctl.timed_key('Down', after=1.0)
+    enter()  # Enter Countdown mode
+    ss("countdown_list.png")
+    ctl.timed_key('Q', after=3.0)  # Back to mode select
+
+    print("=== Done! ===", flush=True)
+
+
 def capture_flashcards(ctl, screenshot_dir):
     """Capture all flashcards app screenshots."""
     def ss(name):
@@ -347,6 +403,8 @@ def main():
         screenshot_dir = args.screenshots or f"/Volumes/PlexLaCie/Dev/Precursor/precursor-{args.app}/screenshots"
         if args.app == 'flashcards':
             capture_flashcards(ctl, screenshot_dir)
+        elif args.app == 'timers':
+            capture_timers(ctl, screenshot_dir)
         else:
             print(f"No capture sequence defined for '{args.app}'. Taking one screenshot.", flush=True)
             ctl.screenshot(os.path.join(screenshot_dir, "app.png"))

@@ -625,23 +625,54 @@ See the detailed "Renode Emulation" section below for headless setup, keyboard i
 
 ## Animation/Background Tasks
 
-For apps needing periodic updates (not just event-driven):
+For apps needing periodic updates (not just event-driven), use a controllable pump thread:
 
 ```rust
-// Spawn a pump thread that sends periodic messages
-fn spawn_pump(cid_to_main: xous::CID, interval_ms: usize) {
+// Controllable pump thread with start/stop/quit messages
+fn spawn_pump(main_cid: xous::CID, pump_sid: xous::SID) {
     std::thread::spawn(move || {
         let tt = ticktimer_server::Ticktimer::new().unwrap();
+        let mut running = false;
+        let mut interval_ms = 1000usize;
         loop {
-            tt.sleep_ms(interval_ms).unwrap();
-            // Send blocking scalar to rate-limit
-            xous::send_message(
-                cid_to_main,
-                Message::new_blocking_scalar(AppOp::Pump.to_usize().unwrap(), 0, 0, 0, 0),
-            ).ok();
+            // Check for control messages (non-blocking)
+            match xous::try_receive_message(pump_sid) {
+                Ok(Some(env)) => {
+                    if let xous::Message::Scalar(scalar) = &env.body {
+                        match scalar.id {
+                            0 => { running = true; interval_ms = scalar.arg1; }  // Start
+                            1 => { running = false; }                            // Stop
+                            2 => break,                                          // Quit
+                            _ => {}
+                        }
+                    }
+                }
+                _ => {}
+            }
+            if running {
+                tt.sleep_ms(interval_ms).unwrap();
+                xous::send_message(
+                    main_cid,
+                    xous::Message::new_scalar(AppOp::Pump.to_u32().unwrap() as usize, 0, 0, 0, 0),
+                ).ok();
+            } else {
+                tt.sleep_ms(50).unwrap();  // Low-power poll when stopped
+            }
         }
     });
 }
+
+// Start pump: send scalar with opcode 0, interval in arg1
+xous::send_message(pump_cid, Message::new_scalar(0, 100, 0, 0, 0)).ok();  // 100ms
+// Stop pump: send scalar with opcode 1
+xous::send_message(pump_cid, Message::new_scalar(1, 0, 0, 0, 0)).ok();
+```
+
+**Key patterns:**
+- `try_receive_message()` returns `Result<Option<MessageEnvelope>, Error>` (non-blocking)
+- Stop pump on `FocusChange::Background`, restart on `Foreground`
+- Use 100ms interval for centisecond displays, 1000ms for second-precision timers
+- Zero meaningful CPU usage when pump is stopped (just 50ms poll sleep)
 ```
 
 ## Focus Management
@@ -703,6 +734,7 @@ let greeting = t!("myapp.greeting", locales::LANG);
 |-----|-----------|--------------|
 | `apps/hello/` | Minimal | TextView, basic lifecycle |
 | `apps/flashcards/` | Medium | PDDB storage, state machine, TCP import, multi-screen UI |
+| `apps/timers/` | Medium | Background pump thread, library crate, progress bars, modals, LLIO vibration |
 | `apps/ball/` | Medium | Framebuffer drawing, animation, sensors, modals |
 | `apps/repl/` | Medium | Text input, command handling |
 | `apps/mtxchat/` | Complex | Networking, TLS, background threads, PDDB |
@@ -796,8 +828,9 @@ def inject_line(sock, text):
 ```
 
 **When to use which:**
-- `timed_key`: Navigation keys (Home, Down, Up, Space, Return), all character keys in non-text contexts
-- `inject_line`: PIN entry, text input fields. The trailing CR acts as submit/confirm.
+- `timed_key`: Navigation keys (Home, Down, Up, Space), letter keys (A-Z) in non-text contexts
+- `inject_line("")`: Enter/Return in app rawkeys context — more reliable than `timed_key('Return')` for triggering `'\r'` in key handlers
+- `inject_line("text")`: PIN entry, text input fields. The trailing CR acts as submit/confirm.
 
 ### Xous Keyboard Character Codes
 Apps receiving rawkeys get these Unicode chars from the keyboard:
