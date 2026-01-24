@@ -365,6 +365,122 @@ def capture_flashcards(ctl, screenshot_dir):
     print("=== Done! ===", flush=True)
 
 
+def capture_writer(ctl, screenshot_dir):
+    """Capture all writer app screenshots."""
+    def ss(name):
+        return ctl.screenshot(os.path.join(screenshot_dir, name))
+
+    def enter(after=3.0):
+        ctl.inject_line("")
+        time.sleep(after)
+
+    def esc_cmd(key_name, after=3.0):
+        """Send Esc followed by a command key."""
+        ctl.timed_key('Escape', after=0.5)
+        ctl.timed_key(key_name, after=after)
+
+    print("\n=== Writer Screenshots ===", flush=True)
+
+    # 1. Mode select screen (initial state)
+    print("  mode_select...", flush=True)
+    time.sleep(2)
+    ss("mode_select.png")
+
+    # 2. Enter Markdown Editor (cursor already on it, press Enter)
+    print("  editor...", flush=True)
+    enter()  # → DocList
+    time.sleep(2)
+
+    # 3. New document (press 'n')
+    ctl.timed_key('N', after=3.0)
+    time.sleep(2)
+
+    # 4. Type some markdown content
+    ctl.inject_line("# My Document")
+    time.sleep(1)
+    ctl.inject_line("")  # blank line
+    time.sleep(0.5)
+    ctl.inject_line("This is a **writer** app for Precursor.")
+    time.sleep(0.5)
+    ctl.inject_line("")
+    time.sleep(0.5)
+    ctl.inject_line("## Features")
+    time.sleep(0.5)
+    ctl.inject_line("")
+    time.sleep(0.5)
+    ctl.inject_line("- Markdown styling")
+    time.sleep(0.5)
+    ctl.inject_line("- Journal mode")
+    time.sleep(0.5)
+    ctl.inject_line("- Typewriter mode")
+    time.sleep(0.5)
+    ctl.inject_line("")
+    time.sleep(0.5)
+    ctl.inject_line("> Built for focused writing")
+    time.sleep(0.5)
+    ctl.inject_line("")
+    time.sleep(0.5)
+    ctl.inject_line("---")
+    time.sleep(2)
+
+    # 5. Screenshot editor in edit mode
+    ss("editor_edit.png")
+
+    # 6. Preview mode (Esc + p)
+    print("  editor_preview...", flush=True)
+    esc_cmd('P', after=3.0)
+    ss("editor_preview.png")
+
+    # 7. Back to edit, then export menu (Esc + e)
+    print("  export_menu...", flush=True)
+    esc_cmd('P', after=2.0)  # toggle back to edit
+    esc_cmd('E', after=3.0)  # export menu
+    ss("export_menu.png")
+
+    # 8. Cancel export, back to doc list, back to mode select
+    ctl.timed_key('Q', after=2.0)  # cancel export
+    esc_cmd('Q', after=3.0)  # back to doc list
+    ctl.timed_key('Q', after=3.0)  # back to mode select
+
+    # 9. Journal mode (Down once, Enter)
+    print("  journal...", flush=True)
+    ctl.timed_key('Down', after=2.0)
+    enter()  # Enter journal
+    time.sleep(3)
+
+    # Type some journal content
+    ctl.inject_line("Today I started using the Writer app.")
+    time.sleep(0.5)
+    ctl.inject_line("It has markdown support and auto-saves.")
+    time.sleep(0.5)
+    ctl.inject_line("")
+    time.sleep(0.5)
+    ctl.inject_line("Planning to write more tomorrow.")
+    time.sleep(2)
+    ss("journal.png")
+
+    # Back to mode select
+    esc_cmd('Q', after=3.0)
+
+    # 10. Typewriter mode (Down twice from top, Enter)
+    print("  typewriter...", flush=True)
+    ctl.timed_key('Down', after=1.0)
+    ctl.timed_key('Down', after=1.0)
+    enter()  # Enter typewriter
+    time.sleep(2)
+
+    # Type some freewriting content
+    ctl.inject_line("The quick brown fox jumps over the lazy dog.")
+    time.sleep(0.5)
+    ctl.inject_line("Writing flows freely when you cannot edit.")
+    time.sleep(0.5)
+    ctl.inject_line("Just keep moving forward.")
+    time.sleep(2)
+    ss("typewriter.png")
+
+    print("=== Done! ===", flush=True)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Renode automation for Precursor apps")
     parser.add_argument('--init', action='store_true', help='Initialize PDDB from blank flash')
@@ -405,6 +521,8 @@ def main():
             capture_flashcards(ctl, screenshot_dir)
         elif args.app == 'timers':
             capture_timers(ctl, screenshot_dir)
+        elif args.app == 'writer':
+            capture_writer(ctl, screenshot_dir)
         else:
             print(f"No capture sequence defined for '{args.app}'. Taking one screenshot.", flush=True)
             ctl.screenshot(os.path.join(screenshot_dir, "app.png"))

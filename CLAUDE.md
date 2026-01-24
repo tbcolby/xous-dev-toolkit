@@ -735,6 +735,7 @@ let greeting = t!("myapp.greeting", locales::LANG);
 | `apps/hello/` | Minimal | TextView, basic lifecycle |
 | `apps/flashcards/` | Medium | PDDB storage, state machine, TCP import, multi-screen UI |
 | `apps/timers/` | Medium | Background pump thread, library crate, progress bars, modals, LLIO vibration |
+| `apps/writer/` | Complex | Multi-mode text editor, rawkeys input, line-level markdown styling, PDDB multi-dict, TCP export, Esc-prefix commands |
 | `apps/ball/` | Medium | Framebuffer drawing, animation, sensors, modals |
 | `apps/repl/` | Medium | Text input, command handling |
 | `apps/mtxchat/` | Complex | Networking, TLS, background threads, PDDB |

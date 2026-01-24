@@ -10,7 +10,8 @@ This toolkit was developed entirely through LLM-assisted development (Claude Cod
 |------|---------|
 | `CLAUDE.md` | LLM agent instructions for Precursor/Xous app development |
 | `discoveries.md` | API notes and hard-won discoveries from development |
-| `scripts/renode_interact.py` | Renode automation (screenshots, keyboard, PDDB init) |
+| `scripts/renode_interact.py` | Low-level Renode automation (screenshots, keyboard, PDDB init) |
+| `scripts/renode_capture.py` | Full app screenshot capture (boot, unlock, launch, capture all screens) |
 
 ## The Problem
 

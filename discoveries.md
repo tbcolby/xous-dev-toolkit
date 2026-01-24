@@ -103,3 +103,19 @@ Notes accumulated while developing Precursor apps. Update this as you learn new 
   - LLIO vibration: `Llio::new(&xns)` then `llio.vibe(llio::VibePattern::Double)`
   - Progress bars: two overlapping rectangles (outline + fill, width = fraction * total)
   - Renode automation: `inject_line("")` is more reliable than `timed_key('Return')` for Enter key in app rawkeys context
+
+### Writer (App #3) — 2026-01-23
+- **Repo**: https://github.com/tbcolby/precursor-writer
+- **Features**: Markdown Editor (line-level styling, preview, doc management), Journal (date-keyed entries, search), Typewriter (append-only, word count)
+- **Key deps**: `gam`, `pddb`, `llio`, `modals`, `writer-core` (custom lib)
+- **Build**: `cargo xtask renode-image writer` — compiles clean (0 warnings)
+- **Library crate**: `writer-core` at `apps/writer/writer-core/` — pure Rust, 40 unit tests, host-testable
+- **Lessons learned**:
+  - Esc-prefix key commands: `'\u{001b}'` as leader key avoids conflict with text input
+  - Line-level markdown styling: one GlyphStyle per TextView (Large for H1, Bold for H2, Monospace for code)
+  - Multi-dictionary PDDB: `writer.docs` and `writer.journal` keep concerns separated
+  - Binary index management: `_index` key with count + entries for listing documents/dates
+  - Date from `llio::LocalTime`: `get_local_time_ms()` → epoch ms, then manual division for YYYY-MM-DD
+  - Viewport scrolling: TextBuffer tracks viewport_top, ensure_cursor_visible adjusts scroll
+  - Export via TCP listener (port 7879): same pattern as flashcards import but reversed
+  - Standalone repo structure: writer-core nested inside app dir (not in top-level libs/)
