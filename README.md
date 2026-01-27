@@ -48,6 +48,30 @@ python3 scripts/renode_interact.py launch-app Flashcards 1
 python3 scripts/renode_interact.py full-init 90
 ```
 
+### Full App Screenshot Capture
+
+The `renode_capture.py` script automates the complete process of booting Renode, initializing PDDB, launching an app, and capturing screenshots:
+
+```bash
+cd scripts
+
+# First time (or when PDDB PIN unknown): full initialization
+python3 renode_capture.py --init --app flashcards --screenshots ../output
+
+# Subsequent runs (PDDB already formatted with PIN 'a'):
+python3 renode_capture.py --app flashcards --screenshots ../output
+
+# Specify app menu index (default: 1 = first app after Shellchat)
+python3 renode_capture.py --app othello --app-index 1 --screenshots ../output
+```
+
+**Currently supported apps:**
+- `flashcards` - Deck list, cards, study mode
+- `writer` - Mode selection, editing, preview
+- `othello` - Main menu, difficulty selection, gameplay
+
+Adding new apps: Implement a `capture_<appname>()` function in `renode_capture.py`.
+
 ## Screenshots
 
 | PDDB Format Dialog | Formatting Progress | App Running |
@@ -100,6 +124,45 @@ renode --disable-xwt -P 4567 \
 
 # In another terminal: initialize PDDB and launch app
 python3 scripts/renode_interact.py full-init 90
+```
+
+## Screenshot Capture Troubleshooting
+
+### Screenshots show "Incorrect PIN" dialog
+**Cause:** PDDB has different PIN than expected, or was never formatted.
+
+**Solution:** Use `--init` flag to reset and format PDDB:
+```bash
+python3 renode_capture.py --init --app myapp --screenshots ./output
+```
+
+### Screenshots show Shellchat instead of app
+**Cause:** App not appearing in "Switch to App" menu. Usually an app registration issue.
+
+**Solution:** Ensure app uses correct naming pattern:
+```rust
+const SERVER_NAME: &str = "_MyApp_";  // Underscored for xous names server
+const APP_NAME: &str = "MyApp";       // Plain for GAM, must match manifest
+```
+The `APP_NAME` must exactly match `context_name` in `apps/manifest.json`.
+
+### System reboots during capture (uptime jumps backwards)
+**Cause:** App crash during key handling.
+
+**Solution:** Use direct keyboard shortcuts instead of Enter for navigation. Check app's key handling code for panics.
+
+### Keys don't work / wrong characters produced
+**Cause:** Keyboard hold timing issue (>500ms emulated time between press/release).
+
+**Solution:** Always use `timed_key()` method which pauses emulation during key press:
+```python
+def timed_key(key, after=1.0):
+    send('pause')
+    send(f'sysbus.keyboard Press {key}')
+    send('emulation RunFor "0:0:0.001"')  # 1ms hold time
+    send(f'sysbus.keyboard Release {key}')
+    send('start')
+    time.sleep(after)
 ```
 
 ## Critical: Keyboard Hold Timing
