@@ -365,6 +365,52 @@ def capture_flashcards(ctl, screenshot_dir):
     print("=== Done! ===", flush=True)
 
 
+def capture_c64(ctl, screenshot_dir):
+    """Capture all C64 emulator app screenshots."""
+    def ss(name):
+        return ctl.screenshot(os.path.join(screenshot_dir, name))
+
+    def enter(after=3.0):
+        ctl.inject_line("")
+        time.sleep(after)
+
+    print("\n=== C64 Emulator Screenshots ===", flush=True)
+
+    # 1. Menu screen (initial state, cursor on first item or "Import Game")
+    print("  menu...", flush=True)
+    time.sleep(2)
+    ss("menu.png")
+
+    # 2. Navigate to "Boot C64 (no game)" - it's at the bottom of the menu
+    # Move cursor down to "Boot C64 (no game)" (skip "Import Game")
+    print("  boot_c64...", flush=True)
+    ctl.timed_key('Down', after=1.0)  # to "Import Game"
+    ctl.timed_key('Down', after=1.0)  # to "Boot C64"
+    ss("menu_boot.png")
+
+    # 3. Boot the emulator (Enter on "Boot C64")
+    print("  running emulator...", flush=True)
+    enter()  # Select "Boot C64"
+    time.sleep(5)  # Wait for boot and initial render
+    ss("running.png")
+
+    # 4. Back to menu via Menu key (map_key uses '\u{2234}' but we need Renode key)
+    # The Menu key on Precursor sends character code - let's use Home which often maps to menu
+    print("  back to menu...", flush=True)
+    ctl.timed_key('Home', after=3.0)
+    ss("menu_return.png")
+
+    # 5. Import screen
+    print("  import_wait...", flush=True)
+    ctl.timed_key('Up', after=1.0)  # Back to "Import Game"
+    enter()  # Select Import
+    time.sleep(3)
+    ss("import_wait.png")
+
+    # Note: Import will timeout eventually, returning to menu
+    print("=== Done! ===", flush=True)
+
+
 def capture_writer(ctl, screenshot_dir):
     """Capture all writer app screenshots."""
     def ss(name):
@@ -481,6 +527,98 @@ def capture_writer(ctl, screenshot_dir):
     print("=== Done! ===", flush=True)
 
 
+def capture_othello(ctl, screenshot_dir):
+    """Capture all Othello app screenshots."""
+    def ss(name):
+        return ctl.screenshot(os.path.join(screenshot_dir, name))
+
+    def enter(after=3.0):
+        ctl.inject_line("")
+        time.sleep(after)
+
+    print("\n=== Othello Screenshots ===", flush=True)
+
+    # 1. Main menu (initial state after app launch)
+    print("  main_menu...", flush=True)
+    time.sleep(2)
+    ss("main_menu.png")
+
+    # 2. Open F1 menu to start new game
+    print("  new_game_menu...", flush=True)
+    ctl.timed_key('F1', after=2.0)  # Open menu
+    ss("f1_menu.png")
+
+    # Navigate to New Game and select
+    ctl.timed_key('Down', after=0.5)  # Help -> New Game
+    enter()  # Select New Game
+    time.sleep(2)
+    ss("new_game_menu.png")
+
+    # 3. Start Easy game
+    print("  playing...", flush=True)
+    ctl.timed_key('Number1', after=3.0)  # Select Easy
+    time.sleep(5)  # Wait for game to initialize
+
+    # Make a few moves to show gameplay
+    # Move cursor to a valid move position and place
+    ctl.timed_key('Up', after=0.5)
+    enter()  # Try to place disc
+    time.sleep(2)
+
+    # AI makes its move
+    time.sleep(3)
+
+    # Make another move
+    ctl.timed_key('Down', after=0.5)
+    ctl.timed_key('Right', after=0.5)
+    enter()
+    time.sleep(3)
+    ss("playing.png")
+
+    # 4. Show F1 menu during game
+    print("  game_menu...", flush=True)
+    ctl.timed_key('F1', after=2.0)
+    ss("game_menu.png")
+    ctl.timed_key('F4', after=2.0)  # Close menu
+
+    # 5. Continue playing until game over (or simulate)
+    # For demo, we'll play a few more moves
+    print("  playing more moves...", flush=True)
+    for _ in range(5):
+        ctl.timed_key('Down', after=0.3)
+        ctl.timed_key('Right', after=0.3)
+        enter()
+        time.sleep(2)  # AI response time
+
+    # Take another gameplay screenshot
+    ss("playing_midgame.png")
+
+    # 6. Settings screen
+    print("  settings...", flush=True)
+    ctl.timed_key('F4', after=3.0)  # Exit to main menu
+    time.sleep(2)
+    ctl.timed_key('F1', after=2.0)  # Open menu
+
+    # Navigate to Settings
+    for _ in range(4):  # Help, NewGame, Resume(?), Statistics, Settings
+        ctl.timed_key('Down', after=0.5)
+    enter()
+    time.sleep(2)
+    ss("settings.png")
+    ctl.timed_key('F4', after=2.0)  # Back
+
+    # 7. Statistics screen
+    print("  statistics...", flush=True)
+    ctl.timed_key('F1', after=2.0)
+    for _ in range(3):  # Help, NewGame, Resume(?), Statistics
+        ctl.timed_key('Down', after=0.5)
+    enter()
+    time.sleep(2)
+    ss("statistics.png")
+
+    print("=== Done! ===", flush=True)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Renode automation for Precursor apps")
     parser.add_argument('--init', action='store_true', help='Initialize PDDB from blank flash')
@@ -523,6 +661,10 @@ def main():
             capture_timers(ctl, screenshot_dir)
         elif args.app == 'writer':
             capture_writer(ctl, screenshot_dir)
+        elif args.app == 'c64':
+            capture_c64(ctl, screenshot_dir)
+        elif args.app == 'othello':
+            capture_othello(ctl, screenshot_dir)
         else:
             print(f"No capture sequence defined for '{args.app}'. Taking one screenshot.", flush=True)
             ctl.screenshot(os.path.join(screenshot_dir, "app.png"))
