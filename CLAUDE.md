@@ -78,7 +78,8 @@ xous::msg_blocking_scalar_unpack!(msg, arg1, arg2, arg3, arg4, { /* handler */ }
 
 use num_traits::FromPrimitive;
 
-const SERVER_NAME: &str = "_My App Name_";  // Unique, max 64 chars
+const SERVER_NAME: &str = "_MyApp_";  // Underscored - for xous names server registration
+const APP_NAME: &str = "MyApp";          // No underscores - for GAM, must match manifest context_name
 
 #[derive(Debug, num_derive::FromPrimitive, num_derive::ToPrimitive)]
 enum AppOp {
@@ -101,9 +102,9 @@ fn main() -> ! {
     // 3. Connect to GAM for graphics
     let gam = gam::Gam::new(&xns).expect("can't connect to GAM");
 
-    // 4. Register UX with GAM
+    // 4. Register UX with GAM (APP_NAME must match manifest context_name)
     let token = gam.register_ux(gam::UxRegistration {
-        app_name: String::from(SERVER_NAME),
+        app_name: String::from(APP_NAME),
         ux_type: gam::UxType::Chat,  // or Framebuffer for raw drawing
         predictor: None,
         listener: sid.to_array(),
@@ -625,54 +626,23 @@ See the detailed "Renode Emulation" section below for headless setup, keyboard i
 
 ## Animation/Background Tasks
 
-For apps needing periodic updates (not just event-driven), use a controllable pump thread:
+For apps needing periodic updates (not just event-driven):
 
 ```rust
-// Controllable pump thread with start/stop/quit messages
-fn spawn_pump(main_cid: xous::CID, pump_sid: xous::SID) {
+// Spawn a pump thread that sends periodic messages
+fn spawn_pump(cid_to_main: xous::CID, interval_ms: usize) {
     std::thread::spawn(move || {
         let tt = ticktimer_server::Ticktimer::new().unwrap();
-        let mut running = false;
-        let mut interval_ms = 1000usize;
         loop {
-            // Check for control messages (non-blocking)
-            match xous::try_receive_message(pump_sid) {
-                Ok(Some(env)) => {
-                    if let xous::Message::Scalar(scalar) = &env.body {
-                        match scalar.id {
-                            0 => { running = true; interval_ms = scalar.arg1; }  // Start
-                            1 => { running = false; }                            // Stop
-                            2 => break,                                          // Quit
-                            _ => {}
-                        }
-                    }
-                }
-                _ => {}
-            }
-            if running {
-                tt.sleep_ms(interval_ms).unwrap();
-                xous::send_message(
-                    main_cid,
-                    xous::Message::new_scalar(AppOp::Pump.to_u32().unwrap() as usize, 0, 0, 0, 0),
-                ).ok();
-            } else {
-                tt.sleep_ms(50).unwrap();  // Low-power poll when stopped
-            }
+            tt.sleep_ms(interval_ms).unwrap();
+            // Send blocking scalar to rate-limit
+            xous::send_message(
+                cid_to_main,
+                Message::new_blocking_scalar(AppOp::Pump.to_usize().unwrap(), 0, 0, 0, 0),
+            ).ok();
         }
     });
 }
-
-// Start pump: send scalar with opcode 0, interval in arg1
-xous::send_message(pump_cid, Message::new_scalar(0, 100, 0, 0, 0)).ok();  // 100ms
-// Stop pump: send scalar with opcode 1
-xous::send_message(pump_cid, Message::new_scalar(1, 0, 0, 0, 0)).ok();
-```
-
-**Key patterns:**
-- `try_receive_message()` returns `Result<Option<MessageEnvelope>, Error>` (non-blocking)
-- Stop pump on `FocusChange::Background`, restart on `Foreground`
-- Use 100ms interval for centisecond displays, 1000ms for second-precision timers
-- Zero meaningful CPU usage when pump is stopped (just 50ms poll sleep)
 ```
 
 ## Focus Management
@@ -727,6 +697,44 @@ let greeting = t!("myapp.greeting", locales::LANG);
 6. **Not adding to workspace Cargo.toml** - Build system won't find the crate
 7. **Large allocations** - No swap on most configs; OOM kills the process
 8. **Blocking the main loop** - Long operations (network, crypto) should run in a separate thread
+9. **Wrong app registration names** - Use underscored `SERVER_NAME` for xns, plain `APP_NAME` for GAM (see below)
+
+## App Registration Pattern (Critical!)
+
+Apps must use **two separate name constants**:
+
+```rust
+const SERVER_NAME: &str = "_MyApp_";  // Underscored - for xous names server
+const APP_NAME: &str = "MyApp";       // Plain - for GAM, must match manifest context_name
+```
+
+**Why this matters:**
+- `SERVER_NAME` (underscored) prevents name collisions in the xous names server
+- `APP_NAME` (plain) must exactly match `context_name` in `manifest.json`
+- The GAM uses `APP_NAME` to match against auto-generated `apps.rs` constants
+- If these don't match, the app won't appear in "Switch to App" menu
+
+**Usage:**
+```rust
+// Register with xous names server (underscored name)
+let sid = xns.register_name(SERVER_NAME, None)?;
+
+// Register UX with GAM (plain name matching manifest)
+let token = gam.register_ux(gam::UxRegistration {
+    app_name: String::from(APP_NAME),  // NOT SERVER_NAME!
+    // ...
+})?;
+```
+
+**Manifest must match APP_NAME:**
+```json
+{
+  "myapp": {
+    "context_name": "MyApp",  // Must match APP_NAME exactly
+    "menu_name": { ... }
+  }
+}
+```
 
 ## Reference Apps
 
@@ -734,7 +742,7 @@ let greeting = t!("myapp.greeting", locales::LANG);
 |-----|-----------|--------------|
 | `apps/hello/` | Minimal | TextView, basic lifecycle |
 | `apps/flashcards/` | Medium | PDDB storage, state machine, TCP import, multi-screen UI |
-| `apps/timers/` | Medium | Background pump thread, library crate, progress bars, modals, LLIO vibration |
+| `apps/timers/` | Medium | Multiple concurrent timers, custom duration input, timer-core lib |
 | `apps/writer/` | Complex | Multi-mode text editor, rawkeys input, line-level markdown styling, PDDB multi-dict, TCP export, Esc-prefix commands |
 | `apps/ball/` | Medium | Framebuffer drawing, animation, sensors, modals |
 | `apps/repl/` | Medium | Text input, command handling |
@@ -829,9 +837,8 @@ def inject_line(sock, text):
 ```
 
 **When to use which:**
-- `timed_key`: Navigation keys (Home, Down, Up, Space), letter keys (A-Z) in non-text contexts
-- `inject_line("")`: Enter/Return in app rawkeys context — more reliable than `timed_key('Return')` for triggering `'\r'` in key handlers
-- `inject_line("text")`: PIN entry, text input fields. The trailing CR acts as submit/confirm.
+- `timed_key`: Navigation keys (Home, Down, Up, Space, Return), all character keys in non-text contexts
+- `inject_line`: PIN entry, text input fields. The trailing CR acts as submit/confirm.
 
 ### Xous Keyboard Character Codes
 Apps receiving rawkeys get these Unicode chars from the keyboard:

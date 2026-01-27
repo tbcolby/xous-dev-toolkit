@@ -1,121 +1,191 @@
-# Discoveries & API Notes
+# Precursor Development Discoveries
 
-Notes accumulated while developing Precursor apps. Update this as you learn new things.
+Accumulated learnings from building Precursor apps. These supplement CLAUDE.md with real-world debugging experiences.
 
-## Confirmed Patterns (Updated 2026-01-23 from Flashcards app build)
+## Screenshot Capture (Renode)
 
-- **Do NOT depend on `ux-api` or `blitstr2` directly** — they require platform feature flags.
-  Use `gam::menu::*` (re-exports `ux_api::minigfx::*`) and `gam::GlyphStyle` instead.
-- `Point` coordinates are `isize`, not `i16` (important for layout arithmetic)
-- `std::net::TcpListener`/`TcpStream`/`UdpSocket` work directly in apps — no `net` crate needed.
-  Xous routes std::net calls to the net service via IPC automatically.
-- PDDB `get()` returns a `PddbKey` implementing Read/Write/Seek — always Seek(Start(0)) before reading
-- PDDB feature flags (precursor/hosted/renode) are handled by `cargo xtask`, not by app Cargo.toml
-- GAM rate limits redraws to ~30fps (33ms minimum between flushes)
-- `GamObjectList` is preferred over individual draw calls for atomicity
-- Server names must be globally unique across all running processes
-- `main() -> !` pattern is mandatory; use `xous::terminate_process(0)` to exit
-- Apps must handle `FocusChange` to avoid wasting CPU when backgrounded
-- TLS certificate trust is interactive - first connection to new host prompts user
+### Common Failures and Solutions
 
-## API Quirks
+#### 1. PDDB PIN Mismatch
+**Symptom**: Screenshots show "Incorrect PIN" dialog instead of app content.
 
-- `APP_NAME` in UxRegistration must match `context_name` in `apps/manifest.json`
-- `SERVER_NAME` for xous-names registration is separate from `APP_NAME` (convention: `_AppName_`)
-- Modal radiobuttons: Enter at item index just selects payload; Enter at items.len() confirms
-- Menu key is '∴' (U+2234) - used for BOTH opening menu AND selecting items in menu
-- `allow_mainmenu` is set to true automatically after PDDB mount (not PIN entry per se)
-- Menu uses rawkeys with '∴' to select, '↑'/'↓' to navigate — NOT Enter!
-- Arrow keys produce Unicode arrows: '→' (U+2192), '←' (U+2190), '↑' (U+2191), '↓' (U+2193)
-- Do NOT use Apple PUA codes (\u{F700}-\u{F7FF}) for arrow keys in Xous apps
+**Cause**: The `renode.bin` flash image has a different PIN than expected, OR the PDDB was never formatted.
 
-## Keyboard Hold Timing (Critical for Renode)
+**Solution**:
+- Use `--init` flag to reset flash and do full PDDB format with known PIN
+- The format process takes ~6 minutes in Renode
+- After formatting once, the `renode.bin` file retains state - subsequent runs just need unlock
 
-- Keyboard service has 500ms hold threshold (configurable, default 500ms)
-- If press-to-release emulated time >= 500ms, the `hold` variant is produced
-- Keys with `hold: None` (arrows, Home, Space) produce NOTHING when held — silently dropped!
-- Keys with `hold: Some(x)` produce the hold character (e.g. 'h' hold → '+', 'a' hold → '@')
-- Enter key has same character for all variants (0x0D) — always works regardless of timing
-- Renode keyboard C# has two shift scan code sets:
-  - `ShiftLeft`/`ShiftRight` → (3,0)/(3,9) — WRONG for Xous
-  - `ShiftL`/`ShiftR` → (8,5)/(8,9) — CORRECT for Xous keyboard service
+```bash
+# Full init (resets flash, formats PDDB with PIN 'a'):
+python3 renode_capture.py --init --app myapp
 
-## Things That Don't Work As Expected
+# Quick capture (PDDB already formatted):
+python3 renode_capture.py --app myapp
+```
 
-- Renode GUI ("XWT") does not work on macOS ARM64 portable package - use `--disable-xwt`
-- Keyboard peripheral Reset desyncs the keyboard service's shift/hold/layer state
-- InjectKey path only passes bottom 8 bits of characters (can't inject Unicode like '∴')
-- PDDB first-boot blocks UI until init complete - but format only takes ~5 min on blank image
-- Renode keyboard timing is CPU-load-dependent: idle CPU = faster emulated time = easier to trigger hold
-- **Solution**: Use `pause → Press → emulation RunFor "0:0:0.001" → Release → start` to hold key for exactly 1ms emulated time (well under 500ms threshold). This works reliably for all keys.
-- For text input (PIN entry): `sysbus.keyboard InjectLine "text"` injects characters + CR without hold timing issues. CR (0x0D) acts as submit in PIN/text dialogs.
-- Radio dialog navigation: Down key moves cursor between options; submit only fires when cursor is at [Okay] button (index >= items.len()). Sequence: Down, Down, then CR to confirm.
+#### 2. App Not Appearing in Menu / Switch Fails
+**Symptom**: Navigation completes but app doesn't launch; screenshots show Shellchat instead.
 
-## Renode PDDB Setup
+**Cause**: App registration pattern doesn't match Xous conventions.
 
-- Renode keybox PIN is `a` (single character, hardcoded in `emulation/renode-keybox.bin`)
-- Blank 128 MiB image at `tools/pddb-images/renode.bin` (create with `\xff` fill)
-- First boot: format dialog (Down,Down,CR to confirm) → InjectLine "a" → InjectLine "" (dismiss) → InjectLine "a" (confirm) → ~6 min format → InjectLine "a" (unlock) → mount → ready
-- Pre-formatted backup: `tools/pddb-images/renode-formatted.bin`
-- Copy formatted version to `renode.bin` to skip re-initialization on subsequent runs
+**Solution**: Use separate names for xous-names server and GAM UX registration:
+```rust
+// CORRECT pattern (matches Writer, Flashcards, Timers):
+const SERVER_NAME: &str = "_MyApp_";  // Underscored - for xous names server
+const APP_NAME: &str = "MyApp";       // No underscores - for GAM, matches manifest
 
-## Performance Notes
+// In main():
+let sid = xns.register_name(SERVER_NAME, None)?;  // Uses _MyApp_
+let token = gam.register_ux(gam::UxRegistration {
+    app_name: String::from(APP_NAME),  // Uses MyApp
+    // ...
+})?;
+```
 
-- 100MHz CPU means JSON parsing is noticeable; prefer small payloads
-- PDDB sync is expensive; batch writes before calling sync()
-- Network latency compounds with TLS handshake overhead
+**Why this matters**:
+- `SERVER_NAME` with underscores prevents name collisions in the xous names server
+- `APP_NAME` without underscores must match `context_name` in `manifest.json`
+- The GAM uses `APP_NAME` to match against the auto-generated `apps.rs` constants
 
-## Toolchain Notes
+#### 3. System Reboots During Capture
+**Symptom**: Uptime in screenshots jumps backwards (e.g., 0:17:24 → 0:00:30); later screenshots show different state (PIN dialog, Shellchat).
 
-- Target triple: `riscv32imac-unknown-xous-elf` (userspace), `riscv32imac-unknown-none-elf` (kernel)
-- Does NOT use Rust nightly - uses stable Rust with a custom sysroot
-- Custom sysroot from `betrusted-io/rust` GitHub releases (match your stable Rust version)
-- Install sysroot to: `~/.rustup/toolchains/stable-<host>/lib/rustlib/riscv32imac-unknown-xous-elf/`
-- `cargo xtask renode-image <app>` builds the full image with the specified app
-- Apps must be registered in: workspace `Cargo.toml` members + `apps/manifest.json`
-- Renode provides full system emulation including network (but GUI doesn't work on macOS ARM64)
+**Cause**: App crash or panic during key handling. Often triggered by:
+- Pressing Enter which triggers unexpected menu actions
+- Memory issues during complex operations
+- Bugs in state machine transitions
 
-## Completed Apps
+**Solution**:
+- Use direct keyboard shortcuts instead of menu navigation where possible
+- Avoid Enter key for navigation; use app-specific keys (e.g., 'N' for New Game, '1' for select)
+- Take debug screenshots at each step to identify where failure occurs
+- Check for panics in app code triggered by specific key sequences
 
-### Flashcards (App #1) — 2026-01-23
-- **Repo**: https://github.com/tbcolby/precursor-flashcards
-- **Features**: Multi-deck PDDB storage, TCP import (port 7878), state machine UI
-- **Key deps**: `gam`, `pddb` (no direct ux-api/blitstr2)
-- **Build**: `cargo xtask renode-image flashcards` — compiles clean (0 warnings)
-- **Import format**: TSV with `#name:` header, pushed via `cat deck.tsv | nc <ip> 7878`
-- **Lessons learned**: gam::menu::* for graphics types, Point is isize, std::net just works
+#### 4. Keys Not Working / Wrong Characters
+**Symptom**: Navigation keys (Home, Down, Up) don't work; character keys produce wrong output (a→@).
 
-### Timers (App #2) — 2026-01-23
-- **Repo**: https://github.com/tbcolby/precursor-timers
-- **Features**: Pomodoro (25/5/15 min cycles), Stopwatch (centisecond + laps), Countdown collection
-- **Key deps**: `gam`, `pddb`, `modals`, `llio`, `ticktimer-server`, `timer-core` (custom lib)
-- **Build**: `cargo xtask renode-image timers` — compiles clean (0 warnings)
-- **Library crate**: `timer-core` at `libs/timer-core/` — pure Rust, 7 unit tests, host-testable
-- **Lessons learned**:
-  - `std::thread::spawn` works in Xous for background threads
-  - Pump thread pattern: separate SID/CID, `try_receive_message` returns `Result<Option<MessageEnvelope>>`
-  - Non-blocking receive + sleep loop for controllable pump intervals
-  - Must stop pump on FocusChange::Background, restart on Foreground
-  - `AppMode` enum should derive `Copy` to avoid move issues in match arms
-  - Borrow checker: extract data from `&mut self.field` before calling other `&mut self` methods
-  - PDDB binary serialization: manual `to_le_bytes`/`from_le_bytes` works well for small structs
-  - Modals text input: `alert_builder("prompt").field(None, None).build()` → `.first().content`
-  - LLIO vibration: `Llio::new(&xns)` then `llio.vibe(llio::VibePattern::Double)`
-  - Progress bars: two overlapping rectangles (outline + fill, width = fraction * total)
-  - Renode automation: `inject_line("")` is more reliable than `timed_key('Return')` for Enter key in app rawkeys context
+**Cause**: Keyboard hold timing issue. Keys held >500ms emulated time produce hold variants or nothing.
 
-### Writer (App #3) — 2026-01-23
-- **Repo**: https://github.com/tbcolby/precursor-writer
-- **Features**: Markdown Editor (line-level styling, preview, doc management), Journal (date-keyed entries, search), Typewriter (append-only, word count)
-- **Key deps**: `gam`, `pddb`, `llio`, `modals`, `writer-core` (custom lib)
-- **Build**: `cargo xtask renode-image writer` — compiles clean (0 warnings)
-- **Library crate**: `writer-core` at `apps/writer/writer-core/` — pure Rust, 40 unit tests, host-testable
-- **Lessons learned**:
-  - Esc-prefix key commands: `'\u{001b}'` as leader key avoids conflict with text input
-  - Line-level markdown styling: one GlyphStyle per TextView (Large for H1, Bold for H2, Monospace for code)
-  - Multi-dictionary PDDB: `writer.docs` and `writer.journal` keep concerns separated
-  - Binary index management: `_index` key with count + entries for listing documents/dates
-  - Date from `llio::LocalTime`: `get_local_time_ms()` → epoch ms, then manual division for YYYY-MM-DD
-  - Viewport scrolling: TextBuffer tracks viewport_top, ensure_cursor_visible adjusts scroll
-  - Export via TCP listener (port 7879): same pattern as flashcards import but reversed
-  - Standalone repo structure: writer-core nested inside app dir (not in top-level libs/)
+**Solution**: Always use `timed_key()` for reliable key presses:
+```python
+def timed_key(key, hold_ms=1, after=1.0):
+    """Press key with exactly hold_ms emulated time."""
+    send('pause')
+    send(f'sysbus.keyboard Press {key}')
+    send(f'emulation RunFor "0:0:0.{hold_ms:03d}"')
+    send(f'sysbus.keyboard Release {key}')
+    send('start')
+    time.sleep(after)
+```
+
+### App-Specific Capture Tips
+
+#### General Pattern
+1. Launch app via menu navigation (Home → Down → Home → Down×N → Home)
+2. Wait for app initialization (5-10 seconds)
+3. Use app-specific direct keys, not Enter for navigation
+4. Take screenshots with sufficient delay (3-4 seconds) for screen updates
+
+#### Othello
+- Main menu responds to 'N' key (New Game menu directly)
+- Difficulty selection responds to '1', '2', '3', '4', '5' keys
+- Avoid Enter on main menu (opens F1 menu which can cause issues)
+
+#### Writer
+- Mode selection responds to Enter
+- Uses Esc-prefix commands (Esc+P for preview, Esc+Q to quit)
+
+#### Flashcards
+- Deck list responds to Enter to open deck
+- Uses 'I' for import, 'M' for manage menu
+
+## App Registration
+
+### Manifest Entry
+```json
+{
+  "myapp": {
+    "context_name": "MyApp",  // Must match APP_NAME in code (no underscores)
+    "menu_name": {
+      "appmenu.myapp": {
+        "en": "My App",
+        "en-tts": "My App"
+      }
+    }
+  }
+}
+```
+
+### Auto-Generated Files
+When building with `cargo xtask`, these files are generated:
+- `services/gam/src/apps.rs` - Contains `APP_NAME_MYAPP` constant
+- `services/status/src/app_autogen.rs` - Contains menu dispatch logic
+
+The `context_name` from manifest becomes the `APP_NAME_*` constant value.
+
+### Debugging Registration Issues
+1. Check `apps.rs` contains your app constant
+2. Verify `context_name` in manifest matches `APP_NAME` in code exactly
+3. Ensure app is added to both `members` and `default-members` in root Cargo.toml
+4. Rebuild with `cargo xtask renode-image myapp` to regenerate auto files
+
+## Graphics API
+
+### Type Mismatches
+Common error: Circle/DrawStyle parameters expect `isize`, not `u16`.
+
+```rust
+// Wrong:
+Circle::new_with_style(center, radius as u16, style)
+
+// Correct:
+let radius: isize = 14;
+Circle::new_with_style(center, radius, style)
+```
+
+### DrawStyle stroke_width
+The `stroke_width` field is `isize`, not `u16`:
+```rust
+DrawStyle {
+    fill_color: None,
+    stroke_color: Some(PixelColor::Dark),
+    stroke_width: 3,  // isize, not u16
+}
+```
+
+## Borrow Checker Patterns
+
+### Mutating Self While Borrowing State
+Common pattern when you need to extract data from state, then mutate self:
+
+```rust
+// Wrong - borrow checker error:
+if let AppState::Playing { game, mode, .. } = &self.state {
+    self.update_stats(*mode);  // Error: can't mutate while borrowing
+    self.state = AppState::GameOver { game: game.clone(), .. };
+}
+
+// Correct - extract first, then mutate:
+let data = if let AppState::Playing { game, mode, .. } = &self.state {
+    Some((game.clone(), *mode))
+} else {
+    None
+};
+if let Some((game, mode)) = data {
+    self.update_stats(mode);
+    self.state = AppState::GameOver { game, mode, .. };
+}
+```
+
+## PDDB
+
+### Timing
+- Format: ~6 minutes in Renode
+- Mount after unlock: ~45 seconds
+- First access to a key after mount: may have slight delay
+
+### Key/Dictionary Naming
+- Dictionary names: max 111 characters
+- Key names: max 95 characters
+- Use dots for namespacing: `myapp.settings`, `myapp.data`
