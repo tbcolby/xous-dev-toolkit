@@ -528,7 +528,7 @@ def capture_writer(ctl, screenshot_dir):
 
 
 def capture_othello(ctl, screenshot_dir):
-    """Capture all Othello app screenshots."""
+    """Capture Othello app screenshots - using direct keys to avoid crashes."""
     def ss(name):
         return ctl.screenshot(os.path.join(screenshot_dir, name))
 
@@ -540,81 +540,46 @@ def capture_othello(ctl, screenshot_dir):
 
     # 1. Main menu (initial state after app launch)
     print("  main_menu...", flush=True)
-    time.sleep(2)
+    time.sleep(3)
     ss("main_menu.png")
 
-    # 2. Open F1 menu to start new game
+    # 2. Press 'N' to go to New Game menu (direct key, not Enter)
     print("  new_game_menu...", flush=True)
-    ctl.timed_key('F1', after=2.0)  # Open menu
-    ss("f1_menu.png")
-
-    # Navigate to New Game and select
-    ctl.timed_key('Down', after=0.5)  # Help -> New Game
-    enter()  # Select New Game
-    time.sleep(2)
+    ctl.timed_key('N', after=3.0)
     ss("new_game_menu.png")
 
-    # 3. Start Easy game
-    print("  playing...", flush=True)
-    ctl.timed_key('Number1', after=3.0)  # Select Easy
+    # 3. Press '1' to start Easy game
+    print("  starting easy game...", flush=True)
+    ctl.timed_key('Number1', after=5.0)
     time.sleep(5)  # Wait for game to initialize
+    ss("game_start.png")
 
-    # Make a few moves to show gameplay
-    # Move cursor to a valid move position and place
-    ctl.timed_key('Up', after=0.5)
-    enter()  # Try to place disc
-    time.sleep(2)
-
-    # AI makes its move
-    time.sleep(3)
-
-    # Make another move
-    ctl.timed_key('Down', after=0.5)
-    ctl.timed_key('Right', after=0.5)
-    enter()
-    time.sleep(3)
+    # 4. Move cursor and make a move
+    print("  playing...", flush=True)
+    # Move up to find a valid move position
+    ctl.timed_key('Up', after=1.0)
+    ctl.timed_key('Up', after=1.0)
+    enter(after=3.0)  # Place disc
+    time.sleep(3)  # Wait for AI response
     ss("playing.png")
 
-    # 4. Show F1 menu during game
-    print("  game_menu...", flush=True)
-    ctl.timed_key('F1', after=2.0)
+    # 5. Make another move
+    print("  more moves...", flush=True)
+    ctl.timed_key('Down', after=1.0)
+    ctl.timed_key('Right', after=1.0)
+    enter(after=3.0)
+    time.sleep(3)  # Wait for AI
+    ss("playing_2.png")
+
+    # 6. Open F1 menu during game
+    print("  game menu...", flush=True)
+    ctl.timed_key('F1', after=3.0)
     ss("game_menu.png")
-    ctl.timed_key('F4', after=2.0)  # Close menu
 
-    # 5. Continue playing until game over (or simulate)
-    # For demo, we'll play a few more moves
-    print("  playing more moves...", flush=True)
-    for _ in range(5):
-        ctl.timed_key('Down', after=0.3)
-        ctl.timed_key('Right', after=0.3)
-        enter()
-        time.sleep(2)  # AI response time
-
-    # Take another gameplay screenshot
-    ss("playing_midgame.png")
-
-    # 6. Settings screen
-    print("  settings...", flush=True)
-    ctl.timed_key('F4', after=3.0)  # Exit to main menu
-    time.sleep(2)
-    ctl.timed_key('F1', after=2.0)  # Open menu
-
-    # Navigate to Settings
-    for _ in range(4):  # Help, NewGame, Resume(?), Statistics, Settings
-        ctl.timed_key('Down', after=0.5)
-    enter()
-    time.sleep(2)
-    ss("settings.png")
-    ctl.timed_key('F4', after=2.0)  # Back
-
-    # 7. Statistics screen
-    print("  statistics...", flush=True)
-    ctl.timed_key('F1', after=2.0)
-    for _ in range(3):  # Help, NewGame, Resume(?), Statistics
-        ctl.timed_key('Down', after=0.5)
-    enter()
-    time.sleep(2)
-    ss("statistics.png")
+    # 7. Close menu with F4
+    print("  closing menu...", flush=True)
+    ctl.timed_key('F4', after=3.0)
+    ss("after_f4.png")
 
     print("=== Done! ===", flush=True)
 
