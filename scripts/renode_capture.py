@@ -528,7 +528,7 @@ def capture_writer(ctl, screenshot_dir):
 
 
 def capture_othello(ctl, screenshot_dir):
-    """Capture Othello app screenshots - using direct keys to avoid crashes."""
+    """Capture comprehensive Othello screenshots including full games at each AI level."""
     def ss(name):
         return ctl.screenshot(os.path.join(screenshot_dir, name))
 
@@ -536,52 +536,170 @@ def capture_othello(ctl, screenshot_dir):
         ctl.inject_line("")
         time.sleep(after)
 
-    print("\n=== Othello Screenshots ===", flush=True)
+    def play_game(ai_wait=2, max_moves=70):
+        """Play moves until game ends or max_moves reached."""
+        move_count = 0
+        # Scan board making moves - cursor wraps around
+        for _ in range(max_moves):
+            # Try different directions to find valid moves
+            ctl.timed_key('Right', after=0.3)
+            enter(after=ai_wait)
+            move_count += 1
+            if move_count % 8 == 0:
+                ctl.timed_key('Down', after=0.3)
+            if move_count % 20 == 0:
+                print(f"      ...move {move_count}", flush=True)
 
-    # 1. Main menu (initial state after app launch)
-    print("  main_menu...", flush=True)
+    print("\n=== Othello Comprehensive Screenshots ===", flush=True)
+
+    # ========== MAIN MENU ==========
+    print("  [1] Main menu...", flush=True)
     time.sleep(3)
-    ss("main_menu.png")
+    ss("01_main_menu.png")
 
-    # 2. Press 'N' to go to New Game menu (direct key, not Enter)
-    print("  new_game_menu...", flush=True)
+    # ========== NEW GAME MENU ==========
+    print("  [2] New game menu...", flush=True)
     ctl.timed_key('N', after=3.0)
-    ss("new_game_menu.png")
+    ss("02_new_game_menu.png")
 
-    # 3. Press '1' to start Easy game
-    print("  starting easy game...", flush=True)
+    # ========== EASY GAME ==========
+    print("  [3] Starting Easy game...", flush=True)
     ctl.timed_key('Number1', after=5.0)
-    time.sleep(5)  # Wait for game to initialize
-    ss("game_start.png")
+    time.sleep(3)
+    ss("03_easy_start.png")
 
-    # 4. Move cursor and make a move
-    print("  playing...", flush=True)
-    # Move up to find a valid move position
-    ctl.timed_key('Up', after=1.0)
-    ctl.timed_key('Up', after=1.0)
-    enter(after=3.0)  # Place disc
-    time.sleep(3)  # Wait for AI response
-    ss("playing.png")
+    print("  [4] Playing Easy game (this takes a few minutes)...", flush=True)
+    play_game(ai_wait=2, max_moves=65)
+    time.sleep(3)
+    ss("04_easy_end.png")
 
-    # 5. Make another move
-    print("  more moves...", flush=True)
-    ctl.timed_key('Down', after=1.0)
-    ctl.timed_key('Right', after=1.0)
-    enter(after=3.0)
-    time.sleep(3)  # Wait for AI
-    ss("playing_2.png")
-
-    # 6. Open F1 menu during game
-    print("  game menu...", flush=True)
-    ctl.timed_key('F1', after=3.0)
-    ss("game_menu.png")
-
-    # 7. Close menu with F4
-    print("  closing menu...", flush=True)
+    # Back to main menu
+    print("  [5] Returning to menu...", flush=True)
     ctl.timed_key('F4', after=3.0)
-    ss("after_f4.png")
+    enter(after=2.0)  # Dismiss any dialog
+    time.sleep(2)
 
-    print("=== Done! ===", flush=True)
+    # ========== MEDIUM GAME ==========
+    print("  [6] Starting Medium game...", flush=True)
+    ctl.timed_key('N', after=3.0)
+    ctl.timed_key('Number2', after=5.0)
+    time.sleep(3)
+    ss("05_medium_start.png")
+
+    print("  [7] Playing Medium game...", flush=True)
+    play_game(ai_wait=3, max_moves=65)
+    time.sleep(3)
+    ss("06_medium_end.png")
+
+    ctl.timed_key('F4', after=3.0)
+    enter(after=2.0)
+    time.sleep(2)
+
+    # ========== HARD GAME ==========
+    print("  [8] Starting Hard game...", flush=True)
+    ctl.timed_key('N', after=3.0)
+    ctl.timed_key('Number3', after=5.0)
+    time.sleep(3)
+    ss("07_hard_start.png")
+
+    print("  [9] Playing Hard game...", flush=True)
+    play_game(ai_wait=4, max_moves=65)
+    time.sleep(3)
+    ss("08_hard_end.png")
+
+    ctl.timed_key('F4', after=3.0)
+    enter(after=2.0)
+    time.sleep(2)
+
+    # ========== EXPERT GAME ==========
+    print("  [10] Starting Expert game...", flush=True)
+    ctl.timed_key('N', after=3.0)
+    ctl.timed_key('Number4', after=5.0)
+    time.sleep(3)
+    ss("09_expert_start.png")
+
+    print("  [11] Playing Expert game...", flush=True)
+    play_game(ai_wait=5, max_moves=65)
+    time.sleep(3)
+    ss("10_expert_end.png")
+
+    ctl.timed_key('F4', after=3.0)
+    enter(after=2.0)
+    time.sleep(2)
+
+    # ========== TWO PLAYER MODE ==========
+    print("  [12] Two Player mode...", flush=True)
+    ctl.timed_key('N', after=3.0)
+    ctl.timed_key('Number5', after=5.0)
+    time.sleep(3)
+    ss("11_two_player.png")
+
+    # Make a few moves to show two-player gameplay
+    for _ in range(6):
+        ctl.timed_key('Right', after=0.5)
+        enter(after=1.5)
+
+    ss("12_two_player_midgame.png")
+    ctl.timed_key('F4', after=3.0)
+    time.sleep(2)
+
+    # ========== IN-GAME F1 MENU ==========
+    print("  [13] In-game F1 menu...", flush=True)
+    ctl.timed_key('N', after=3.0)
+    ctl.timed_key('Number1', after=5.0)
+    time.sleep(3)
+    # Make a few moves first
+    for _ in range(4):
+        ctl.timed_key('Right', after=0.5)
+        enter(after=2.0)
+    ctl.timed_key('F1', after=3.0)
+    ss("13_f1_menu.png")
+    ctl.timed_key('F4', after=2.0)
+
+    # ========== HINT FEATURE ==========
+    print("  [14] Hint feature...", flush=True)
+    ctl.timed_key('F1', after=2.0)
+    # Navigate: Help(0), MoveHistory(1), Hint(2)
+    ctl.timed_key('Down', after=0.5)
+    ctl.timed_key('Down', after=0.5)
+    enter(after=3.0)
+    ss("14_hint.png")
+
+    # ========== SETTINGS ==========
+    print("  [15] Settings...", flush=True)
+    ctl.timed_key('F4', after=2.0)  # Exit current game
+    time.sleep(2)
+    ctl.timed_key('S', after=3.0)
+    ss("15_settings.png")
+
+    # Toggle a setting
+    enter(after=2.0)
+    ss("16_settings_toggled.png")
+    ctl.timed_key('F4', after=2.0)
+
+    # ========== STATISTICS ==========
+    print("  [16] Statistics (should show game results)...", flush=True)
+    ctl.timed_key('F1', after=2.0)
+    # Navigate: Help(0), NewGame(1), Statistics(2) - in main menu context
+    ctl.timed_key('Down', after=0.5)
+    ctl.timed_key('Down', after=0.5)
+    ctl.timed_key('Down', after=0.5)
+    enter(after=3.0)
+    ss("17_statistics.png")
+    ctl.timed_key('F4', after=2.0)
+
+    # ========== HELP SCREEN ==========
+    print("  [17] Help screen...", flush=True)
+    ctl.timed_key('F1', after=2.0)
+    enter(after=3.0)  # First item is Help
+    ss("18_help.png")
+    ctl.timed_key('F4', after=2.0)
+
+    # ========== FINAL MAIN MENU ==========
+    print("  [18] Final main menu...", flush=True)
+    ss("19_final_menu.png")
+
+    print("=== Done! 19 screenshots captured ===", flush=True)
 
 
 def main():

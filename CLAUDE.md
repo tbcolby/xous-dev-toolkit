@@ -1,912 +1,204 @@
-# Precursor/Xous App Development Agent
+# CLAUDE.md
 
-You are a specialized assistant for developing applications on the Precursor hardware platform running the Xous microkernel OS. You have deep knowledge of the Xous architecture, APIs, and hardware constraints.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Approach
+## Repository Purpose
 
-- **Exploratory**: Infer from source code, try reasonable approaches, document assumptions
-- **Pragmatic**: Prioritize working code over theoretical perfection
-- **Resource-aware**: Always consider the 100MHz CPU and limited RAM
-- When uncertain about an API, check the source in `xous-core/` before guessing
+This is the **Xous Development Toolkit** — automation tools and specialized agents for developing Precursor/Xous apps. It provides:
 
-## Repository Layout
+- **Multi-agent system** for full development lifecycle
+- **Python automation** for headless Renode testing on macOS ARM64
+- **Domain specialists** for ideation, architecture, graphics, storage, networking, build, testing, and review
 
+## Agent System
+
+This toolkit uses a **supervisor/specialist agent model** for comprehensive app development. See `agents/README.md` for full documentation.
+
+### Quick Reference
+
+| Agent | Invoke When... |
+|-------|----------------|
+| **Supervisor** | Starting a new task, need routing |
+| **Ideation** | Conceiving apps, designing UX, prioritizing features |
+| **Architecture** | Designing state machines, opcodes, module structure |
+| **Graphics** | Implementing UI, text rendering, drawing |
+| **Storage** | PDDB persistence, serialization, key management |
+| **Networking** | TCP/UDP, HTTP, TLS, background sync |
+| **Build** | Cargo.toml, manifest.json, workspace, deployment |
+| **Testing** | Renode automation, screenshots, validation |
+| **Review** | Code review, patterns, performance, pitfalls |
+
+### Development Flow
 ```
-xous-core/
-├── apps/              # User applications (where our apps live)
-├── services/          # Core OS services (gam, net, pddb, keyboard, etc.)
-├── libs/              # Shared libraries (blitstr2, tls, ux-api, etc.)
-├── kernel/            # Xous microkernel (reference only)
-├── loader/            # Boot loader (reference only)
-├── xous-rs/           # Core Xous APIs and syscalls
-├── xous-ipc/          # IPC primitives
-├── locales/           # i18n translations
-├── xtask/             # Build system
-├── emulation/         # Renode emulator configs
-└── tools/             # Flashing and signing tools
-```
-
-## Hardware Constraints
-
-- **Display**: 336x536 pixels, 1-bit (black/white only, no grayscale)
-- **CPU**: 100MHz VexRISC-V RV32IMAC (single core)
-- **RAM**: ~16 MiB total, ~4-8 MiB available for apps after OS services
-- **Storage**: 128 MiB SPI NOR flash, ~98 MiB for PDDB
-- **Input**: Physical keyboard (no touchscreen)
-- **Network**: WF200 WiFi module (2.4GHz)
-- **RNG**: Hardware TRNG
-- **Sensors**: Gyroscope/accelerometer via COM service
-
-## Xous Architecture
-
-Xous is a **microkernel** OS. All communication between processes uses **message passing**. There are no shared memory regions between processes (with limited exceptions for performance-critical paths).
-
-### Key Concepts
-
-- **Server**: A process that registers a name and receives messages
-- **Client**: Connects to a server by name, sends messages
-- **SID** (Server ID): Unique identifier for a server's message queue
-- **CID** (Connection ID): Handle for sending messages to a server
-- **Opcode**: Numeric message type ID, typically an enum with `FromPrimitive`/`ToPrimitive`
-- **Scalar Message**: Up to 4 `usize` values, no heap allocation
-- **Memory Message**: Passes a memory buffer between processes
-
-### Message Types
-
-```rust
-// Non-blocking scalar (fire and forget)
-xous::send_message(cid, Message::new_scalar(opcode, a1, a2, a3, a4))?;
-
-// Blocking scalar (waits for response)
-xous::send_message(cid, Message::new_blocking_scalar(opcode, a1, a2, a3, a4))?;
-
-// Return a scalar response to a blocking message
-xous::return_scalar(msg.sender, value)?;
-
-// Unpack scalar messages in handler
-xous::msg_scalar_unpack!(msg, arg1, arg2, arg3, arg4, { /* handler */ });
-xous::msg_blocking_scalar_unpack!(msg, arg1, arg2, arg3, arg4, { /* handler */ });
+User Request → Supervisor → Ideation → Architecture
+                              ↓
+                    Graphics / Storage / Networking
+                              ↓
+                    Build → Testing → Review → Ship
 ```
 
-## App Anatomy
+Load an agent's context by reading `agents/<name>.md` when working in that domain.
 
-### Minimal App Template
+---
 
-```rust
-#![cfg_attr(target_os = "none", no_std)]
-#![cfg_attr(target_os = "none", no_main)]
+## Python Automation
 
-use num_traits::FromPrimitive;
+The toolkit includes Python scripts for headless Renode testing:
 
-const SERVER_NAME: &str = "_MyApp_";  // Underscored - for xous names server registration
-const APP_NAME: &str = "MyApp";          // No underscores - for GAM, must match manifest context_name
+## Repository Structure
 
-#[derive(Debug, num_derive::FromPrimitive, num_derive::ToPrimitive)]
-enum AppOp {
-    Redraw = 0,
-    Rawkeys,
-    FocusChange,
-    Quit,
-}
-
-fn main() -> ! {
-    // 1. Initialize logging
-    log_server::init_wait().unwrap();
-    log::set_max_level(log::LevelFilter::Info);
-    log::info!("my PID is {}", xous::process::id());
-
-    // 2. Connect to name server and register
-    let xns = xous_names::XousNames::new().unwrap();
-    let sid = xns.register_name(SERVER_NAME, None).expect("can't register server");
-
-    // 3. Connect to GAM for graphics
-    let gam = gam::Gam::new(&xns).expect("can't connect to GAM");
-
-    // 4. Register UX with GAM (APP_NAME must match manifest context_name)
-    let token = gam.register_ux(gam::UxRegistration {
-        app_name: String::from(APP_NAME),
-        ux_type: gam::UxType::Chat,  // or Framebuffer for raw drawing
-        predictor: None,
-        listener: sid.to_array(),
-        redraw_id: AppOp::Redraw.to_u32().unwrap(),
-        gotinput_id: None,
-        audioframe_id: None,
-        rawkeys_id: Some(AppOp::Rawkeys.to_u32().unwrap()),
-        focuschange_id: Some(AppOp::FocusChange.to_u32().unwrap()),
-    }).expect("couldn't register UX").unwrap();
-
-    // 5. Get drawing canvas
-    let content = gam.request_content_canvas(token).expect("couldn't get canvas");
-    let screensize = gam.get_canvas_bounds(content).expect("couldn't get dimensions");
-
-    // 6. Main event loop
-    let mut allow_redraw = true;
-    loop {
-        let msg = xous::receive_message(sid).unwrap();
-        match FromPrimitive::from_usize(msg.body.id()) {
-            Some(AppOp::Redraw) => {
-                if allow_redraw {
-                    // Draw content here
-                }
-            }
-            Some(AppOp::Rawkeys) => xous::msg_scalar_unpack!(msg, k1, k2, k3, k4, {
-                let keys = [
-                    core::char::from_u32(k1 as u32).unwrap_or('\u{0000}'),
-                    core::char::from_u32(k2 as u32).unwrap_or('\u{0000}'),
-                    core::char::from_u32(k3 as u32).unwrap_or('\u{0000}'),
-                    core::char::from_u32(k4 as u32).unwrap_or('\u{0000}'),
-                ];
-                // Handle key input
-            }),
-            Some(AppOp::FocusChange) => xous::msg_scalar_unpack!(msg, new_state_code, _, _, _, {
-                let new_state = gam::FocusState::convert_focus_change(new_state_code);
-                match new_state {
-                    gam::FocusState::Background => { allow_redraw = false; }
-                    gam::FocusState::Foreground => {
-                        allow_redraw = true;
-                        // Trigger full redraw
-                    }
-                }
-            }),
-            Some(AppOp::Quit) => break,
-            _ => log::error!("unknown opcode: {:?}", msg),
-        }
-    }
-
-    // 7. Cleanup
-    xns.unregister_server(sid).unwrap();
-    xous::destroy_server(sid).unwrap();
-    xous::terminate_process(0)
-}
+```
+xous-dev-toolkit/
+├── agents/                  # Specialist agent definitions
+│   ├── README.md            # Agent system overview
+│   ├── supervisor.md        # Task routing and orchestration
+│   ├── ideation.md          # App concepts and UX design
+│   ├── architecture.md      # Code structure and patterns
+│   ├── graphics.md          # GAM API and UI implementation
+│   ├── storage.md           # PDDB persistence patterns
+│   ├── networking.md        # TCP/UDP, HTTP, TLS
+│   ├── build.md             # Cargo, manifest, deployment
+│   ├── testing.md           # Renode automation and QA
+│   └── review.md            # Code review and quality
+├── scripts/
+│   ├── renode_capture.py    # Full automation: boot, PDDB init, app launch, screenshots
+│   ├── renode_interact.py   # Low-level Renode control (legacy, simpler API)
+│   └── usb_log_monitor.py   # USB serial log viewer for hardware debugging
+├── CLAUDE.md                # This file (toolkit-specific guidance)
+├── README.md                # User documentation
+└── discoveries.md           # Debugging notes and API discoveries
 ```
 
-### Cargo.toml Template
+## Common Commands
 
-```toml
-[package]
-name = "myapp"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-# Core Xous
-xous = "0.9.69"
-xous-ipc = "0.10.9"
-log = "0.4.14"
-log-server = { package = "xous-api-log", version = "0.1.68" }
-xous-names = { package = "xous-api-names", version = "0.9.70" }
-
-# Graphics (IMPORTANT: do NOT add ux-api or blitstr2 directly — use gam re-exports)
-gam = { path = "../../services/gam" }
-
-# Timing
-ticktimer-server = { package = "xous-api-ticktimer", version = "0.9.68" }
-
-# Enum serialization (required for opcodes)
-num-derive = { version = "0.4.2", default-features = false }
-num-traits = { version = "0.2.14", default-features = false }
-
-# Optional: Storage
-# pddb = { path = "../../services/pddb" }
-
-# Optional: Input/UI modals
-# modals = { path = "../../services/modals" }
-
-# Optional: Networking (just use std::net — it routes through net service automatically)
-# No crate dependency needed for std::net::TcpListener, TcpStream, UdpSocket
-
-# Optional: HTTP client
-# ureq = { version = "2.9.4", default-features = false, features = ["json"] }
-# tls = { path = "../../libs/tls" }
-```
-
-### Graphics Import Pattern
-
-**IMPORTANT**: Do NOT depend on `ux-api` or `blitstr2` directly. These require feature flags
-(`precursor`/`hosted`/`renode`) that the xtask build system manages. Instead, access all types
-through `gam`'s re-exports:
-
-```rust
-use gam::{Gam, GlyphStyle, UxRegistration};  // Core GAM types + blitstr2::GlyphStyle
-use gam::menu::*;  // Re-exports ux_api::minigfx::* (Point, Rectangle, DrawStyle, TextView, etc.)
-```
-
-Note: `Point` uses `isize` coordinates (not `i16`).
-
-## Graphics API
-
-### UX Types
-
-- `UxType::Chat` - Text-oriented UI with optional input field
-- `UxType::Framebuffer` - Raw pixel drawing (like the ball app)
-- `UxType::Menu` - Menu-style interface
-
-### Drawing Primitives
-
-All drawing uses 1-bit color: `PixelColor::Dark` (black) or `PixelColor::Light` (white).
-
-```rust
-use gam::menu::*;  // Point, Rectangle, DrawStyle, PixelColor, etc.
-
-// Style for filled shapes
-let filled_dark = DrawStyle::new(PixelColor::Dark, PixelColor::Dark, 1);
-let filled_light = DrawStyle::new(PixelColor::Light, PixelColor::Light, 1);
-let outline_only = DrawStyle { fill_color: None, stroke_color: Some(PixelColor::Dark), stroke_width: 2 };
-
-// Rectangle
-gam.draw_rectangle(gid, Rectangle::new_with_style(
-    Point::new(10, 10), Point::new(100, 50), filled_dark
-))?;
-
-// Circle
-gam.draw_circle(gid, Circle::new_with_style(
-    Point::new(168, 268), 30, filled_dark
-))?;
-
-// Line
-gam.draw_line(gid, Line::new_with_style(
-    Point::new(0, 0), Point::new(100, 100), DrawStyle::new(PixelColor::Dark, PixelColor::Dark, 1)
-))?;
-
-// Rounded rectangle
-gam.draw_rounded_rectangle(gid, RoundedRectangle::new(
-    Rectangle::new(Point::new(10, 10), Point::new(100, 50)), 8
-))?;
-
-// Batch drawing (atomic, preferred for animations)
-let mut draw_list = GamObjectList::new(gid);
-draw_list.push(GamObjectType::Circ(my_circle)).unwrap();
-draw_list.push(GamObjectType::Rect(my_rect)).unwrap();
-gam.draw_list(draw_list)?;
-
-// Commit to screen (REQUIRED after drawing)
-gam.redraw()?;
-```
-
-### Text Rendering
-
-```rust
-use gam::{GlyphStyle, Gam};
-use gam::menu::*;  // TextView, TextBounds, Rectangle, Point
-
-let mut tv = TextView::new(
-    gid,
-    TextBounds::BoundingBox(Rectangle::new_coords(10, 10, 326, 520))
-);
-tv.style = GlyphStyle::Regular;  // See font list below
-tv.draw_border = true;
-tv.border_width = 1;
-tv.rounded_border = Some(3);
-tv.clear_area = true;
-tv.margin = Point::new(4, 4);
-
-use std::fmt::Write;
-write!(tv.text, "Hello, Precursor!").unwrap();
-
-gam.post_textview(&mut tv)?;
-gam.redraw()?;
-```
-
-### Available Fonts (GlyphStyle)
-
-| Style | Height | Notes |
-|-------|--------|-------|
-| `Small` | 12px | Compact text |
-| `Regular` | 15px | Default body text |
-| `Bold` | 15px | Emphasized text |
-| `Monospace` | 15px | Code, fixed-width |
-| `Cjk` | 16px | CJK characters and emoji |
-| `Large` | 24px | Headers (2x Small) |
-| `ExtraLarge` | 30px | Large headers (2x Regular) |
-| `Tall` | 19px | System UI font |
-
-### TextBounds Modes
-
-```rust
-// Fixed bounding box
-TextBounds::BoundingBox(Rectangle::new_coords(x0, y0, x1, y1))
-
-// Grows from a corner, with max width
-TextBounds::GrowableFromTl(Point::new(x, y), max_width)  // Top-left, grows down
-TextBounds::GrowableFromBr(Point::new(x, y), max_width)  // Bottom-right, grows up
-TextBounds::GrowableFromBl(Point::new(x, y), max_width)  // Bottom-left, grows up
-TextBounds::GrowableFromTr(Point::new(x, y), max_width)  // Top-right, grows down
-```
-
-### Screen Clear Pattern
-
-```rust
-fn clear_screen(gam: &gam::Gam, gid: gam::Gid, screensize: Point) {
-    gam.draw_rectangle(gid, Rectangle::new_with_style(
-        Point::new(0, 0),
-        screensize,
-        DrawStyle { fill_color: Some(PixelColor::Light), stroke_color: None, stroke_width: 0 },
-    )).expect("can't clear");
-}
-```
-
-## Keyboard Input
-
-Keys arrive as up to 4 chars packed into scalar message parameters:
-
-```rust
-Some(AppOp::Rawkeys) => xous::msg_scalar_unpack!(msg, k1, k2, k3, k4, {
-    let keys = [
-        core::char::from_u32(k1 as u32).unwrap_or('\u{0000}'),
-        core::char::from_u32(k2 as u32).unwrap_or('\u{0000}'),
-        core::char::from_u32(k3 as u32).unwrap_or('\u{0000}'),
-        core::char::from_u32(k4 as u32).unwrap_or('\u{0000}'),
-    ];
-    for &key in keys.iter() {
-        if key != '\u{0000}' {
-            handle_key(key);
-        }
-    }
-}),
-```
-
-### Special Keys
-
-- Arrow keys: `'\u{F700}'` (up), `'\u{F701}'` (down), `'\u{F702}'` (left), `'\u{F703}'` (right)
-- Enter: `'\r'` or `'\n'`
-- Backspace: `'\u{0008}'`
-- Escape: `'\u{001B}'`
-
-### Modal Dialogs (High-Level Input)
-
-```rust
-let modals = modals::Modals::new(&xns).unwrap();
-
-// Text input
-let input = modals.alert_builder("Enter your name:")
-    .field(None, None)  // (placeholder, validator)
-    .build()?;
-
-// Notification
-modals.show_notification("Operation complete!", None)?;
-
-// Radio button selection
-modals.add_list_item("Option A")?;
-modals.add_list_item("Option B")?;
-modals.add_list_item("Option C")?;
-let choice = modals.get_radiobutton("Select mode:")?;
-
-// Yes/No confirmation
-let confirmed = modals.alert_builder("Delete item?")
-    .field(None, None)
-    .build()?;
-```
-
-## Networking
-
-### TCP/UDP (std::net — no extra crate needed)
-
-Xous hooks the standard library's networking into the net service via IPC. Apps can use
-`std::net::TcpListener`, `TcpStream`, and `UdpSocket` directly:
-
-```rust
-use std::net::TcpListener;
-use std::io::Read;
-
-let listener = TcpListener::bind("0.0.0.0:7878").unwrap();
-match listener.accept() {
-    Ok((mut stream, addr)) => {
-        let mut buf = vec![0u8; 4096];
-        let n = stream.read(&mut buf).unwrap_or(0);
-        // process buf[..n]
-    }
-    Err(e) => log::error!("Accept failed: {:?}", e),
-}
-```
-
-No `net` crate dependency is needed. The net service (with smoltcp TCP/IP stack) handles
-routing automatically when an app calls any `std::net` function.
-
-### HTTP Client (ureq + custom TLS)
-
-```rust
-use ureq;
-use tls::xtls::TlsConnector;
-use std::sync::Arc;
-
-// Create HTTP agent with Xous TLS
-let agent = ureq::builder()
-    .tls_connector(Arc::new(TlsConnector {}))
-    .build();
-
-// GET request
-let response = agent
-    .get("https://api.example.com/data")
-    .set("Accept", "application/json")
-    .set("Authorization", &format!("Bearer {}", token))
-    .call()?;
-
-let body: serde_json::Value = response.into_json()?;
-
-// POST request with JSON
-let response = agent
-    .post("https://api.example.com/submit")
-    .set("Accept", "application/json")
-    .set("Authorization", &format!("Bearer {}", token))
-    .send_string(&serde_json::to_string(&payload)?)?;
-```
-
-### Error Handling for Network Requests
-
-```rust
-match agent.get(url).call() {
-    Ok(response) => {
-        if let Ok(body) = response.into_json::<serde_json::Value>() {
-            // Process response
-        }
-    }
-    Err(ureq::Error::Status(code, response)) => {
-        let err_body = response.into_string().unwrap_or_default();
-        log::warn!("HTTP {}: {}", code, err_body);
-    }
-    Err(ureq::Error::Transport(e)) => {
-        log::warn!("Network error: {:?}", e.kind());
-    }
-}
-```
-
-### TLS Certificate Trust
-
-The first time connecting to a new host, Xous will probe the certificate chain and may prompt the user to trust it. Trusted certs are stored in PDDB under the `tls.trusted` dictionary.
-
-### Dependencies for Networking
-
-```toml
-[dependencies]
-ureq = { version = "2.9.4", default-features = false, features = ["json"] }
-tls = { path = "../../libs/tls" }
-```
-
-## PDDB Storage
-
-The PDDB (Plausibly Deniable Database) provides encrypted key-value storage organized as:
-`basis > dictionary > key`
-
-### Basic Read/Write
-
-```rust
-use pddb::Pddb;
-use std::io::{Read, Write, Seek, SeekFrom};
-
-let pddb = Pddb::new();
-
-// Write data
-match pddb.get(
-    "myapp.settings",       // dictionary name (max 111 chars)
-    "last_sync",            // key name (max 95 chars)
-    None,                   // basis (None = default)
-    true,                   // create dict if missing
-    true,                   // create key if missing
-    Some(256),              // allocation size hint
-    None::<fn()>,           // basis change callback
-) {
-    Ok(mut key) => {
-        key.write_all(b"2024-01-15T10:30:00Z")?;
-        pddb.sync()?;  // Flush to disk
-    }
-    Err(e) => log::warn!("PDDB write error: {:?}", e),
-}
-
-// Read data
-match pddb.get("myapp.settings", "last_sync", None, false, false, None, None::<fn()>) {
-    Ok(mut key) => {
-        let mut data = Vec::new();
-        key.read_to_end(&mut data)?;
-        let text = String::from_utf8(data)?;
-    }
-    Err(e) => { /* key doesn't exist or other error */ }
-}
-```
-
-### List Keys/Dictionaries
-
-```rust
-// List all keys in a dictionary
-let keys = pddb.list_keys("myapp.data", None)?;
-for key_name in keys {
-    log::info!("Found key: {}", key_name);
-}
-
-// List all dictionaries
-let dicts = pddb.list_dict(None)?;
-
-// Delete a key
-pddb.delete_key("myapp.data", "old_key", None)?;
-pddb.sync()?;
-```
-
-### Serialization Pattern
-
-```rust
-use serde::{Serialize, Deserialize};
-
-#[derive(Serialize, Deserialize)]
-struct AppState {
-    page: u32,
-    highlights: Vec<String>,
-    last_sync: String,
-}
-
-// Save
-let state = AppState { page: 5, highlights: vec![], last_sync: "now".into() };
-let data = serde_json::to_vec(&state)?;
-let mut key = pddb.get("myapp.state", "current", None, true, true, Some(data.len()), None::<fn()>)?;
-key.write_all(&data)?;
-pddb.sync()?;
-
-// Load
-let mut key = pddb.get("myapp.state", "current", None, false, false, None, None::<fn()>)?;
-let mut buf = Vec::new();
-key.read_to_end(&mut buf)?;
-let state: AppState = serde_json::from_slice(&buf)?;
-```
-
-## Toolchain Setup
-
-The Xous target `riscv32imac-unknown-xous-elf` is a Tier 3 Rust target with std support upstreamed into the Rust compiler.
+### Screenshot Capture (Primary Use Case)
 
 ```bash
-# Ensure you have a recent Rust (nightly may be required for Tier 3 targets)
-rustup update
-rustup component add rust-src
+cd scripts
 
-# The target is built from source via -Zbuild-std or has been pre-built
-# The xtask handles all target-specific flags automatically
+# Full PDDB init (blank flash) + app capture:
+python3 renode_capture.py --init --app flashcards --screenshots ../output
 
-# For the Renode emulator:
-# Download from https://renode.io/#downloads (use nightly builds)
+# Quick capture (PDDB already formatted with PIN 'a'):
+python3 renode_capture.py --app flashcards --screenshots ../output
 
-# For flashing to device:
-pip3 install pyusb
+# Custom app index (if app isn't first in submenu):
+python3 renode_capture.py --app othello --app-index 2 --screenshots ../output
 ```
 
-**Cargo config** (already in `xous-core/.cargo/config.toml`):
-- Sets `crossbeam_no_atomic_64` flag (RV32 has no 64-bit atomics)
-- Configures curve25519 backend for RISC-V
-- Provides `cargo xtask` alias
-
-## Build & Deploy
-
-### Adding a New App
-
-1. Create `apps/myapp/` with `Cargo.toml` and `src/main.rs`
-2. Add to workspace in root `Cargo.toml`:
-   ```toml
-   # In both default-members and members arrays:
-   "apps/myapp",
-   ```
-3. Add to `apps/manifest.json`:
-   ```json
-   {
-     "myapp": {
-       "context_name": "My App Display Name",
-       "menu_name": {
-         "appmenu.myapp": {
-           "en": "My App",
-           "en-tts": "My App"
-         }
-       }
-     }
-   }
-   ```
-
-### Build Commands
+### USB Log Monitoring (Hardware)
 
 ```bash
-# Build for Renode emulator
-cargo xtask renode-image myapp
-
-# Build for real Precursor hardware
-cargo xtask app-image myapp
-
-# Build with XIP (execute-in-place, frees RAM)
-cargo xtask app-image-xip myapp
-
-# Run in hosted mode (Linux/macOS simulation)
-cargo xtask run myapp
-
-# Debug build for Renode
-cargo xtask renode-image-debug myapp
+# First, on the Precursor: open shellchat, type "usb console"
+# Then on your Mac:
+python3 scripts/usb_log_monitor.py                    # Auto-detect
+python3 scripts/usb_log_monitor.py --filter myapp     # Filter by keyword
+python3 scripts/usb_log_monitor.py --save debug.log   # Save to file
 ```
 
-### Flash to Device
+### Low-Level Renode Interaction
 
 ```bash
-python3 tools/usb_update.py -k
+# Take a screenshot (requires Renode already running on port 4567)
+python3 scripts/renode_interact.py screenshot output.png
+
+# Press a key
+python3 scripts/renode_interact.py press-key Home
+
+# Full init sequence
+python3 scripts/renode_interact.py full-init 90
 ```
 
-### Renode Emulator
+## Architecture
 
-See the detailed "Renode Emulation" section below for headless setup, keyboard interaction, and PDDB initialization.
+### RenodeController Class (`renode_capture.py`)
 
-## Animation/Background Tasks
+The core automation class that communicates with Renode via telnet:
 
-For apps needing periodic updates (not just event-driven):
-
-```rust
-// Spawn a pump thread that sends periodic messages
-fn spawn_pump(cid_to_main: xous::CID, interval_ms: usize) {
-    std::thread::spawn(move || {
-        let tt = ticktimer_server::Ticktimer::new().unwrap();
-        loop {
-            tt.sleep_ms(interval_ms).unwrap();
-            // Send blocking scalar to rate-limit
-            xous::send_message(
-                cid_to_main,
-                Message::new_blocking_scalar(AppOp::Pump.to_usize().unwrap(), 0, 0, 0, 0),
-            ).ok();
-        }
-    });
-}
-```
-
-## Focus Management
-
-Apps receive `FocusChange` messages when they go to background/foreground:
-
-```rust
-Some(AppOp::FocusChange) => xous::msg_scalar_unpack!(msg, state_code, _, _, _, {
-    match gam::FocusState::convert_focus_change(state_code) {
-        gam::FocusState::Background => {
-            allow_redraw = false;
-            // Stop timers, pause network polling
-        }
-        gam::FocusState::Foreground => {
-            allow_redraw = true;
-            // Resume activity, trigger full redraw
-            gam.redraw().unwrap();
-        }
-    }
-}),
-```
-
-## Localization
-
-```rust
-use locales;
-
-// In code:
-let greeting = t!("myapp.greeting", locales::LANG);
-
-// In locales/src/i18n.json (auto-generated from app manifests + custom):
-// Typically apps add translations to their own locale files
-```
-
-## Performance Guidelines
-
-- **Batch draws**: Use `GamObjectList` instead of individual draw calls
-- **Rate limit**: GAM enforces ~30fps max (33ms between redraws)
-- **Stop when backgrounded**: Always gate on `allow_redraw` flag
-- **Minimize allocations**: Reuse buffers where possible
-- **Network timeouts**: Always set reasonable timeouts for HTTP requests
-- **PDDB sync**: Don't call `pddb.sync()` after every write; batch when possible
-- **Sleep between polls**: Use `ticktimer.sleep_ms()` not busy-wait
-
-## Common Pitfalls
-
-1. **Forgetting `gam.redraw()`** - Drawing commands are buffered; nothing shows without this
-2. **Not handling FocusChange** - App will waste CPU drawing when backgrounded
-3. **Server name collisions** - Each app's `SERVER_NAME` must be globally unique
-4. **Message loop never returns** - `main()` returns `!`, use `xous::terminate_process(0)` to exit
-5. **Missing manifest.json entry** - App won't appear in device menu
-6. **Not adding to workspace Cargo.toml** - Build system won't find the crate
-7. **Large allocations** - No swap on most configs; OOM kills the process
-8. **Blocking the main loop** - Long operations (network, crypto) should run in a separate thread
-9. **Wrong app registration names** - Use underscored `SERVER_NAME` for xns, plain `APP_NAME` for GAM (see below)
-
-## App Registration Pattern (Critical!)
-
-Apps must use **two separate name constants**:
-
-```rust
-const SERVER_NAME: &str = "_MyApp_";  // Underscored - for xous names server
-const APP_NAME: &str = "MyApp";       // Plain - for GAM, must match manifest context_name
-```
-
-**Why this matters:**
-- `SERVER_NAME` (underscored) prevents name collisions in the xous names server
-- `APP_NAME` (plain) must exactly match `context_name` in `manifest.json`
-- The GAM uses `APP_NAME` to match against auto-generated `apps.rs` constants
-- If these don't match, the app won't appear in "Switch to App" menu
-
-**Usage:**
-```rust
-// Register with xous names server (underscored name)
-let sid = xns.register_name(SERVER_NAME, None)?;
-
-// Register UX with GAM (plain name matching manifest)
-let token = gam.register_ux(gam::UxRegistration {
-    app_name: String::from(APP_NAME),  // NOT SERVER_NAME!
-    // ...
-})?;
-```
-
-**Manifest must match APP_NAME:**
-```json
-{
-  "myapp": {
-    "context_name": "MyApp",  // Must match APP_NAME exactly
-    "menu_name": { ... }
-  }
-}
-```
-
-## Reference Apps
-
-| App | Complexity | Demonstrates |
-|-----|-----------|--------------|
-| `apps/hello/` | Minimal | TextView, basic lifecycle |
-| `apps/flashcards/` | Medium | PDDB storage, state machine, TCP import, multi-screen UI |
-| `apps/timers/` | Medium | Multiple concurrent timers, custom duration input, timer-core lib |
-| `apps/writer/` | Complex | Multi-mode text editor, rawkeys input, line-level markdown styling, PDDB multi-dict, TCP export, Esc-prefix commands |
-| `apps/ball/` | Medium | Framebuffer drawing, animation, sensors, modals |
-| `apps/repl/` | Medium | Text input, command handling |
-| `apps/mtxchat/` | Complex | Networking, TLS, background threads, PDDB |
-| `apps/vault/` | Complex | PDDB storage, complex UI, USB HID |
-| `services/skeleton/` | Template | Service pattern with suspend/resume |
-
-## Key Source Files
-
-- App registration constants: `services/gam/src/apps.rs` (auto-generated)
-- Graphics primitives: `libs/ux-api/src/minigfx/`
-- Text rendering: `libs/blitstr2/src/`
-- GAM client API: `services/gam/src/lib.rs`
-- Modal dialogs: `services/modals/src/lib.rs`
-- Network service: `services/net/src/`
-- PDDB client: `services/pddb/src/lib.rs`
-- TLS connector: `libs/tls/src/xtls.rs`
-
-## Renode Emulation
-
-### Setup
-```bash
-# Install: Download Renode ARM64 portable DMG from https://github.com/renode/renode/releases
-# Symlink: ln -s /Applications/Renode.app/Contents/MacOS/renode ~/bin/renode
-
-# Create blank 128 MiB PDDB flash backing file (required, not in git)
-python3 -c "
-with open('tools/pddb-images/renode.bin', 'wb') as f:
-    for _ in range(128):
-        f.write(b'\xff' * (1024*1024))
-"
-```
-
-### Running Headless (macOS - GUI doesn't work)
-```bash
-cd xous-core
-# Build the image first
-cargo xtask renode-image flashcards
-
-# Run headless with telnet monitor on port 4567
-renode --disable-xwt -P 4567 \
-  -e 'path add @/path/to/xous-core; i @emulation/xous-release.resc; start'
-```
-
-### Monitor Commands (via telnet to port 4567)
-```
-mach set "SoC"                              # Switch to SoC machine context
-sysbus.memlcd TakeScreenshot                 # Capture framebuffer (returns base64 PNG)
-sysbus.keyboard Press <KeyScanCode>          # Press key (Enter, Down, Up, A-Z, Number0-9, Space, etc.)
-sysbus.keyboard Release <KeyScanCode>        # Release key
-sysbus.keyboard Reset                        # Reset keyboard peripheral (fixes stuck states)
-sysbus WriteDoubleWord 0xF0017030 0x3        # Re-enable keyboard interrupts after reset
-pause / start                                # Pause/resume emulation
-peripherals                                  # List all peripherals
-```
-
-### Key Scan Codes
-Letters: `A` through `Z` | Numbers: `Number0` through `Number9`
-Navigation: `Up`, `Down`, `Left`, `Right`, `Home` (menu key = '∴')
-Special: `Return` (Enter), `Space`, `BackSpace`, `ShiftL`, `ShiftR`
-Function: `F1`, `F2`, `F3`, `F4`
-
-**Warning**: `ShiftLeft`/`ShiftRight` map to WRONG positions (3,0)/(3,9). Use `ShiftL`/`ShiftR` for correct Xous shift at (8,5)/(8,9).
-
-### Keyboard Hold Timing (Critical!)
-The keyboard service has a **500ms hold threshold**. If a key is held (press-to-release) for >= 500ms of *emulated time*, the `hold` character variant is produced instead of the base character. Many navigation keys have `hold: None`, meaning they produce **nothing** when held too long.
-
-**Impact**: With Renode running, even small wall-clock delays between Press/Release can exceed 500ms emulated time (CPU runs fast when idle). Keys like Home, Up, Down, Left, Right all have `hold: None` and will be silently dropped. Character keys produce hold variants (a→@, etc).
-
-**Solution - `timed_key` (RELIABLE)**: Pause emulation, press key, advance exactly 1ms of emulated time, release, resume. This guarantees the hold time is 1ms (well under 500ms):
 ```python
-def timed_key(sock, key, after=1.0):
-    """Press key with exactly 1ms emulated hold time."""
-    sock.sendall(b'pause\n')
-    time.sleep(0.2)
-    sock.sendall(f'sysbus.keyboard Press {key}\n'.encode())
-    time.sleep(0.1)
-    sock.sendall(b'emulation RunFor "0:0:0.001"\n')
-    time.sleep(0.3)
-    sock.sendall(f'sysbus.keyboard Release {key}\n'.encode())
-    time.sleep(0.1)
-    sock.sendall(b'start\n')
-    time.sleep(after)
+class RenodeController:
+    def timed_key(key, hold_ms=1, after=1.0)  # Safe key press with timing control
+    def inject_line(text)                      # Direct text injection (bypasses timing)
+    def screenshot(filepath)                   # Capture LCD as PNG
+    def init_pddb(pin)                         # Full PDDB format sequence
+    def unlock_pddb(pin)                       # Unlock already-formatted PDDB
+    def launch_app(app_index)                  # Navigate menu to launch app
 ```
 
-**Solution - `InjectLine` (for text input)**: Bypasses hold timing entirely. Characters are injected directly into the keyboard peripheral's UART_CHAR register:
+### Key Timing Problem & Solutions
+
+The Xous keyboard has a **500ms hold threshold**. Keys held longer produce hold variants or are dropped entirely. Two solutions:
+
+1. **`timed_key()`** — Pauses emulation, presses key, advances exactly 1ms, releases. Use for navigation keys.
+2. **`inject_line()`** — Injects text directly into keyboard buffer. Use for PIN entry and text input.
+
+### Adding Support for New Apps
+
+1. Create a `capture_<appname>()` function in `renode_capture.py`:
+
 ```python
-def inject_line(sock, text):
-    """Inject string + CR. CR (0x0D) acts as submit in dialogs."""
-    sock.sendall(f'sysbus.keyboard InjectLine "{text}"\n'.encode())
-    time.sleep(0.5)
+def capture_myapp(ctl, screenshot_dir):
+    """Capture all myapp screenshots."""
+    def ss(name):
+        return ctl.screenshot(os.path.join(screenshot_dir, name))
+
+    def enter(after=3.0):
+        ctl.inject_line("")
+        time.sleep(after)
+
+    print("\n=== MyApp Screenshots ===", flush=True)
+
+    # Initial state
+    ss("initial.png")
+
+    # Navigate and capture
+    ctl.timed_key('Down', after=2.0)
+    enter()
+    ss("next_screen.png")
+
+    print("=== Done! ===", flush=True)
 ```
 
-**When to use which:**
-- `timed_key`: Navigation keys (Home, Down, Up, Space, Return), all character keys in non-text contexts
-- `inject_line`: PIN entry, text input fields. The trailing CR acts as submit/confirm.
+2. Add the app to the dispatch in `main()`:
 
-### Xous Keyboard Character Codes
-Apps receiving rawkeys get these Unicode chars from the keyboard:
-- Arrows: `'→'` (U+2192), `'←'` (U+2190), `'↑'` (U+2191), `'↓'` (U+2193)
-- Menu key: `'∴'` (U+2234) - from Home key at position (5,2)
-- Enter: `'\r'` (0x0D) - from Return key at position (7,9)
-- Backspace: `'\u{08}'` - from BackSpace at position (6,9)
-- Shift In: `'\u{0F}'` - shift indicator (not a printable char)
-
-**Do NOT use Apple PUA codes** (`\u{F700}`-`\u{F7FF}`) for arrow keys in Xous apps.
-
-### Menu Navigation
-- **Open menu**: Press `Home` key (produces '∴') while an App-layout context is focused
-- **Navigate menu**: `Down`/`Up` keys (produce '↓'/'↑')
-- **Select menu item**: Press `Home` key again (produces '∴') — NOT Enter!
-- **App submenu**: Main menu → "Switch to App..." → navigate to app → Home to select
-
-### PDDB Initialization
-- First boot with blank flash shows format dialog (radio: Okay/Cancel + [Okay] button)
-- PIN for Renode keybox is `a` (single character)
-- Format takes ~6 minutes emulated time on a blank image
-
-**Full init sequence (blank flash):**
 ```python
-# 1. Wait 60s for boot + format dialog
-# 2. Confirm format: navigate to [Okay] button, then submit
-timed_key('Down')       # Okay radio → Cancel radio
-timed_key('Down')       # Cancel radio → [Okay] button
-inject_line("")         # CR submits at button position
-
-# 3. Set PIN
-inject_line("a")        # Types 'a' + CR submits
-
-# 4. Dismiss "press any key" notification
-inject_line("")         # CR dismisses
-
-# 5. Confirm PIN
-inject_line("a")        # Types 'a' + CR submits
-
-# 6. Wait ~6 min for format to complete
-# 7. Unlock with PIN
-inject_line("a")        # Types 'a' + CR submits
-
-# 8. Wait 45s for PDDB mount
+elif args.app == 'myapp':
+    capture_myapp(ctl, screenshot_dir)
 ```
 
-**Radio dialog key insight**: Submit (CR or Home) only fires when cursor is at the [Okay] button (index >= items.len()). Pressing Enter while a radio option is focused does NOTHING.
+## Configuration
 
-**Quick unlock (pre-formatted):** Just `inject_line("a")` after 45s boot wait.
+Key constants at the top of `renode_capture.py`:
 
-**Pre-formatted backup**: After formatting, the `renode.bin` file retains the formatted state across runs (it's a backing file). To reset, overwrite with 128MB of 0xFF.
-
-**Automation script**: `xous-dev-toolkit/scripts/renode_capture.py` handles the full sequence.
-```bash
-# Full init + flashcards screenshots:
-python3 scripts/renode_capture.py --init --app flashcards
-
-# Quick capture (PDDB already formatted):
-python3 scripts/renode_capture.py --app flashcards
+```python
+MONITOR_PORT = 4567          # Renode telnet port
+XOUS_ROOT = "/path/to/xous-core"  # Update for your system
+RENODE = "/Applications/Renode.app/Contents/MacOS/renode"
+DEFAULT_PIN = "a"            # PDDB PIN for test images
 ```
 
-### Important Notes
-- **Screenshot extraction**: TakeScreenshot returns iTerm2 inline image protocol (base64 PNG).
-  Extract with: `re.search(r'inline=1:([A-Za-z0-9+/=\s]+)', response)`
-- **InjectLine vs InjectKey**: `InjectLine` adds string + '\r'. `InjectString` adds string only.
-  `InjectKey` adds single char. All bypass hold timing. The INJECT interrupt must be enabled
-  by the keyboard driver (it is in standard Xous builds).
-- **renode.bin persistence**: The flash backing file retains state across Renode runs.
-  Once formatted, subsequent boots go straight to PIN prompt (no re-format needed).
-- **GDB available**: Port 3333 for SoC, port 3334 for EC
-- **Disk image**: Flash backing file at `tools/pddb-images/renode.bin` (128 MiB, not in git)
+## Dependencies
+
+- Python 3.x (standard library only for renode scripts)
+- `pyserial` (only for usb_log_monitor.py): `pip install pyserial`
+- Renode emulator with ARM64 support
+
+## Key Scan Codes Reference
+
+| Key | Code | Notes |
+|-----|------|-------|
+| Letters | `A`-`Z` | Uppercase scan codes |
+| Numbers | `Number0`-`Number9` | |
+| Navigation | `Up`, `Down`, `Left`, `Right` | Timing-critical (use `timed_key`) |
+| Menu/Select | `Home` | Opens menu AND selects items |
+| Enter | `Return` | |
+| Function | `F1`, `F2`, `F3`, `F4` | |
+| Shift | `ShiftL`, `ShiftR` | NOT `ShiftLeft`/`ShiftRight` |
+
+## Debugging Tips
+
+- **Keys not working**: Use `timed_key()` instead of bare press/release
+- **Wrong characters**: Key held too long; reduce `after` parameter or use `inject_line()`
+- **App not launching**: Check app index in menu; Shellchat is index 0
+- **PIN mismatch**: Use `--init` flag to reset and reformat PDDB
+- **Screenshot shows wrong state**: Increase `time.sleep()` delays for slower operations
