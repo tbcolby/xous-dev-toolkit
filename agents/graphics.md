@@ -349,6 +349,218 @@ fn redraw(&self, gam: &Gam, gid: Gid, screensize: Point) {
 }
 ```
 
+## Text Layout Helpers
+
+### Glyph Height Hint
+Get exact pixel height for a font without creating a TextView:
+```rust
+let height = gam.glyph_height_hint(GlyphStyle::Regular);
+// Returns 15 for Regular, 12 for Small, etc.
+// Use for precise layout calculations
+```
+
+### Pre-flight Bounds Checking
+Check if text fits before rendering:
+```rust
+let mut tv = TextView::new(gid,
+    TextBounds::BoundingBox(Rectangle::new_coords(10, 10, 326, 520))
+);
+write!(tv.text, "{}", long_text).unwrap();
+
+// Compute bounds without drawing
+gam.bounds_compute_textview(&mut tv)?;
+
+// Check overflow
+if tv.overflow {
+    log::warn!("Text overflows bounds, need scrolling/truncation");
+}
+// tv.cursor contains the end position after text
+```
+
+### Screen Layout Calculator
+
+Pixel budget by font (usable height = 536 - header(30) - status(20) = 486px):
+
+| Font | Height | Max Rows | With 4px gaps |
+|------|--------|----------|---------------|
+| Small | 12px | 40 | 34 |
+| Regular | 15px | 32 | 25 |
+| Tall | 19px | 25 | 21 |
+| Large | 24px | 20 | 17 |
+| ExtraLarge | 30px | 16 | 14 |
+
+Common layouts:
+```
+Header (30px, Bold/Large)
++ 15 list items (Regular, 19px each with 4px gap) = 285px
++ Footer hints (30px, Small)
+= 345px — fits easily with 191px to spare
+
+Header (30px, Bold)
++ Title (30px, ExtraLarge)
++ 8 lines body (Regular, 15px each) = 120px
++ Spacer (20px)
++ 2 buttons (24px each) = 48px
+= 248px — comfortable fit
+```
+
+## Scrolling & Pagination
+
+For content that exceeds one screen:
+```rust
+struct ScrollState {
+    offset: usize,      // First visible item index
+    cursor: usize,      // Selected item index
+    total: usize,       // Total item count
+    visible: usize,     // Items that fit on screen
+}
+
+impl ScrollState {
+    fn scroll_down(&mut self) {
+        if self.cursor < self.total.saturating_sub(1) {
+            self.cursor += 1;
+            // Scroll viewport if cursor goes past visible area
+            if self.cursor >= self.offset + self.visible {
+                self.offset = self.cursor - self.visible + 1;
+            }
+        }
+    }
+
+    fn scroll_up(&mut self) {
+        if self.cursor > 0 {
+            self.cursor -= 1;
+            if self.cursor < self.offset {
+                self.offset = self.cursor;
+            }
+        }
+    }
+
+    fn visible_range(&self) -> std::ops::Range<usize> {
+        self.offset..std::cmp::min(self.offset + self.visible, self.total)
+    }
+}
+```
+
+## Advanced Modals
+
+The `modals` service provides high-level dialog widgets beyond basic alerts.
+
+### Progress Bar
+```rust
+let modals = modals::Modals::new(&xns).unwrap();
+
+// Start (blocking — takes focus)
+modals.start_progress("Syncing data...", 0, 100, 0)?;
+
+// Update (non-blocking — may overflow queue, that's OK)
+for i in 0..100 {
+    do_work(i);
+    match modals.update_progress(i as u32) {
+        Ok(_) => {},
+        Err(_) => { xous::yield_slice(); }  // Queue full, yield
+    }
+}
+
+// Close (blocking)
+modals.finish_progress()?;
+```
+
+### Slider (Range Input)
+```rust
+let value = modals.slider(
+    "Set brightness:",  // title
+    0,                  // min
+    100,                // max
+    50,                 // initial
+    5,                  // step size
+)?;
+// Returns selected value. User adjusts with D-pad, confirms with Home/Enter.
+```
+
+### Checkbox List (Multi-Select)
+```rust
+// Add items with initial checked state
+modals.add_stateful_list_item(false, "Option A")?;
+modals.add_stateful_list_item(true, "Option B")?;   // Pre-checked
+modals.add_stateful_list_item(false, "Option C")?;
+
+// Show and get selections
+let checked = modals.get_checkbox("Select features:")?;
+// Returns Vec<String> of checked item labels
+```
+
+### Radio Button List (Single-Select)
+```rust
+modals.add_list_item("Mode A")?;
+modals.add_list_item("Mode B")?;
+modals.add_list_item("Mode C")?;
+
+let choice = modals.get_radiobutton("Select mode:")?;
+// Returns String of selected item
+```
+
+### Dynamic Notification (Long-Lived, Updatable)
+```rust
+// Show notification (non-blocking)
+modals.dynamic_notification(Some("Connecting..."), Some("Please wait"))?;
+
+// Update text
+modals.dynamic_notification_update(Some("Authenticating..."), None)?;
+
+// Close when done
+modals.dynamic_notification_close()?;
+```
+
+### QR Code Notification
+```rust
+modals.show_notification(
+    "Scan to visit:\nhttps://example.com",
+    Some("https://example.com"),  // QR code content
+)?;
+// Shows text + QR code side-by-side, blocks until user dismisses
+```
+
+### Text Input with Validation
+```rust
+let result = modals
+    .alert_builder("Enter credentials:")
+    .field(Some("username".into()), Some(validate_username))
+    .field(Some("password".into()), None)
+    .field_placeholder_persist(Some("notes (optional)".into()), None)  // Placeholder persists
+    .set_growable()  // Last field can expand
+    .build()?;
+
+// Validator function keeps modal open on error
+fn validate_username(input: &TextEntryPayload) -> Option<ValidatorErr> {
+    if input.as_str().len() < 3 {
+        Some(ValidatorErr::new("Min 3 characters"))
+    } else {
+        None  // Valid
+    }
+}
+
+// Access results
+for (i, entry) in result.content().iter().enumerate() {
+    log::info!("Field {}: {}", i, entry.as_str());
+}
+```
+
+### Modals Cargo Dependency
+```toml
+modals = { path = "../../services/modals" }
+```
+
+## Haptic & Display Control
+
+```rust
+// Haptic vibration (via GAM)
+gam.set_vibe(true);   // Enable
+gam.set_vibe(false);  // Disable
+
+// Backlight brightness (via COM service — see system agent)
+// com.set_backlight(main_brightness, secondary_brightness);
+```
+
 ## Quality Criteria
 
 - [ ] All drawing uses GAM re-exports (not direct ux-api/blitstr2)
@@ -358,6 +570,8 @@ fn redraw(&self, gam: &Gam, gid: Gid, screensize: Point) {
 - [ ] Selected items clearly distinguishable
 - [ ] Consistent margins and spacing
 - [ ] Appropriate font sizes for content type
+- [ ] Scrolling implemented for variable-length content
+- [ ] Modals used for system-style dialogs (not custom-drawn)
 
 ## Handoff
 
@@ -366,3 +580,4 @@ Provide to Build/Testing:
 2. Screen layout specifications
 3. Font usage summary
 4. Any custom components created
+5. Modal dialog types used (for testing flows)

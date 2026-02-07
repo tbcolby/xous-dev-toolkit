@@ -381,15 +381,93 @@ First connection to a new host may prompt user to trust the certificate:
 
 ## WiFi Status
 
+For WiFi hardware control (scanning, enable/disable), see the **System Agent** (`agents/system.md`).
+
 ```rust
-// Check if WiFi is connected before network operations
-// (Implementation depends on available APIs)
-fn is_wifi_connected() -> bool {
-    // Try a simple connection or check net service status
-    TcpStream::connect_timeout(
-        &"8.8.8.8:53".parse().unwrap(),
-        Duration::from_secs(2)
-    ).is_ok()
+// Check if WiFi is connected using the net service
+use net::Net;
+let net = Net::new(&xns)?;
+
+if let Some(ipv4) = net.get_ipv4_config() {
+    log::info!("Connected, IP: {:?}", ipv4);
+    // Proceed with network operations
+} else {
+    log::warn!("No network connection");
+    // Use cached data or queue request
+}
+```
+
+## Offline-First Patterns
+
+Precursor often operates without WiFi. Design for it:
+
+### Queue-and-Flush
+```rust
+struct SyncQueue {
+    pending: Vec<PendingRequest>,
+}
+
+impl SyncQueue {
+    fn enqueue(&mut self, req: PendingRequest) {
+        self.pending.push(req);
+        // Save queue to PDDB so it survives restarts
+        self.save_to_pddb();
+    }
+
+    fn flush(&mut self, agent: &ureq::Agent) {
+        let mut succeeded = Vec::new();
+        for (i, req) in self.pending.iter().enumerate() {
+            match req.execute(agent) {
+                Ok(_) => succeeded.push(i),
+                Err(_) => break,  // Stop on first failure
+            }
+        }
+        // Remove successful items (reverse order to preserve indices)
+        for i in succeeded.into_iter().rev() {
+            self.pending.remove(i);
+        }
+        self.save_to_pddb();
+    }
+}
+```
+
+### Graceful Degradation
+```rust
+fn fetch_or_cache(pddb: &Pddb, agent: &ureq::Agent, url: &str) -> Option<Data> {
+    // Try network first
+    match agent.get(url).call() {
+        Ok(resp) => {
+            let data: Data = resp.into_json().ok()?;
+            cache_to_pddb(pddb, &data);  // Update cache
+            Some(data)
+        }
+        Err(_) => {
+            // Fall back to cached data
+            load_from_pddb(pddb)
+        }
+    }
+}
+```
+
+## Battery-Aware Networking
+
+WiFi is the biggest power consumer. Adjust behavior based on power state (see System Agent for `com.is_charging()`):
+
+| Scenario | Poll Interval | WiFi |
+|----------|--------------|------|
+| Charging + foreground | 5-10s | Always on |
+| Battery + foreground | 30-60s | On during sync only |
+| Background | 5+ min | Off between syncs |
+
+```rust
+fn sync_interval_ms(&self) -> usize {
+    if self.is_charging {
+        10_000   // 10s when charging
+    } else if self.is_foreground {
+        60_000   // 60s on battery, foreground
+    } else {
+        300_000  // 5min background
+    }
 }
 ```
 
@@ -405,6 +483,7 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 
 # std::net requires no additional dependencies
+# For WiFi state: net = { path = "../../services/net" }
 ```
 
 ## Quality Criteria
@@ -416,6 +495,8 @@ serde_json = "1.0"
 - [ ] Retry logic for transient failures
 - [ ] User feedback during network operations
 - [ ] Graceful degradation when offline
+- [ ] Offline-first with PDDB cache/queue
+- [ ] Battery-aware polling intervals
 
 ## Handoff
 
@@ -423,5 +504,7 @@ Provide to Build/Testing:
 1. API endpoints used
 2. Authentication requirements
 3. Data formats (JSON schemas)
-4. Required dependencies (ureq, tls)
+4. Required dependencies (ureq, tls, net)
 5. Background thread design
+6. Offline fallback strategy
+7. Power budget (polling intervals)

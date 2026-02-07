@@ -264,6 +264,84 @@ build/renode-image-myapp.bin    # Flash image
 build/myapp                      # ELF binary (for debugging)
 ```
 
+## Advanced Build Flags
+
+The `cargo xtask` build system supports additional flags beyond basic usage:
+
+### Debug & Development
+```bash
+# Enable GDB debugging interface (port 3333 for SoC, 3334 for EC)
+cargo xtask renode-image myapp --gdb-stub
+
+# Build without timestamp (for reproducible builds)
+cargo xtask renode-image myapp --no-timestamp
+```
+
+### Features
+```bash
+# Per-app conditional compilation
+cargo xtask renode-image myapp --app-feature my_feature
+
+# Kernel features
+cargo xtask renode-image myapp --kernel-feature some_kernel_flag
+
+# Loader features
+cargo xtask renode-image myapp --loader-feature some_loader_flag
+
+# Language/i18n support
+cargo xtask renode-image myapp --feature xous/lang-ja
+```
+
+### Memory Configuration
+```bash
+# Configure swap region (hex offset:size)
+cargo xtask renode-image myapp --swap 0x1000000:0x400000
+```
+
+### Signing Keys
+```bash
+# Custom signing keys (for deployment)
+cargo xtask app-image myapp --lkey path/to/loader.key --kkey path/to/kernel.key
+```
+
+## Feature Gating
+
+Use `--app-feature` with `#[cfg(feature = "...")]` in app code:
+
+```rust
+// In app code
+#[cfg(feature = "debug_overlay")]
+fn draw_debug_info(&self, gam: &Gam, gid: Gid) {
+    // Debug visualization only in debug builds
+}
+
+// In Cargo.toml
+[features]
+debug_overlay = []
+```
+
+Build with: `cargo xtask renode-image myapp --app-feature debug_overlay`
+
+## Binary Size Analysis
+
+Apps share limited flash space. Monitor binary size:
+
+```bash
+# Check binary size after build
+ls -la build/myapp
+# Typical app: 100-500 KB
+
+# Detailed size breakdown (requires cargo-binutils)
+cargo size -p myapp --release --target riscv32imac-unknown-xous-elf
+```
+
+### Size Reduction Strategies
+- Avoid large dependencies (each dep adds code)
+- Use `no_std` compatible crates where possible
+- Minimize string formatting (fmt machinery is large)
+- Prefer binary serialization over JSON for large data
+- Check if unused features are pulling in extra code
+
 ## Handoff to Testing
 
 Provide:
@@ -272,3 +350,4 @@ Provide:
 3. Any special build flags used
 4. Known warnings/issues
 5. Dependencies added
+6. App index in menu (for navigation)

@@ -8,7 +8,7 @@ This is the **Xous Development Toolkit** — automation tools and specialized ag
 
 - **Multi-agent system** for full development lifecycle
 - **Python automation** for headless Renode testing on macOS ARM64
-- **Domain specialists** for ideation, architecture, graphics, storage, networking, build, testing, and review
+- **Domain specialists** for ideation, architecture, graphics, storage, networking, build, testing, review, and system/hardware
 
 ## Agent System
 
@@ -24,6 +24,7 @@ This toolkit uses a **supervisor/specialist agent model** for comprehensive app 
 | **Graphics** | Implementing UI, text rendering, drawing |
 | **Storage** | PDDB persistence, serialization, key management |
 | **Networking** | TCP/UDP, HTTP, TLS, background sync |
+| **System** | COM service, battery, sensors, WiFi hardware, backlight, power |
 | **Build** | Cargo.toml, manifest.json, workspace, deployment |
 | **Testing** | Renode automation, screenshots, validation |
 | **Review** | Code review, patterns, performance, pitfalls |
@@ -57,12 +58,15 @@ xous-dev-toolkit/
 │   ├── graphics.md          # GAM API and UI implementation
 │   ├── storage.md           # PDDB persistence patterns
 │   ├── networking.md        # TCP/UDP, HTTP, TLS
+│   ├── system.md            # COM service, battery, sensors, WiFi hardware, power
 │   ├── build.md             # Cargo, manifest, deployment
 │   ├── testing.md           # Renode automation and QA
 │   └── review.md            # Code review and quality
 ├── scripts/
+│   ├── renode_lib.py        # Shared RenodeController library (import this)
 │   ├── renode_capture.py    # Full automation: boot, PDDB init, app launch, screenshots
-│   ├── renode_interact.py   # Low-level Renode control (legacy, simpler API)
+│   ├── capture_calc.py      # Standalone calculator capture
+│   ├── renode_interact.py   # DEPRECATED — use renode_lib.py instead
 │   └── usb_log_monitor.py   # USB serial log viewer for hardware debugging
 ├── CLAUDE.md                # This file (toolkit-specific guidance)
 ├── README.md                # User documentation
@@ -96,7 +100,9 @@ python3 scripts/usb_log_monitor.py --filter myapp     # Filter by keyword
 python3 scripts/usb_log_monitor.py --save debug.log   # Save to file
 ```
 
-### Low-Level Renode Interaction
+### Low-Level Renode Interaction (Deprecated)
+
+> **Note**: `renode_interact.py` is deprecated. Use `renode_lib.py` directly or `renode_capture.py` instead.
 
 ```bash
 # Take a screenshot (requires Renode already running on port 4567)
@@ -111,19 +117,32 @@ python3 scripts/renode_interact.py full-init 90
 
 ## Architecture
 
-### RenodeController Class (`renode_capture.py`)
+### RenodeController Class (`renode_lib.py`)
 
-The core automation class that communicates with Renode via telnet:
+The core automation class lives in `scripts/renode_lib.py` and communicates with Renode via telnet:
 
 ```python
 class RenodeController:
-    def timed_key(key, hold_ms=1, after=1.0)  # Safe key press with timing control
-    def inject_line(text)                      # Direct text injection (bypasses timing)
-    def screenshot(filepath)                   # Capture LCD as PNG
-    def init_pddb(pin)                         # Full PDDB format sequence
-    def unlock_pddb(pin)                       # Unlock already-formatted PDDB
-    def launch_app(app_index)                  # Navigate menu to launch app
+    def connect(retries=3, delay=2.0)          # Connect with retry/reconnect
+    def timed_key(key, hold_ms=1, after=1.0)   # Safe key press with timing control
+    def inject_line(text)                       # Direct text injection + CR (bypasses timing)
+    def inject_string(text)                     # Direct text injection, no CR
+    def inject_key(char)                        # Single character injection
+    def screenshot(filepath)                    # Capture LCD as PNG (with validation)
+    def screenshot_hash()                       # MD5 hash of current screen
+    def wait_for_screen_change(timeout, interval)  # Wait until screen changes
+    def init_pddb(pin)                          # Full PDDB format sequence
+    def unlock_pddb(pin)                        # Unlock already-formatted PDDB
+    def launch_app(app_index)                   # Navigate menu to launch app
+    def confirm_radio_dialog()                  # Confirm a radio button dialog
+    def quit()                                  # Clean disconnect
+
+# Utility functions
+start_renode(xous_root=None, extra_args=None)   # Launch Renode process
+reset_flash(xous_root=None)                     # Reset flash backing file
 ```
+
+Both `renode_capture.py` and `capture_calc.py` import from `renode_lib.py`.
 
 ### Key Timing Problem & Solutions
 
@@ -168,14 +187,19 @@ elif args.app == 'myapp':
 
 ## Configuration
 
-Key constants at the top of `renode_capture.py`:
+Configuration is centralized in `renode_lib.py` with environment variable overrides:
 
 ```python
-MONITOR_PORT = 4567          # Renode telnet port
-XOUS_ROOT = "/path/to/xous-core"  # Update for your system
-RENODE = "/Applications/Renode.app/Contents/MacOS/renode"
-DEFAULT_PIN = "a"            # PDDB PIN for test images
+# Environment variables (override defaults):
+RENODE_PORT=4567                                          # Renode telnet port
+XOUS_ROOT="/Volumes/PlexLaCie/Dev/Precursor/xous-core"   # Path to xous-core
+RENODE_PATH="/Applications/Renode.app/Contents/MacOS/renode"  # Renode binary
+
+# Example: use a different port
+RENODE_PORT=5678 python3 renode_capture.py --app flashcards
 ```
+
+Default PIN for test images: `a` (single character).
 
 ## Dependencies
 

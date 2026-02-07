@@ -359,6 +359,134 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 ```
 
+## Basis Management
+
+A basis is an independently encrypted partition within PDDB. The default basis is always open after unlock. Additional bases provide compartmentalized storage (e.g., Vault uses separate bases for Password, FIDO, TOTP).
+
+### Creating and Opening Bases
+```rust
+// Create a new encrypted basis
+pddb.create_basis("myapp.secrets")?;
+
+// Unlock/open a basis (prompts user for passphrase)
+pddb.unlock_basis("myapp.secrets", None)?;
+
+// Lock/close a basis
+pddb.lock_basis("myapp.secrets")?;
+
+// Delete a basis permanently
+pddb.delete_basis("myapp.secrets")?;
+```
+
+### Listing and Monitoring
+```rust
+// List all currently open bases
+let bases = pddb.list_basis();
+
+// Get most recently opened basis
+let latest = pddb.latest_basis();  // Option<String>
+
+// Block until basis order changes (useful for detecting lock/unlock)
+let new_order = pddb.monitor_basis();  // Blocks, returns Vec<String>
+```
+
+### Use Cases
+- **Default basis**: General app data (settings, documents)
+- **Named bases**: Sensitive data that should be lockable independently
+- **Plausible deniability**: Data in locked bases is indistinguishable from free space
+
+## Bulk Operations
+
+### Delete Entire Dictionary
+```rust
+pddb.delete_dict("myapp.old_data", None)?;
+pddb.sync()?;
+```
+
+### Bulk Key Deletion
+```rust
+let keys_to_delete = vec!["item_001", "item_002", "item_003"];
+pddb.delete_key_list("myapp.items", &keys_to_delete, None)?;
+pddb.sync()?;
+```
+
+### Read Entire Dictionary
+```rust
+// Returns an iterator over all keys in a dictionary
+let iter = pddb.read_dict("myapp.items", None)?;
+for (key_name, data) in iter {
+    let item: Item = serde_json::from_slice(&data)?;
+    // process item
+}
+```
+
+## Data Migration & Versioning
+
+When your data format changes between app versions:
+
+### Version Key Pattern
+```rust
+const CURRENT_VERSION: u32 = 2;
+
+fn ensure_migrated(pddb: &Pddb) {
+    let version = load_version(pddb).unwrap_or(0);
+
+    if version < 1 {
+        migrate_v0_to_v1(pddb);
+    }
+    if version < 2 {
+        migrate_v1_to_v2(pddb);
+    }
+
+    save_version(pddb, CURRENT_VERSION);
+}
+
+fn load_version(pddb: &Pddb) -> Option<u32> {
+    let mut key = pddb.get("myapp.meta", "version", None, false, false, None, None::<fn()>).ok()?;
+    let mut buf = [0u8; 4];
+    key.read_exact(&mut buf).ok()?;
+    Some(u32::from_le_bytes(buf))
+}
+
+fn save_version(pddb: &Pddb, version: u32) {
+    let mut key = pddb.get("myapp.meta", "version", None, true, true, Some(4), None::<fn()>).unwrap();
+    key.seek(SeekFrom::Start(0)).ok();
+    key.write_all(&version.to_le_bytes()).ok();
+    pddb.sync().ok();
+}
+```
+
+## Concurrency & Callbacks
+
+### Thread Safety
+PDDB operations are serialized through the PDDB service process via IPC. Multiple threads in the same app can call PDDB methods safely — the service handles sequencing. However, avoid holding a `PddbKey` handle across long operations; open, read/write, close promptly.
+
+### Key Change Callback
+The `key_changed_cb` parameter fires when a basis lock invalidates an open key:
+```rust
+let mut key = pddb.get(
+    "myapp.settings", "config", None, false, false, None,
+    Some(|| {
+        log::warn!("Key invalidated by basis lock! Re-read needed.");
+        // This runs in a callback thread — signal main thread to reload
+    }),
+)?;
+```
+
+## Mount Lifecycle
+
+```rust
+// Block until PDDB is mounted (no CPU spinning)
+pddb.is_mounted_blocking();
+
+// Non-blocking mount check
+let (mounted, retry_count) = pddb.try_mount();
+
+// Proper flush sequence
+pddb.sync()?;           // Write to flash
+pddb.sync_cleanup()?;   // Cleanup journal
+```
+
 ## Quality Criteria
 
 - [ ] Dictionary/key names within length limits
@@ -368,6 +496,8 @@ serde_json = "1.0"
 - [ ] Size hints provided for large data
 - [ ] Writes batched where possible
 - [ ] Graceful handling of corrupt data
+- [ ] Version key for migration support
+- [ ] Basis used for sensitive compartmentalized data
 
 ## Handoff
 
@@ -376,3 +506,4 @@ Provide to Build/Testing:
 2. Serialization format used
 3. Required pddb/serde dependencies
 4. Data migration needs (if updating existing app)
+5. Basis requirements (if using separate encrypted partitions)

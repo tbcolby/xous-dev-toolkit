@@ -1,22 +1,42 @@
 #!/usr/bin/env python3
 """
-Renode Interaction Toolkit for Precursor/Xous Development
+DEPRECATED: Use renode_lib.py + renode_capture.py instead.
 
+This was the original low-level Renode interaction toolkit. Its functionality
+has been consolidated into renode_lib.py with improvements:
+- Retry/reconnect logic on connection
+- PNG signature validation on screenshots
+- Configurable paths via environment variables
+- Proper timed_key() instead of unreliable fast_key()
+
+Migration:
+    # Old: python3 renode_interact.py screenshot output.png
+    # New: from renode_lib import RenodeController
+    #      ctl = RenodeController(); ctl.connect(); ctl.screenshot('output.png')
+
+    # Old: python3 renode_interact.py press-key Home
+    # New: ctl.timed_key('Home')
+
+    # Old: python3 renode_interact.py init-pddb
+    # New: ctl.init_pddb()
+
+Original description:
 Provides programmatic control of the Renode emulator for headless testing
 on platforms where the Renode GUI (XWT) is unavailable (e.g., macOS ARM64).
 
-Features:
-- Screenshot capture from the emulated LCD display
-- Keyboard input with hold-timing-safe key presses
-- Full PDDB initialization automation
-- App menu navigation
-
-Usage:
+Usage (legacy, still works):
     python3 renode_interact.py screenshot output.png
     python3 renode_interact.py init-pddb
     python3 renode_interact.py launch-app Flashcards
     python3 renode_interact.py press-key Home
 """
+
+import warnings
+warnings.warn(
+    "renode_interact.py is deprecated. Use renode_lib.py instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 import socket
 import time

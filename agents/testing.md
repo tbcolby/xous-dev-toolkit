@@ -15,8 +15,10 @@ You are the **Testing Agent** for Precursor/Xous application development. You sp
 ### Toolkit Location
 ```
 xous-dev-toolkit/scripts/
+├── renode_lib.py          # Shared RenodeController library
 ├── renode_capture.py      # Full automation: boot, PDDB, app, screenshots
-├── renode_interact.py     # Low-level Renode control
+├── capture_calc.py        # Standalone calculator capture
+├── renode_interact.py     # Legacy (deprecated, use renode_lib.py)
 └── usb_log_monitor.py     # Hardware log monitoring
 ```
 
@@ -303,6 +305,111 @@ After capture:
 - [ ] UI elements visible and correct
 - [ ] No truncated/corrupted images
 
+## Screenshot Validation
+
+### Image Hash Comparison
+Detect if the screen actually changed after an action:
+```python
+import hashlib
+
+def image_hash(filepath):
+    """MD5 hash of a PNG file."""
+    with open(filepath, 'rb') as f:
+        return hashlib.md5(f.read()).hexdigest()
+
+# Check if action produced a visible change
+before = ctl.screenshot('/tmp/before.png')
+ctl.timed_key('Down', after=2.0)
+after = ctl.screenshot('/tmp/after.png')
+
+if image_hash('/tmp/before.png') == image_hash('/tmp/after.png'):
+    print("WARNING: Screen did not change after key press!")
+```
+
+### Built-In Screen Change Detection
+The `renode_lib.py` RenodeController has `wait_for_screen_change()`:
+```python
+# Wait until screen changes (e.g., after triggering a long operation)
+ctl.timed_key('Return', after=0.5)
+if ctl.wait_for_screen_change(timeout=60, interval=5):
+    print("Operation completed (screen changed)")
+else:
+    print("WARNING: Timeout waiting for screen change")
+```
+
+### PNG Validation
+Screenshots are validated automatically by `renode_lib.py` — PNG signature (`\x89PNG\r\n\x1a\n`) is checked, and failed captures retry up to 2 times.
+
+### Baseline Regression Testing
+```python
+# Save baseline hashes for an app version
+baselines = {
+    "01_initial.png": "a3b2c1d4...",
+    "02_feature.png": "e5f6g7h8...",
+}
+
+# Compare after capture
+for name, expected_hash in baselines.items():
+    actual = image_hash(os.path.join(screenshot_dir, name))
+    if actual != expected_hash:
+        print(f"REGRESSION: {name} changed (expected {expected_hash[:8]}, got {actual[:8]})")
+```
+
+**Note**: Use this sparingly — UI changes between versions are normal. Flag as warnings, not failures.
+
+## Error Recovery
+
+### Socket Reconnection
+`renode_lib.py` has built-in retry logic (3 attempts, 2s backoff). If Renode crashes mid-capture:
+```python
+try:
+    ctl.timed_key('Home', after=3.0)
+except (BrokenPipeError, ConnectionResetError):
+    print("Renode connection lost, attempting reconnect...")
+    ctl.connect(retries=3)
+```
+
+### Graceful Cleanup
+Always wrap capture sequences in try/finally:
+```python
+proc = start_renode()
+ctl = RenodeController()
+ctl.connect()
+try:
+    # ... capture sequence ...
+finally:
+    ctl.quit()
+    proc.terminate()
+    try:
+        proc.wait(timeout=5)
+    except Exception:
+        proc.kill()
+```
+
+### Diagnostic Output on Failure
+If screenshots fail, check:
+1. Is Renode process still running? (`proc.poll() is None`)
+2. Is socket connected? (try `ctl._send('help')`)
+3. What was the last telnet response?
+
+## Hardware vs Renode Differences
+
+| Aspect | Renode | Hardware |
+|--------|--------|----------|
+| LCD resolution | Identical (336x536) | Identical |
+| LCD refresh | Instant (no scan artifacts) | Memory LCD refresh visible |
+| Keyboard | timed_key required | Real debounce, natural timing |
+| WiFi | Not emulated | Real WF200 module |
+| PDDB format time | ~6 minutes | ~2 minutes |
+| Gyro/accelerometer | Returns zeros (unless scripted) | Real sensor data |
+| USB | Not emulated | Full USB-C with HID/serial |
+| Battery | Not emulated | Real BattStats via COM |
+| Boot time | ~45-60s | ~20-30s |
+
+### What to Test Where
+- **Renode**: UI layout, navigation flows, state machines, PDDB persistence
+- **Hardware**: Network features, sensor input, USB, battery behavior, real-time performance
+
 ## Handoff to Review
 
 Provide:
@@ -311,3 +418,5 @@ Provide:
 3. Any failures or anomalies observed
 4. Log excerpts (if relevant)
 5. Timing notes (delays needed)
+6. Hash baseline (if establishing regression tests)
+7. Hardware-specific test results (if available)

@@ -159,6 +159,77 @@ UNLIKE: [Current alternatives and their limitations]
 - [How to know if this app is useful]
 ```
 
+## Screen Layout Calculator
+
+Usable content area after system UI: **336 x 486 px** (536 minus 30px header, 20px status).
+
+| Font | Height | Max Lines (no gap) | Max Lines (4px gap) | Best For |
+|------|--------|--------------------|---------------------|----------|
+| Small (12px) | 12 | 40 | 34 | Dense data, footnotes |
+| Regular (15px) | 15 | 32 | 25 | Body text, lists |
+| Tall (19px) | 19 | 25 | 21 | System UI, menus |
+| Large (24px) | 24 | 20 | 17 | Section headers |
+| ExtraLarge (30px) | 30 | 16 | 14 | Screen titles |
+
+### Quick Layout Math
+```
+Header:     30px (Bold or Large font, inverted bar)
+Content:    variable (depends on layout)
+Footer:     20-40px (Small font, key hints)
+Margins:    8px left/right typical
+Separator:  1px line + 4px padding = 9px
+
+Example: "Can I fit a 15-item list?"
+  Header:     30px
+  15 items:   15 * (15 + 4) = 285px  (Regular font + 4px gap)
+  Footer:     30px
+  Total:      345px < 536px  ✓ Yes, with 191px to spare
+
+Example: "Detail screen with title + 8 body lines + 2 buttons?"
+  Header:     30px
+  Title:      30px (ExtraLarge)
+  Gap:        10px
+  Body:       8 * 15 = 120px (Regular)
+  Gap:        10px
+  Buttons:    2 * 24 = 48px (Large)
+  Footer:     30px
+  Total:      308px < 536px  ✓ Comfortable fit
+```
+
+## Offline-First Design
+
+Precursor frequently operates without WiFi. Always design for offline use first:
+
+- **Local-first data**: All core functionality works without network
+- **Optional sync**: Network features are additive, not required
+- **Queue-and-flush**: Queue outbound requests in PDDB, sync when connected
+- **Cached reads**: Cache network data locally, show stale data when offline
+- **Clear status**: Show "offline" / "last synced: 5m ago" in UI
+
+## Animation Budget
+
+- GAM rate limit: **33ms minimum between redraws** (~30fps max)
+- Typical game loop: **50ms** (20fps) via pump thread — adequate for most apps
+- Status updates: **1000ms** — no need for faster
+- Background sync: **30000ms+** — battery-conscious polling
+- **Always stop pump when backgrounded** — mandatory for battery life
+
+## Keyboard Input Codes (Xous)
+
+Apps receiving `rawkeys` get these Unicode characters:
+
+| Key | Xous Char | Code |
+|-----|-----------|------|
+| Up arrow | `'↑'` | U+2191 |
+| Down arrow | `'↓'` | U+2193 |
+| Left arrow | `'←'` | U+2190 |
+| Right arrow | `'→'` | U+2192 |
+| Menu key | `'∴'` | U+2234 |
+| Enter | `'\r'` | U+000D |
+| Backspace | `'\u{08}'` | U+0008 |
+
+**Do NOT use Apple PUA codes** (`\u{F700}`-`\u{F703}`) — those are macOS-specific, not Xous.
+
 ## Handoff to Architecture
 
 When concept is approved, provide:
@@ -167,4 +238,6 @@ When concept is approved, provide:
 3. Key interaction table
 4. Data model sketch
 5. Technical constraints identified
-6. Open questions for user
+6. Screen layout pixel budget
+7. Offline/network requirements
+8. Open questions for user

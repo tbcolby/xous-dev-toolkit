@@ -15,6 +15,14 @@ This directory contains specialized sub-agents for different phases of Precursor
 | **Build** | Toolchain | cargo xtask, manifest, workspace, deployment |
 | **Testing** | QA & Automation | Renode scripts, screenshots, validation |
 | **Review** | Quality | Code review, patterns, performance, pitfalls |
+| **System** | Hardware | COM service, battery, sensors, WiFi hardware, backlight, power |
+
+## Agent Invocation
+
+To load an agent's context, read `agents/<name>.md` when entering that domain. Switch agents:
+- At phase boundaries (e.g., Architecture done, starting Graphics)
+- When blocked and needing a different specialist
+- When the user's question falls outside current agent's domain
 
 ## Invocation Pattern
 
@@ -92,6 +100,28 @@ When an agent completes its phase, it produces a structured handoff:
 5. → Testing: Capture new screenshots
 6. → Review: Verify integration
 ```
+
+## Decision Trees
+
+When unsure which agent to use:
+
+**"Is this Graphics or Architecture?"**
+- What to draw, how it looks → **Graphics**
+- When/how data flows, state transitions → **Architecture**
+
+**"Is this Storage or Networking?"**
+- Persisting data locally → **Storage**
+- Fetching data from remote → **Networking**
+- Caching fetched data locally → **Both** (Networking fetches, Storage caches)
+
+**"Is this Networking or System?"**
+- TCP/HTTP/TLS protocol work → **Networking**
+- WiFi hardware on/off, scanning → **System**
+- Battery-aware poll intervals → **System** (informs Networking strategy)
+
+**"Is this Graphics or System?"**
+- Drawing UI elements → **Graphics**
+- Backlight brightness, haptic vibration → **System**
 
 ## Agent Files
 

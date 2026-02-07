@@ -281,6 +281,50 @@ log::trace!("Very verbose");        // Only when needed
 - [ ] Needs changes (see above)
 ```
 
+## Security Review Checklist
+
+### Input Validation
+- [ ] Data from PDDB validated before use (could be corrupt/tampered)
+- [ ] Network responses checked for expected structure before parsing
+- [ ] Key names and dictionary names sanitized (no user-controlled overflow)
+- [ ] Text input length limited where appropriate
+
+### Credential Handling
+- [ ] Passwords/tokens stored in PDDB, never hardcoded
+- [ ] Sensitive data in a separate PDDB basis (lockable independently)
+- [ ] Credentials not logged (check `log::info!` calls)
+- [ ] TLS used for all network credentials transmission
+
+### TLS & Network
+- [ ] HTTPS used for all API communication (no plain HTTP for sensitive data)
+- [ ] TLS certificate trust prompts expected on first connection
+- [ ] Connection timeouts prevent hanging on bad network
+- [ ] No secrets in URL query parameters (use POST body or headers)
+
+## Thread Safety Checklist
+
+- [ ] Shared mutable state wrapped in `Arc<Mutex<T>>`
+- [ ] Simple flags use `Arc<AtomicBool>` (no Mutex overhead)
+- [ ] No `AtomicU64` used (unavailable on RV32 — split into two `AtomicU32`)
+- [ ] All types shared across threads are `Send + Sync`
+- [ ] Mutex locks released promptly (never held across IPC calls)
+- [ ] No deadlock risk (consistent lock ordering if multiple Mutexes)
+- [ ] Background threads check `allow_redraw` / active flags before work
+
+## Performance Baselines
+
+| Metric | Target | Notes |
+|--------|--------|-------|
+| Redraw time | < 33ms | GAM rate limit; slower = dropped frames |
+| Memory (typical app) | 2-4 MB | Base app + UI buffers + data |
+| Memory (complex app) | 4-8 MB | With heap adjustment, max practical |
+| Network timeout | 10-30s | HTTP requests; 5s for DNS |
+| PDDB sync frequency | Every 5-10s | Batch writes, not per-operation |
+| Pump rate (games) | 50ms | 20fps, adequate for most animation |
+| Pump rate (status) | 1000ms | Once per second for clocks/status |
+| Background poll | 30s+ | Battery-conscious minimum |
+| App binary size | < 500 KB | Typical; larger apps may reach 1 MB |
+
 ## Final Checklist Before Ship
 
 - [ ] All critical issues resolved
@@ -291,4 +335,7 @@ log::trace!("Very verbose");        // Only when needed
 - [ ] Focus/background handling works
 - [ ] Data persists across restarts
 - [ ] Error states handled gracefully
+- [ ] Security review passed (above)
+- [ ] Thread safety verified (if multi-threaded)
+- [ ] Performance within baselines (above)
 - [ ] Documentation updated (if applicable)

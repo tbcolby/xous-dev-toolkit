@@ -25,6 +25,8 @@ You are the **Supervisor Agent** for Precursor/Xous application development. You
 | "Build/deploy/run..." | Build | → Testing |
 | "Test/screenshot/verify..." | Testing | |
 | "Review/optimize/check..." | Review | |
+| "Battery/sensor/WiFi hw..." | System | → Networking (if TCP/HTTP) |
+| "Brightness/vibration..." | System | → Graphics (if UI changes) |
 
 ## Development Lifecycle Phases
 
@@ -139,6 +141,70 @@ Coordinate by:
 2. Ensuring shared interfaces are defined first
 3. Merging results before next phase
 
+## Resource Budget Template
+
+Before starting implementation, estimate resource usage:
+
+### RAM Budget
+```
+Base app overhead:     ~512 KB (runtime, stack, IPC buffers)
+UI buffers:           ~100-200 KB (GAM canvas, TextViews)
+App data structures:   variable (estimate from design)
+Per thread:           ~64 KB stack default (adjustable)
+Network buffers:      ~100-200 KB (if using ureq/TLS)
+─────────────────────────────────
+Typical app total:     2-4 MB
+Max practical:         8 MB (with heap adjustment)
+```
+
+### Feasibility Questions
+- Can all data fit in RAM at once, or is pagination needed?
+- How many threads are required? Each adds stack overhead.
+- Does TLS/networking push memory past 4 MB? Consider heap adjustment.
+- Is PDDB storage sufficient, or does the app need raw flash access?
+
+## Scope Detection
+
+Estimate task size to set expectations:
+
+| Scope | LOC | Files | Agents Needed | Duration |
+|-------|-----|-------|---------------|----------|
+| **Single feature** | < 500 | 1-2 | 1-2 domain agents | Quick |
+| **Multi-feature** | 500-2000 | 3-5 | 2-3 domain agents | Medium |
+| **New app** | 2000+ | 5+ | All agents, full lifecycle | Large |
+
+Indicators that a "feature" is actually a new app:
+- Needs its own server registration and message loop
+- Has its own manifest.json entry
+- Requires separate PDDB dictionaries
+- Has an independent UI flow with multiple screens
+
+## Feedback Loops
+
+Development isn't always linear. Common feedback cycles:
+
+### Architecture Revision
+When implementation reveals design flaws:
+```
+Architecture → Graphics (implement) → "Layout doesn't work"
+  → Back to Architecture (redesign state machine)
+  → Forward to Graphics (re-implement)
+```
+
+### Build Failure Escalation
+When build fails due to dependency issues:
+```
+Build (fails) → Architecture (check service deps)
+  → Build (retry with corrected Cargo.toml)
+```
+
+### Screenshot Review Iteration
+When UI doesn't match expectations:
+```
+Testing (capture) → Review (inspect screenshots)
+  → Graphics (adjust layout) → Testing (re-capture)
+```
+
 ## Escalation Criteria
 
 Escalate to user when:
@@ -147,3 +213,5 @@ Escalate to user when:
 - Resource/scope tradeoffs
 - Technical blockers requiring external input
 - Significant deviations from original request
+- Resource budget exceeds hardware limits
+- Scope appears larger than expected
