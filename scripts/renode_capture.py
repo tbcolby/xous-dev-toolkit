@@ -443,6 +443,88 @@ def capture_calc(ctl, screenshot_dir):
     print("=== Done! 19 screenshots captured ===", flush=True)
 
 
+def capture_carse(ctl, screenshot_dir):
+    """Capture Carse Automata screenshots: grid, cursor, touch, simulation, death, reseed."""
+    def ss(name):
+        return ctl.screenshot(os.path.join(screenshot_dir, name))
+
+    print("\n=== Carse Automata Screenshots ===", flush=True)
+
+    # 1. Initial grid (freshly seeded)
+    print("  [1] Initial grid...", flush=True)
+    time.sleep(3)
+    ss("01_initial.png")
+
+    # 2. Cursor movement — move right and down
+    print("  [2] Cursor movement...", flush=True)
+    for _ in range(5):
+        ctl.timed_key('Right', after=0.3)
+    for _ in range(3):
+        ctl.timed_key('Down', after=0.3)
+    time.sleep(1)
+    ss("02_cursor_moved.png")
+
+    # 3. Touch cells — tap space on several cells
+    print("  [3] Touching cells...", flush=True)
+    ctl.timed_key('Space', after=1.0)
+    ctl.timed_key('Right', after=0.3)
+    ctl.timed_key('Space', after=1.0)
+    ctl.timed_key('Right', after=0.3)
+    ctl.timed_key('Space', after=1.0)
+    ctl.timed_key('Down', after=0.3)
+    ctl.timed_key('Space', after=1.0)
+    time.sleep(1)
+    ss("03_touched_cells.png")
+
+    # 4. Run simulation — hold space (rapid presses simulate hold)
+    print("  [4] Running simulation...", flush=True)
+    # Rapid space presses within 700ms window triggers simulation_running
+    for _ in range(15):
+        ctl.timed_key('Space', after=0.3)
+    time.sleep(2)
+    ss("04_simulation_running.png")
+
+    # 5. Keep running to see evolution
+    print("  [5] Simulation evolution...", flush=True)
+    for _ in range(20):
+        ctl.timed_key('Space', after=0.3)
+    time.sleep(2)
+    ss("05_simulation_evolved.png")
+
+    # 6. Let it continue running further
+    print("  [6] More evolution...", flush=True)
+    for _ in range(30):
+        ctl.timed_key('Space', after=0.3)
+    time.sleep(3)
+    ss("06_simulation_later.png")
+
+    # 7. Pause (stop pressing space, wait for 700ms timeout)
+    print("  [7] Paused state...", flush=True)
+    time.sleep(3)
+    ss("07_paused.png")
+
+    # 8. Resume and run until death (if it happens)
+    print("  [8] Running toward death...", flush=True)
+    for _ in range(50):
+        ctl.timed_key('Space', after=0.3)
+    time.sleep(3)
+    ss("08_toward_death.png")
+
+    # 9. Continue even more
+    print("  [9] Extended run...", flush=True)
+    for _ in range(50):
+        ctl.timed_key('Space', after=0.3)
+    time.sleep(3)
+    ss("09_extended.png")
+
+    # 10. Final state
+    print("  [10] Final state...", flush=True)
+    time.sleep(2)
+    ss("10_final.png")
+
+    print("=== Done! 10 screenshots captured ===", flush=True)
+
+
 def capture_othello(ctl, screenshot_dir):
     """Capture comprehensive Othello screenshots including full games at each AI level."""
     def ss(name):
@@ -676,6 +758,8 @@ def main():
                 capture_othello(ctl, screenshot_dir)
             elif args.app == 'calc':
                 capture_calc(ctl, screenshot_dir)
+            elif args.app == 'carse':
+                capture_carse(ctl, screenshot_dir)
             else:
                 print(f"No capture sequence defined for '{args.app}'. Taking one screenshot.", flush=True)
                 ctl.screenshot(os.path.join(screenshot_dir, "app.png"))
