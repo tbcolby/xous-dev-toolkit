@@ -1,0 +1,86 @@
+# Ecosystem Build Tracker
+
+## Wave 1 — Quick Wins
+
+| # | App | Repo | Port | Stage | Status |
+|---|-----|------|------|-------|--------|
+| 1 | QR Code Generator | precursor-qrcode | 7880 | 8/8 | **SHIPPED** |
+| 2 | Barcode Generator | precursor-barcode | 7881 | 8/8 | **SHIPPED** |
+| 3 | Decision Engine | precursor-decide | — | 8/8 | **SHIPPED** |
+| 4 | Minesweeper | precursor-mines | — | 0/8 | Queued |
+
+## Wave 2 — Productivity Core
+
+| # | App | Repo | Port | Stage | Status |
+|---|-----|------|------|-------|--------|
+| 5 | Contact Book | precursor-contacts | 7882 | 0/8 | Queued |
+| 6 | Budget Ledger | precursor-budget | 7883 | 0/8 | Queued |
+| 7 | Day Planner | precursor-planner | — | 0/8 | Queued |
+| 8 | Math Drill | precursor-mathdrill | 7890 | 0/8 | Queued |
+
+## Wave 3 — Crypto & Security
+
+| # | App | Repo | Port | Stage | Status |
+|---|-----|------|------|-------|--------|
+| 9 | Cipher Workshop | precursor-cipher | 7887 | 0/8 | Queued |
+| 10 | One-Time Pad | precursor-otp | 7888 | 0/8 | Queued |
+| 11 | Key Ceremony | precursor-keygen | 7889 | 0/8 | Queued |
+
+## Wave 4 — Visual Engines
+
+| # | App | Repo | Port | Stage | Status |
+|---|-----|------|------|-------|--------|
+| 12 | Spirograph Engine | precursor-spirograph | — | 0/8 | Queued |
+| 13 | Lissajous Machine | precursor-lissajous | — | 0/8 | Queued |
+| 14 | Moire Generator | precursor-moire | — | 0/8 | Queued |
+| 15 | Sacred Geometry | precursor-sacred | — | 0/8 | Queued |
+| 16 | Kaleidoscope | precursor-kaleidoscope | — | 0/8 | Queued |
+| 17 | Penrose Tiler | precursor-penrose | — | 0/8 | Queued |
+| 18 | Fractal Flames | precursor-flames | — | 0/8 | Queued |
+| 19 | Reaction-Diffusion | precursor-reaction | — | 0/8 | Queued |
+
+## Wave 5 — Network & Parsing
+
+| # | App | Repo | Port | Stage | Status |
+|---|-----|------|------|-------|--------|
+| 20 | Regex Tester | precursor-regex | 7891 | 0/8 | Queued |
+| 21 | JSON Explorer | precursor-json | 7885 | 0/8 | Queued |
+| 22 | RSS Reader | precursor-rss | 7884 | 0/8 | Queued |
+| 23 | Git Log Viewer | precursor-gitlog | 7886 | 0/8 | Queued |
+| 24 | Network Scanner | precursor-netscan | — | 0/8 | Queued |
+| 25 | Cron Scheduler | precursor-cron | — | 0/8 | Queued |
+
+## Wave 6 — Complex Simulations
+
+| # | App | Repo | Port | Stage | Status |
+|---|-----|------|------|-------|--------|
+| 26 | Conway's Life | precursor-life | 7892 | 0/8 | Queued |
+| 27 | Game of Death | precursor-death | — | 0/8 | Queued |
+| 28 | SQLite Client | precursor-sqlite | 7895 | 0/8 | Queued |
+
+## Wave 7 — The Legends
+
+| # | App | Repo | Port | Stage | Status |
+|---|-----|------|------|-------|--------|
+| 29 | Text Adventure Engine | precursor-zork | 7893 | 0/8 | Queued |
+| 30 | Tamagotchi | precursor-pet | — | 0/8 | Queued |
+| 31 | Game Boy Emulator | precursor-gameboy | 7894 | 0/8 | Queued |
+| 32 | Dwarf Fortress ASCII | precursor-fortress | — | 0/8 | Queued |
+
+---
+
+## Agent Evolution Log
+
+| App # | New Agents Created | Existing Agents Updated | Key Learnings |
+|-------|-------------------|------------------------|---------------|
+| 1 | encoding.md | — | GF(2^8) from scratch works; JSON settings pattern validated; header/footer helpers reusable |
+| 2 | — | encoding.md validated | App shell is a proven template; auto-format detection pattern established |
+| 3 | randomness.md | encoding.md referenced | Multi-tool state machine; text input sub-state; TRNG wrapper; independent module pattern |
+
+## Cumulative Stats
+
+- Apps shipped: 3 / 32
+- Total LOC: ~8,200 (qrcode: 2,508 + barcode: 2,200 + decide: 3,479)
+- Specialist agents created: 2 (encoding.md, randomness.md)
+- Toolkit updates: 3 (encoding added, validated, randomness added)
+- Screenshots captured: 0 (pending Renode)
