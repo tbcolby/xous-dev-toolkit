@@ -7,7 +7,7 @@
 | 1 | QR Code Generator | precursor-qrcode | 7880 | 8/8 | **SHIPPED** |
 | 2 | Barcode Generator | precursor-barcode | 7881 | 8/8 | **SHIPPED** |
 | 3 | Decision Engine | precursor-decide | — | 8/8 | **SHIPPED** |
-| 4 | Minesweeper | precursor-mines | — | 0/8 | Queued |
+| 4 | Minesweeper | precursor-mines | — | 8/8 | **SHIPPED** |
 
 ## Wave 2 — Productivity Core
 
@@ -76,11 +76,12 @@
 | 1 | encoding.md | — | GF(2^8) from scratch works; JSON settings pattern validated; header/footer helpers reusable |
 | 2 | — | encoding.md validated | App shell is a proven template; auto-format detection pattern established |
 | 3 | randomness.md | encoding.md referenced | Multi-tool state machine; text input sub-state; TRNG wrapper; independent module pattern |
+| 4 | — | randomness.md validated, graphics.md + architecture.md updated | Dynamic grid cell rendering; ticktimer integration; iterative flood fill |
 
 ## Cumulative Stats
 
-- Apps shipped: 3 / 32
-- Total LOC: ~8,200 (qrcode: 2,508 + barcode: 2,200 + decide: 3,479)
+- Apps shipped: 4 / 32
+- Total LOC: ~10,100 (qrcode: 2,508 + barcode: 2,200 + decide: 3,479 + mines: 1,965)
 - Specialist agents created: 2 (encoding.md, randomness.md)
-- Toolkit updates: 3 (encoding added, validated, randomness added)
+- Toolkit updates: 4 (encoding, randomness, grid rendering pattern, ticktimer pattern)
 - Screenshots captured: 0 (pending Renode)
