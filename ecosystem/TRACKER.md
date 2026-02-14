@@ -30,14 +30,14 @@
 
 | # | App | Repo | Port | Stage | Status |
 |---|-----|------|------|-------|--------|
-| 12 | Spirograph Engine | precursor-spirograph | — | 0/8 | Queued |
-| 13 | Lissajous Machine | precursor-lissajous | — | 0/8 | Queued |
-| 14 | Moire Generator | precursor-moire | — | 0/8 | Queued |
-| 15 | Sacred Geometry | precursor-sacred | — | 0/8 | Queued |
-| 16 | Kaleidoscope | precursor-kaleidoscope | — | 0/8 | Queued |
-| 17 | Penrose Tiler | precursor-penrose | — | 0/8 | Queued |
-| 18 | Fractal Flames | precursor-flames | — | 0/8 | Queued |
-| 19 | Reaction-Diffusion | precursor-reaction | — | 0/8 | Queued |
+| 12 | Spirograph Engine | precursor-spirograph | — | 8/8 | **SHIPPED** |
+| 13 | Lissajous Machine | precursor-lissajous | — | 8/8 | **SHIPPED** |
+| 14 | Moire Generator | precursor-moire | — | 8/8 | **SHIPPED** |
+| 15 | Sacred Geometry | precursor-sacred | — | 8/8 | **SHIPPED** |
+| 16 | Kaleidoscope | precursor-kaleidoscope | — | 8/8 | **SHIPPED** |
+| 17 | Penrose Tiler | precursor-penrose | — | 8/8 | **SHIPPED** |
+| 18 | Fractal Flames | precursor-flames | — | 8/8 | **SHIPPED** |
+| 19 | Reaction-Diffusion | precursor-reaction | — | 8/8 | **SHIPPED** |
 
 ## Wave 5 — Network & Parsing
 
@@ -84,11 +84,19 @@
 | 9 | — | encoding.md validated | Classic cipher module (pure functions); frequency analysis; key entry branching; reverse operation |
 | 10 | — | randomness.md, encoding.md validated | Bulk TRNG bytes; XOR OTP with hex encoding; pad lifecycle tracking; hex I/O filtering |
 | 11 | — | randomness.md, encoding.md validated | Diceware passphrase (~630 words); entropy estimation without float; base64 encoding; char class guarantee |
+| 12 | — | graphics.md validated | Fixed-point 16.16 trig; parabolic sin/cos; hypotrochoid/epitrochoid parametric curves; precomputed point buffer |
+| 13 | — | — | Lissajous parametric (sin(at+d), sin(bt)); LCM period; ratio table grid UI; phase in 1/1024 units |
+| 14 | — | graphics.md validated | Bitmap XOR overlay; per-pixel pattern rendering; run-length display optimization; octant atan2 |
+| 15 | — | — | Primitive enum (Line/Circle); polygon/star helpers; circle as 32-segment polyline; resizable figures |
+| 16 | — | randomness.md validated | Dihedral symmetry (rotation+mirror); LCG PRNG for deterministic seeds; sector-based generation |
+| 17 | — | — | Robinson triangle subdivision; golden ratio as 1618/1000; Penrose P2 aperiodic tiling; interactive level |
+| 18 | — | randomness.md, encoding.md validated | Chaos game IFS; weighted transform selection; compile-time FP constants; 8 classic fractal presets |
+| 19 | — | — | Gray-Scott reaction-diffusion; reduced grid with 4x upscaling; timer-driven auto-step; parameter space presets |
 
 ## Cumulative Stats
 
-- Apps shipped: 11 / 32
-- Total LOC: ~21,500
+- Apps shipped: 19 / 32
+- Total LOC: ~28,300
 - Specialist agents created: 2 (encoding.md, randomness.md)
-- Toolkit updates: 11
+- Toolkit updates: 19
 - Screenshots captured: 0 (pending Renode)
