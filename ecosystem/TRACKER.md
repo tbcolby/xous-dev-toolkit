@@ -13,8 +13,8 @@
 
 | # | App | Repo | Port | Stage | Status |
 |---|-----|------|------|-------|--------|
-| 5 | Contact Book | precursor-contacts | 7882 | 0/8 | Queued |
-| 6 | Budget Ledger | precursor-budget | 7883 | 0/8 | Queued |
+| 5 | Contact Book | precursor-contacts | 7882 | 8/8 | **SHIPPED** |
+| 6 | Budget Ledger | precursor-budget | 7883 | 8/8 | **SHIPPED** |
 | 7 | Day Planner | precursor-planner | — | 0/8 | Queued |
 | 8 | Math Drill | precursor-mathdrill | 7890 | 0/8 | Queued |
 
@@ -77,11 +77,13 @@
 | 2 | — | encoding.md validated | App shell is a proven template; auto-format detection pattern established |
 | 3 | randomness.md | encoding.md referenced | Multi-tool state machine; text input sub-state; TRNG wrapper; independent module pattern |
 | 4 | — | randomness.md validated, graphics.md + architecture.md updated | Dynamic grid cell rendering; ticktimer integration; iterative flood fill |
+| 5 | — | — | Scrollable list with filter; field edit sub-mode; confirmation dialog pattern |
+| 6 | — | — | Cents-based currency; amount string parsing; summary dashboard pattern |
 
 ## Cumulative Stats
 
-- Apps shipped: 4 / 32
-- Total LOC: ~10,100 (qrcode: 2,508 + barcode: 2,200 + decide: 3,479 + mines: 1,965)
+- Apps shipped: 6 / 32
+- Total LOC: ~13,400
 - Specialist agents created: 2 (encoding.md, randomness.md)
-- Toolkit updates: 4 (encoding, randomness, grid rendering pattern, ticktimer pattern)
+- Toolkit updates: 6
 - Screenshots captured: 0 (pending Renode)
