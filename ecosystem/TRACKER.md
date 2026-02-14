@@ -22,9 +22,9 @@
 
 | # | App | Repo | Port | Stage | Status |
 |---|-----|------|------|-------|--------|
-| 9 | Cipher Workshop | precursor-cipher | 7887 | 0/8 | Queued |
-| 10 | One-Time Pad | precursor-otp | 7888 | 0/8 | Queued |
-| 11 | Key Ceremony | precursor-keygen | 7889 | 0/8 | Queued |
+| 9 | Cipher Workshop | precursor-cipher | 7887 | 8/8 | **SHIPPED** |
+| 10 | One-Time Pad | precursor-otp | 7888 | 8/8 | **SHIPPED** |
+| 11 | Key Ceremony | precursor-keygen | 7889 | 8/8 | **SHIPPED** |
 
 ## Wave 4 — Visual Engines
 
@@ -81,11 +81,14 @@
 | 6 | — | — | Cents-based currency; amount string parsing; summary dashboard pattern |
 | 7 | — | — | Calendar month grid; Sakamoto's day-of-week; multi-field form; date arithmetic |
 | 8 | — | randomness.md validated | Reverse-generated division; feedback auto-advance; progress bar; best score caching |
+| 9 | — | encoding.md validated | Classic cipher module (pure functions); frequency analysis; key entry branching; reverse operation |
+| 10 | — | randomness.md, encoding.md validated | Bulk TRNG bytes; XOR OTP with hex encoding; pad lifecycle tracking; hex I/O filtering |
+| 11 | — | randomness.md, encoding.md validated | Diceware passphrase (~630 words); entropy estimation without float; base64 encoding; char class guarantee |
 
 ## Cumulative Stats
 
-- Apps shipped: 8 / 32
-- Total LOC: ~16,700
+- Apps shipped: 11 / 32
+- Total LOC: ~21,500
 - Specialist agents created: 2 (encoding.md, randomness.md)
-- Toolkit updates: 8
+- Toolkit updates: 11
 - Screenshots captured: 0 (pending Renode)
