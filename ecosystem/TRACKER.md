@@ -15,8 +15,8 @@
 |---|-----|------|------|-------|--------|
 | 5 | Contact Book | precursor-contacts | 7882 | 8/8 | **SHIPPED** |
 | 6 | Budget Ledger | precursor-budget | 7883 | 8/8 | **SHIPPED** |
-| 7 | Day Planner | precursor-planner | — | 0/8 | Queued |
-| 8 | Math Drill | precursor-mathdrill | 7890 | 0/8 | Queued |
+| 7 | Day Planner | precursor-planner | — | 8/8 | **SHIPPED** |
+| 8 | Math Drill | precursor-mathdrill | 7890 | 8/8 | **SHIPPED** |
 
 ## Wave 3 — Crypto & Security
 
@@ -79,11 +79,13 @@
 | 4 | — | randomness.md validated, graphics.md + architecture.md updated | Dynamic grid cell rendering; ticktimer integration; iterative flood fill |
 | 5 | — | — | Scrollable list with filter; field edit sub-mode; confirmation dialog pattern |
 | 6 | — | — | Cents-based currency; amount string parsing; summary dashboard pattern |
+| 7 | — | — | Calendar month grid; Sakamoto's day-of-week; multi-field form; date arithmetic |
+| 8 | — | randomness.md validated | Reverse-generated division; feedback auto-advance; progress bar; best score caching |
 
 ## Cumulative Stats
 
-- Apps shipped: 6 / 32
-- Total LOC: ~13,400
+- Apps shipped: 8 / 32
+- Total LOC: ~16,700
 - Specialist agents created: 2 (encoding.md, randomness.md)
-- Toolkit updates: 6
+- Toolkit updates: 8
 - Screenshots captured: 0 (pending Renode)
