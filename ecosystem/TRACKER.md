@@ -43,12 +43,12 @@
 
 | # | App | Repo | Port | Stage | Status |
 |---|-----|------|------|-------|--------|
-| 20 | Regex Tester | precursor-regex | 7891 | 0/8 | Queued |
-| 21 | JSON Explorer | precursor-json | 7885 | 0/8 | Queued |
-| 22 | RSS Reader | precursor-rss | 7884 | 0/8 | Queued |
-| 23 | Git Log Viewer | precursor-gitlog | 7886 | 0/8 | Queued |
-| 24 | Network Scanner | precursor-netscan | — | 0/8 | Queued |
-| 25 | Cron Scheduler | precursor-cron | — | 0/8 | Queued |
+| 20 | Regex Tester | precursor-regex | 7891 | 8/8 | **SHIPPED** |
+| 21 | JSON Explorer | precursor-json | 7885 | 8/8 | **SHIPPED** |
+| 22 | RSS Reader | precursor-rss | 7884 | 8/8 | **SHIPPED** |
+| 23 | Git Log Viewer | precursor-gitlog | 7886 | 8/8 | **SHIPPED** |
+| 24 | Network Scanner | precursor-netscan | — | 8/8 | **SHIPPED** |
+| 25 | Cron Scheduler | precursor-cron | — | 8/8 | **SHIPPED** |
 
 ## Wave 6 — Complex Simulations
 
@@ -92,11 +92,17 @@
 | 17 | — | — | Robinson triangle subdivision; golden ratio as 1618/1000; Penrose P2 aperiodic tiling; interactive level |
 | 18 | — | randomness.md, encoding.md validated | Chaos game IFS; weighted transform selection; compile-time FP constants; 8 classic fractal presets |
 | 19 | — | — | Gray-Scott reaction-diffusion; reduced grid with 4x upscaling; timer-driven auto-step; parameter space presets |
+| 20 | — | encoding.md validated | Backtracking regex engine; character classes [a-z]; greedy quantifiers; cheat sheet UI |
+| 21 | — | — | Recursive descent JSON parser; tree view with expand/collapse; auto-expand 2 levels; numbers stored as String |
+| 22 | — | encoding.md validated | RSS 2.0 tag extraction; HTML stripping; entity decoding; embedded sample feeds |
+| 23 | — | — | Git log line parser; case-insensitive search; commit list/detail navigation; 10 sample commits |
+| 24 | — | — | CIDR subnet math (bitwise); 25-port reference table; simulated scan with 6 hosts; per-host detail |
+| 25 | — | — | 5-field cron parser; alias resolution (@daily etc.); human-readable describe(); 10 presets + reference |
 
 ## Cumulative Stats
 
-- Apps shipped: 19 / 32
-- Total LOC: ~28,300
+- Apps shipped: 25 / 32
+- Total LOC: ~33,800
 - Specialist agents created: 2 (encoding.md, randomness.md)
-- Toolkit updates: 19
+- Toolkit updates: 25
 - Screenshots captured: 0 (pending Renode)
