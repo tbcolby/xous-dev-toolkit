@@ -54,18 +54,18 @@
 
 | # | App | Repo | Port | Stage | Status |
 |---|-----|------|------|-------|--------|
-| 26 | Conway's Life | precursor-life | 7892 | 0/8 | Queued |
-| 27 | Game of Death | precursor-death | — | 0/8 | Queued |
-| 28 | SQLite Client | precursor-sqlite | 7895 | 0/8 | Queued |
+| 26 | Conway's Life | precursor-life | 7892 | 8/8 | **SHIPPED** |
+| 27 | Game of Death | precursor-death | — | 8/8 | **SHIPPED** |
+| 28 | SQLite Client | precursor-sqlite | 7895 | 8/8 | **SHIPPED** |
 
 ## Wave 7 — The Legends
 
 | # | App | Repo | Port | Stage | Status |
 |---|-----|------|------|-------|--------|
-| 29 | Text Adventure Engine | precursor-zork | 7893 | 0/8 | Queued |
-| 30 | Tamagotchi | precursor-pet | — | 0/8 | Queued |
-| 31 | Game Boy Emulator | precursor-gameboy | 7894 | 0/8 | Queued |
-| 32 | Dwarf Fortress ASCII | precursor-fortress | — | 0/8 | Queued |
+| 29 | Text Adventure Engine | precursor-zork | 7893 | 8/8 | **SHIPPED** |
+| 30 | Tamagotchi | precursor-pet | — | 8/8 | **SHIPPED** |
+| 31 | Game Boy Emulator | precursor-gameboy | 7894 | 8/8 | **SHIPPED** |
+| 32 | Dwarf Fortress ASCII | precursor-fortress | — | 8/8 | **SHIPPED** |
 
 ---
 
@@ -98,11 +98,27 @@
 | 23 | — | — | Git log line parser; case-insensitive search; commit list/detail navigation; 10 sample commits |
 | 24 | — | — | CIDR subnet math (bitwise); 25-port reference table; simulated scan with 6 hosts; per-host detail |
 | 25 | — | — | 5-field cron parser; alias resolution (@daily etc.); human-readable describe(); 10 presets + reference |
+| 26 | — | graphics.md validated | B3/S23 toroidal grid; run-length cell rendering; 10 classic patterns (Gosper Gun); crosshair editor |
+| 27 | — | — | Generalized B/S rule engine; 12 Life-like automata; rule notation display; shared grid architecture |
+| 28 | — | encoding.md validated | In-memory SQL engine; tokenizer with quoted strings; WHERE comparisons; 3 sample tables; query history |
+| 29 | — | — | 6-room dungeon world; 7 items; 9 verbs; partial-match parser; score tracking; scrollable output |
+| 30 | — | randomness.md validated | 6 lifecycle stages; 5 stats; 6 actions; ASCII art sprites; tick-driven sim; stat bars |
+| 31 | — | encoding.md validated | LR35902 CPU core; ~60 opcodes; register/flag display; disassembler; 4 demo programs; memory viewer |
+| 32 | — | — | 42x28 ASCII map; 16 tile types; 7 dwarves with AI; 6 resources; mining/building/farming; seasonal calendar |
 
 ## Cumulative Stats
 
-- Apps shipped: 25 / 32
-- Total LOC: ~33,800
+- Apps shipped: **32 / 32 — COMPLETE**
+- Total LOC: ~38,500
 - Specialist agents created: 2 (encoding.md, randomness.md)
-- Toolkit updates: 25
+- Toolkit updates: 32
 - Screenshots captured: 0 (pending Renode)
+
+## Ecosystem Complete
+
+All 32 apps shipped across 7 waves. Every app follows the standard Precursor/Xous pattern:
+- `no_std`/`no_main` Rust with GAM API
+- Standard event loop (Redraw/Rawkeys/FocusChange/Quit)
+- Consistent UI: header bar, footer hints, 336x536 monochrome
+- Individual GitHub repos under tbcolby/
+- Apache 2.0 license, README, CLAUDE.md, AGENTS.md
