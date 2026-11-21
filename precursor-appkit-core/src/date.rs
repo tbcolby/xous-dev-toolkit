@@ -1,5 +1,9 @@
 //! Proleptic Gregorian calendar dates in pure integer math.
 //!
+//! On device, today's date comes from the RTC: `llio::LocalTime::new()` then
+//! `get_local_time_ms()` (`Option<u64>`, `None` until the clock is set);
+//! divide by 86_400_000 for days since the epoch. See planner's `src/app.rs`.
+//!
 //! Conversions to and from a day count use Howard Hinnant's `days_from_civil`
 //! / `civil_from_days` algorithms, which are exact for every year in range.
 //!

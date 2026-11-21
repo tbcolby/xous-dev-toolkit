@@ -23,6 +23,8 @@ Format: **Lesson** · what happened · what changed in the toolkit.
 17. **Stack-size tests need `--release`.** A 128 KiB-stack recursion test overflowed in debug (bigger frames) but passed in release, which is what runs on device. Test stack limits under `cargo test --release`, or scale the debug budget.
 18. **The pump is optional.** Apps that only change on a key press don't need `appkit::pump`; say so in `main.rs` rather than carrying an idle pump.
 19. **Inner loop for the hosted build: `bin/integrate --check --strict --quick <repo>`** skips regenerating the GAM app table when it already lists the app (saves the xtask run). Use the full `--grade` before pushing. The gate takes 3–5 min: run it in the background and wait, don't fight a 120 s tool timeout.
+20. **Rebuild without destroying.** Never `rm -rf src` during a rebuild: `git mv` old files to `old/` and delete them once the new shell builds (a worker lost freshly written work this way).
+21. **The template core already has serde/serde_json.** Adding them again is a duplicate-key error.
 9. **Run the gate early, not just at the end.** Gate failures found at the end cost a full rebuild cycle each. Run `bin/lint` and `core` tests continuously; run `--grade` after the shell compiles.
 
 ## Patterns (use these, don't reinvent)
@@ -46,6 +48,8 @@ Format: **Lesson** · what happened · what changed in the toolkit.
 | Figures that may exceed the screen | `Screen::lines(segs, clip, width)` clips with `fixed::clip_line`; `Screen::circles` for real circles | — (round 5) |
 | Multi-line view of a text field | `text::input_view(&field, cols, rows)` → (visible lines, cursor row/col) | json-viewer, regex-lab, rss-viewer, sql-explorer |
 | Parser/matcher correctness | differential tests against a mature crate as a **dev-dependency only** (regex-lab vs `regex` found 5 semantic bugs; qrcode vs `qrcode`) plus truncate/corrupt-every-position fuzz loops | regex-lab, rss-viewer, qrcode |
+| Side effects that need confirmation (hardware writes, network connects) | core returns `Vec<Effect>` from key handling; the shell performs I/O. "No write without confirm" becomes a unit test | hwtools, netscan |
+| LAN import with one-time code | copy flashcards' `xfer.rs` + `net.rs` (shared crate pending) | flashcards, gitlog, writer |
 | HP-style RPN, unary minus, overflow display | see calc `core/` (70 tests) | calc |
 | Timers that alert in background | pump keeps ticking while an alert is armed, no redraws; time from ticktimer deltas + wall-clock gap check | timers |
 | Text entry with a cursor | `precursor_appkit_core::text::TextField` (char-indexed cursor, max length, redacted Debug) | writer, qrcode |
@@ -64,6 +68,8 @@ Format: **Lesson** · what happened · what changed in the toolkit.
 - Modal confirm/menu overlay, right-aligned text, non-blocking alert thread (round 2a).
 
 ## Log
+
+- 2026-11-21 round 4b (cron, gitlog, netscan, hwtools), Sonnet: 4/4 pass first submission, 28 min / 76 tool calls; tests 54/38/34/30. netscan's fake scan replaced by a real confirmed TCP check; hwtools writes need confirmation and are restored on background. Toolkit: Effect pattern, lessons 20–21, date/pump docs. Open: shared LAN-transfer crate, confirm dialog, scrollable text view.
 
 - 2026-11-21 round 4a (json-viewer, regex-lab, rss-viewer, sql-explorer), Sonnet: 4/4 pass first submission, 37 min / 81 tool calls; tests 38/35/38/39. Toolkit: `text::input_view`, `integrate --quick`, lessons 17–19, differential-testing pattern. rss/sqlite packages renamed to stop overclaiming (pending Tyler's OK).
 

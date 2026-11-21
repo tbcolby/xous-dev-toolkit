@@ -10,6 +10,7 @@ license = "Apache-2.0"
 # Pure appkit parts (keys, layout, fail-closed entropy). Git so `cargo test`
 # works in this repo; bin/integrate patches it to the in-tree copy.
 precursor-appkit-core = { git = "https://github.com/tbcolby/xous-dev-toolkit" }
+# serde and serde_json are already here; do not add them again.
 serde = { version = "1.0", default-features = false, features = ["derive", "alloc"] }
 
 [dev-dependencies]

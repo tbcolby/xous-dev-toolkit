@@ -27,7 +27,7 @@ Real key codes and a `Key` enum. `decode_rawkeys([k1, k2, k3, k4])` turns a GAM 
 `Trng::new(&xns)`: `below(n)`, `range_inclusive(lo, hi)`, `shuffle`, `fill_bytes`, all unbiased and **panicking on TRNG failure**. `try_u32()` if you'd rather show an error. The algorithms are generic over `RandomSource` for host tests.
 
 ### `pump`
-`Pump::spawn(main_cid, opcode, interval_ms)`, then `run()` on foreground, `stop()` on background, `quit()` on exit. Ticks arrive as blocking scalars; answer each with `pump::ack(&msg)`. Generation counting stops double-ticking after rapid focus changes.
+`Pump::spawn(main_cid, opcode, interval_ms)` (`interval_ms: usize`; only animating apps need a pump), then `run()` on foreground, `stop()` on background, `quit()` on exit. Ticks arrive as blocking scalars; answer each with `pump::ack(&msg)`. Generation counting stops double-ticking after rapid focus changes.
 
 ## Tests
 
