@@ -158,7 +158,16 @@ def check(root: Path, pkgs, verbose, broken, strict=False):
     # its build result and check each app individually afterwards.
     print(f"generating app tables for {len(pkgs)} apps…", flush=True)
     buildable = [p for p in pkgs if p not in broken]
-    sh(["cargo", "xtask", "hosted-ci", *buildable], cwd=root, capture=True)
+    gen = sh(["cargo", "xtask", "hosted-ci", *buildable], cwd=root, capture=True)
+    apps_rs = root / "services" / "gam" / "src" / "apps.rs"
+    table = apps_rs.read_text() if apps_rs.exists() else ""
+    missing = [p for p in buildable if f"APP_NAME_{p.upper().replace('-', '_')}:" not in table]
+    if missing:
+        print(f"error: xtask did not generate GAM app names for {missing}. xtask output (tail):", file=sys.stderr)
+        for line in (gen.stdout + gen.stderr).strip().splitlines()[-25:]:
+            print("    " + line, file=sys.stderr)
+        for p in missing:
+            broken[p] = "xtask failed to generate the GAM app table (see log above)"
     base = ["cargo", "clippy" if strict else "check", "--release", "--message-format", "short"]
     for p in HOSTED_PKGS:
         base += ["--package", p]
