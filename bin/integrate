@@ -1,0 +1,246 @@
+#!/usr/bin/env python3
+"""Integrate Precursor app repos into a xous-core tree and (optionally) build them.
+
+    bin/integrate --xous-root ~/xous-core ~/Dev/precursor/precursor-*          # copy in only
+    bin/integrate --xous-root ~/xous-core --check ~/Dev/precursor/precursor-*  # + hosted build per app
+    bin/integrate --clone /tmp/xc --check precursor-mines                     # fresh xous-core at the anchor
+
+What it does, per app repo:
+  1. Copies precursor-appkit into libs/precursor-appkit.
+  2. Copies the repo (minus .git/target) into apps/<package-name>/.
+     A repo-level `libs/<crate>/` directory is copied into xous-core/libs/.
+  3. Merges the repo's manifest-fragment.json into apps/manifest.json
+     (key must equal the package name, or gam::APP_NAME_* won't match).
+  4. Adds apps/<pkg> to the workspace `members` (never `default-members`).
+  5. Lints packaging: non-standard path deps, missing fragment, name collisions.
+With --check: generates the GAM app tables once, then runs a hosted
+`cargo check` per app and prints a pass/fail table. Writes results JSON with
+--json. Exit code is the number of failing apps (capped at 100).
+"""
+import argparse
+import json
+import re
+import shutil
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+TOOLKIT = Path(__file__).resolve().parent.parent
+APPKIT = TOOLKIT / "appkit"
+
+# Service packages and features xtask selects for a hosted build at the anchor
+# commit (xtask `hosted-ci`). Selecting them is what turns on the `hosted`
+# feature across the dependency graph so a single app can be checked alone.
+HOSTED_PKGS = (
+    "xous-ticktimer xous-log xous-names xous-susres graphics-server early_settings keyboard "
+    "spinor llio com net dns gam ime-frontend ime-plugin-shell codec modals root-keys trng sha2 "
+    "jtag status shellchat pddb usb-device-xous"
+).split()
+HOSTED_FEATURES = ["hosted", "timestamp"]
+
+STD_PATH = re.compile(r'path\s*=\s*"(\.\./\.\./(services|libs)/[^"]+|[A-Za-z0-9_-][^"]*)"')
+ANY_PATH = re.compile(r'path\s*=\s*"([^"]+)"')
+
+
+def read_anchor():
+    vals = {}
+    for line in (TOOLKIT / "XOUS_CORE_ANCHOR").read_text().splitlines():
+        if "=" in line and not line.startswith("#"):
+            k, v = line.split("=", 1)
+            vals[k.strip()] = v.strip()
+    return vals["repo"], vals["commit"]
+
+
+def sh(cmd, cwd=None, capture=False):
+    return subprocess.run(cmd, cwd=cwd, text=True, capture_output=capture)
+
+
+def package_name(cargo_toml: Path) -> str:
+    m = re.search(r'^\[package\][^\[]*?^name\s*=\s*"([^"]+)"', cargo_toml.read_text(), re.M | re.S)
+    if not m:
+        raise SystemExit(f"error: no package name in {cargo_toml}")
+    return m.group(1)
+
+
+def add_member(root: Path, member: str):
+    p = root / "Cargo.toml"
+    text = p.read_text()
+    m = re.search(r"(?ms)^members\s*=\s*\[(.*?)\]", text)
+    if not m:
+        raise SystemExit(f"error: no [workspace] members list in {p}")
+    if f'"{member}"' in m.group(1):
+        return
+    text = text[: m.start(1)] + f'\n  "{member}",' + text[m.start(1):]
+    p.write_text(text)
+
+
+def remove_member(root: Path, member: str):
+    p = root / "Cargo.toml"
+    text = p.read_text()
+    new = re.sub(rf'\n\s*"{re.escape(member)}",', "", text)
+    if new != text:
+        p.write_text(new)
+
+
+def copy_tree(src: Path, dst: Path):
+    if dst.exists():
+        shutil.rmtree(dst)
+    shutil.copytree(src, dst, ignore=shutil.ignore_patterns(".git", "target", "*.png", "screenshots"))
+
+
+def integrate(root: Path, repos, warnings, broken):
+    copy_tree(APPKIT, root / "libs" / "precursor-appkit")
+    add_member(root, "libs/precursor-appkit")
+    manifest_p = root / "apps" / "manifest.json"
+    manifest = json.loads(manifest_p.read_text())
+    pkgs = []
+    for repo in repos:
+        cargo = repo / "Cargo.toml"
+        if not cargo.exists():
+            warnings.append(f"{repo.name}: no Cargo.toml, skipped")
+            continue
+        pkg = package_name(cargo)
+        tracked = sh(["git", "-C", str(root), "ls-files", f"apps/{pkg}"], capture=True).stdout.strip()
+        if tracked:
+            warnings.append(f"{repo.name}: apps/{pkg} is an upstream xous-core app; rename the package")
+            continue
+        dst = root / "apps" / pkg
+        copy_tree(repo, dst)
+
+        if (repo / "libs").is_dir():
+            for lib in (repo / "libs").iterdir():
+                if (lib / "Cargo.toml").exists():
+                    copy_tree(lib, root / "libs" / lib.name)
+
+        # A member whose path deps don't resolve makes cargo refuse to load the
+        # whole workspace, failing every other app. Keep such apps out.
+        missing = []
+        for m in ANY_PATH.finditer(cargo.read_text()):
+            dep = m.group(1)
+            if not (dst / dep / "Cargo.toml").exists():
+                missing.append(dep)
+            elif not STD_PATH.fullmatch(m.group(0)):
+                warnings.append(f"{pkg}: non-standard path dependency {dep!r}")
+        if missing:
+            warnings.append(f"{pkg}: unresolved path dependencies {missing}; not added to the workspace")
+            broken[pkg] = f"packaging: unresolved path dependencies {missing}"
+            remove_member(root, f"apps/{pkg}")
+            pkgs.append(pkg)
+            continue
+        add_member(root, f"apps/{pkg}")
+
+        frag_p = repo / "manifest-fragment.json"
+        if frag_p.exists():
+            frag = json.loads(frag_p.read_text())
+            for key in frag:
+                if key != pkg:
+                    warnings.append(f"{pkg}: manifest key {key!r} != package name; gam::APP_NAME_* will not match")
+            manifest.update(frag)
+        elif pkg not in manifest:
+            warnings.append(f"{pkg}: no manifest-fragment.json; synthesized entry (menu name may be wrong)")
+            title = pkg.replace("-", " ").title()
+            manifest[pkg] = {"context_name": title, "menu_name": {f"appmenu.{pkg}": {"en": title, "en-tts": title}}}
+
+        src = "\n".join(p.read_text(errors="ignore") for p in (repo / "src").rglob("*.rs"))
+        src = re.sub(r"//.*", "", src)  # ignore names mentioned in comments / doc comments
+        for used in set(re.findall(r"gam::APP_NAME_([A-Z0-9_]+)", src)):
+            if used != pkg.upper().replace("-", "_"):
+                expected = pkg.upper().replace("-", "_")
+                warnings.append(f"{pkg}: code uses gam::APP_NAME_{used}, but package implies APP_NAME_{expected}")
+        pkgs.append(pkg)
+    manifest_p.write_text(json.dumps(manifest, indent=4, ensure_ascii=False) + "\n")
+    return pkgs
+
+
+def check(root: Path, pkgs, verbose, broken):
+    # One xtask run generates gam's apps.rs / i18n for the whole set; we ignore
+    # its build result and check each app individually afterwards.
+    print(f"generating app tables for {len(pkgs)} apps…", flush=True)
+    buildable = [p for p in pkgs if p not in broken]
+    sh(["cargo", "xtask", "hosted-ci", *buildable], cwd=root, capture=True)
+    base = ["cargo", "check", "--release", "--message-format", "short"]
+    for p in HOSTED_PKGS:
+        base += ["--package", p]
+    for f in HOSTED_FEATURES:
+        base += ["--features", f]
+    results = {}
+    for pkg in pkgs:
+        if pkg in broken:
+            results[pkg] = {"ok": False, "errors": 1, "warnings": 0, "seconds": 0, "first_errors": [broken[pkg]]}
+            print(f"  FAIL  {pkg:<20}   - packaging ({broken[pkg]})", flush=True)
+            continue
+        t0 = time.monotonic()
+        r = sh(base + ["--package", pkg], cwd=root, capture=True)
+        mine = [ln for ln in r.stderr.splitlines() if f"apps/{pkg}/" in ln]
+        errors = [ln for ln in mine if ": error" in ln]
+        warns = [ln for ln in mine if ": warning" in ln]
+        ok = r.returncode == 0
+        if not ok and not errors:
+            errors = [ln for ln in r.stderr.splitlines() if ln.startswith("error")][:5]
+        results[pkg] = {"ok": ok, "errors": len(errors), "warnings": len(warns),
+                        "seconds": round(time.monotonic() - t0, 1), "first_errors": errors[:5]}
+        print(f"  {'PASS' if ok else 'FAIL'}  {pkg:<20} {len(errors):>3} err {len(warns):>3} warn", flush=True)
+        if verbose and errors:
+            for e in errors[:10]:
+                print("        " + e)
+    return results
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("repos", nargs="+", help="app repo directories")
+    g = ap.add_mutually_exclusive_group()
+    g.add_argument("--xous-root", help="existing xous-core checkout (default: $XOUS_ROOT)")
+    g.add_argument("--clone", metavar="DIR", help="clone xous-core at the anchor commit into DIR")
+    ap.add_argument("--check", action="store_true", help="hosted cargo check per app")
+    ap.add_argument("--json", metavar="FILE", help="write results JSON")
+    ap.add_argument("-v", "--verbose", action="store_true")
+    a = ap.parse_args()
+
+    import os
+    if a.clone:
+        root = Path(a.clone).expanduser().resolve()
+        if not root.exists():
+            repo, commit = read_anchor()
+            print(f"cloning xous-core @ {commit} into {root}…", flush=True)
+            if sh(["git", "clone", "-q", repo, str(root)]).returncode or \
+               sh(["git", "-C", str(root), "checkout", "-q", commit]).returncode:
+                sys.exit("error: clone/checkout failed")
+    else:
+        rp = a.xous_root or os.environ.get("XOUS_ROOT")
+        if not rp:
+            sys.exit("error: pass --xous-root, --clone, or set XOUS_ROOT")
+        root = Path(rp).expanduser().resolve()
+    if not (root / "xtask").is_dir() or not (root / "apps" / "manifest.json").exists():
+        sys.exit(f"error: {root} does not look like a xous-core checkout")
+
+    _, anchor = read_anchor()
+    head = sh(["git", "-C", str(root), "rev-parse", "--short", "HEAD"], capture=True).stdout.strip()
+    if head and not anchor.startswith(head[:7]) and not head.startswith(anchor[:7]):
+        print(f"warning: xous-core is at {head}, toolkit is verified against {anchor}", file=sys.stderr)
+
+    repos = [Path(r).expanduser().resolve() for r in a.repos]
+    warnings = []
+    broken = {}
+    pkgs = integrate(root, repos, warnings, broken)
+    for w in warnings:
+        print(f"warn: {w}")
+    print(f"integrated {len(pkgs)} app(s) into {root}")
+    if not pkgs:
+        print("error: nothing was integrated", file=sys.stderr)
+        return 100
+    if not a.check:
+        return 0
+
+    results = check(root, pkgs, a.verbose, broken)
+    failed = [p for p, r in results.items() if not r["ok"]]
+    print(f"\n{len(pkgs) - len(failed)}/{len(pkgs)} apps pass hosted check at xous-core {head or '?'}")
+    if a.json:
+        Path(a.json).write_text(json.dumps({"xous_core": head, "anchor": anchor, "warnings": warnings,
+                                            "results": results}, indent=2))
+    return min(len(failed), 100)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

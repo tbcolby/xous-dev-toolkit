@@ -1,0 +1,21 @@
+[package]
+name = "{{name}}"
+version = "0.1.0"
+edition = "2021"
+description = "{{display}} for Precursor"
+license = "Apache-2.0"
+
+# Lives at xous-core/apps/{{name}}/ (see xous-dev-toolkit/scripts/integrate.sh).
+[dependencies]
+log = "0.4.14"
+num-derive = { version = "0.4.2", default-features = false }
+num-traits = { version = "0.2.14", default-features = false }
+serde = { version = "1.0", default-features = false, features = ["derive", "alloc"] }
+xous = "0.9.71"
+log-server = { package = "xous-api-log", version = "0.1.70" }
+xous-names = { package = "xous-api-names", version = "0.9.72" }
+gam = { path = "../../services/gam" }
+precursor-appkit = { path = "../../libs/precursor-appkit" }
+
+[features]
+default = []

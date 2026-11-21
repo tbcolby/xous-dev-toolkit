@@ -1,0 +1,26 @@
+[package]
+name = "precursor-appkit"
+version = "0.1.0"
+edition = "2021"
+description = "Shared building blocks for Precursor (Xous) apps: correct key codes, GAM drawing helpers, PDDB JSON storage, fail-closed TRNG, focus-aware pump"
+license = "Apache-2.0"
+
+# This crate lives at `xous-core/libs/precursor-appkit/` when integrated
+# (see `scripts/integrate.sh`). Paths below are relative to that location.
+
+[dependencies]
+log = "0.4.14"
+serde = { version = "1.0", default-features = false, features = ["derive", "alloc"] }
+serde_json = { version = "1.0", default-features = false, features = ["alloc"] }
+
+# Xous services (disabled with `--no-default-features` for host unit tests)
+xous = { version = "0.9.71", optional = true }
+xous-names = { package = "xous-api-names", version = "0.9.72", optional = true }
+ticktimer-server = { package = "xous-api-ticktimer", version = "0.9.71", optional = true }
+gam = { path = "../../services/gam", optional = true }
+pddb = { path = "../../services/pddb", optional = true }
+trng = { path = "../../services/trng", optional = true }
+
+[features]
+default = ["xous"]
+xous = ["dep:xous", "dep:xous-names", "dep:ticktimer-server", "dep:gam", "dep:pddb", "dep:trng"]

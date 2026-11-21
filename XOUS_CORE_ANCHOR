@@ -1,0 +1,4 @@
+# xous-core commit this toolkit (appkit, templates, docs) is verified against.
+# Update only after scripts/../bin/integrate passes on the new commit.
+repo=https://github.com/betrusted-io/xous-core.git
+commit=31fbe23

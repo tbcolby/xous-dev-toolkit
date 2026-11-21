@@ -1,0 +1,11 @@
+{
+    "{{name}}": {
+        "context_name": "{{display}}",
+        "menu_name": {
+            "appmenu.{{name}}": {
+                "en": "{{display}}",
+                "en-tts": "{{display}}"
+            }
+        }
+    }
+}
