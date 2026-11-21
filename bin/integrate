@@ -321,6 +321,9 @@ def main() -> int:
             if f:
                 results[pkg]["ok"] = False
             print(f"  {'PASS' if not f else 'FAIL'}  {pkg:<20} lint: {len(f)} finding(s)", flush=True)
+            if a.verbose:
+                for x in f[:10]:
+                    print(f"        {x['file']}:{x['line']}: [{x['rule']}] {x['msg']}")
     failed = [p for p, r in results.items() if not r["ok"]]
     gate = "10/10 gate" if a.grade else "hosted check"
     print(f"\n{len(pkgs) - len(failed)}/{len(pkgs)} apps pass {gate} at xous-core {head or '?'}")

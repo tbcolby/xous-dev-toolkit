@@ -14,6 +14,8 @@ Format: **Lesson** · what happened · what changed in the toolkit.
 7. **Every commit should build.** A round-2a commit removed the old shell before the new one landed, so bisecting would hit a broken tree. Order commits core → shell → docs, each compiling, or squash.
 8. **Don't overload the machine.** Two worker builds plus the orchestrator's verification pushed load past 40 on 8 cores (other sessions' jobs too). Orchestrator verification runs one build at a time.
 10. **Tests must model the device, not the test harness.** Budget/planner created a fresh seeded test RNG per keypress, so every save drew the same "random" key and silently overwrote the previous record — and the tests passed. · Toolkit: `records::fresh_key` and `Store::create_record` refuse keys already in use; test with one long-lived entropy source and assert distinct keys.
+11. **In an R rebuild, delete the old shell files.** Unused `src/ui.rs`/`src/cpu.rs` from the old app were still scanned by lint and confused reviewers. `git rm` anything the new shell doesn't `mod`.
+12. **`bin/integrate -v` shows lint findings** (added round 2b); you don't need a separate `bin/lint` run to see why the gate failed.
 9. **Run the gate early, not just at the end.** Gate failures found at the end cost a full rebuild cycle each. Run `bin/lint` and `core` tests continuously; run `--grade` after the shell compiles.
 
 ## Patterns (use these, don't reinvent)
@@ -47,6 +49,8 @@ Format: **Lesson** · what happened · what changed in the toolkit.
 - Modal confirm/menu overlay, right-aligned text, non-blocking alert thread (round 2a).
 
 ## Log
+
+- 2026-11-21 round 2b (othello, c64, gameboy) — first Sonnet round: 3/3 pass first submission, 12 min / 45 tool calls (othello and c64 resumed from WIP). Gate tests: 59/90/51. Toolkit: `-v` prints lint findings, template ignores `Cargo.lock`, lesson 11. Open: Key match helper where Backspace is input and F4 exits (c64 run mode).
 
 - 2026-11-21 docs audit (`ecosystem/DOCS_AUDIT.md`, toolkit vs Xous Book + source): fixed 7 contradictions (`--app-feature`, `generated.rs`, `update_progress`, manifest locales, members note, `KeypadEnter` = `∴`, stale script name); documented i18n, `submenu`, IPC (try_send, deferred responses, memory messages, limits), ticktimer/susres, app-loader dev loop, `std::fs` PDDB, `menu_matic`, hosted-mode limits; new lint rule `manifest-locales`.
 
