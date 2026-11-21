@@ -23,7 +23,7 @@ bin/lint <repo>                         # banned patterns only (fast, no cargo)
 
 The full bar for an app is in `ecosystem/REMEDIATION.md` ("What 10/10 means").
 
-Build new apps on `precursor-appkit` (`appkit/`). Only drop to raw GAM/PDDB APIs for things the kit doesn't cover, and follow the rules below when you do.
+Build new apps on `precursor-appkit` (`appkit/`). Its pure parts (`keys`, `layout`, fail-closed `entropy`) live in `precursor-appkit-core/`, which an app's `core/` crate depends on by git (`precursor-appkit-core = { git = "https://github.com/tbcolby/xous-dev-toolkit" }`, plus `features = ["testing"]` in dev-dependencies for deterministic/failing entropy sources). `bin/integrate` patches that git source to the in-tree copy so app, core and appkit share one crate; don't copy `entropy.rs` into apps. Only drop to raw GAM/PDDB APIs for things the kit doesn't cover, and follow the rules below when you do.
 
 ## Hard rules (each one has broken real apps)
 
@@ -63,7 +63,7 @@ Every screen needs an exit reachable with Backspace or F4.
 - Put a `version` field in stored JSON.
 
 **Randomness**
-- Fail closed. Never `get_u32().unwrap_or(0)`. Use `appkit::rng::Trng` (panics on TRNG error) and its unbiased `below`/`shuffle`.
+- Fail closed. Never `get_u32().unwrap_or(0)`. Games: `appkit::rng::Trng` (panics on TRNG error) and its unbiased `below`/`shuffle`. Secrets: write core generators against `precursor_appkit_core::entropy::Entropy` (fallible; `Trng` implements it) so a TRNG failure becomes an error message, never a value.
 
 **Build**
 - Add apps to workspace `members` only, never `default-members` (`bin/integrate` does this).
@@ -106,8 +106,9 @@ Read `agents/<name>.md` when working in that area. `agents/README.md` has the fu
 ## Repository layout
 
 ```
-bin/            new-app, integrate
-appkit/         precursor-appkit crate
+bin/            new-app, integrate, lint, status
+appkit/         precursor-appkit crate (Xous shell helpers)
+precursor-appkit-core/  pure half: keys, layout, entropy (host-testable, git-dependable)
 templates/app/  app template
 scripts/        Renode + USB tooling (Python)
 agents/         specialist docs

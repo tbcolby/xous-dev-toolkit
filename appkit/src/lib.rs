@@ -13,11 +13,11 @@
 //! | [`screen`]| used `invert` (refused for apps), `gam.clear()`, or `graphics_server`      |
 //! | [`app`]   | registered the UX with the xous-names server name instead of `APP_NAME_*`  |
 //!
-//! `keys`, `rng::unbiased_below`, and `layout` are pure and unit-tested on the
-//! host with `cargo test --no-default-features`. The rest need Xous services.
+//! `keys`, `layout` and `entropy` come from `precursor-appkit-core` (pure,
+//! usable from an app's `core/` crate); `rng::unbiased_below` is pure too.
+//! All are unit-tested on the host with `cargo test --no-default-features`. The rest need Xous services.
 
-pub mod keys;
-pub mod layout;
+pub use precursor_appkit_core::{entropy, keys, layout};
 pub mod rng;
 
 #[cfg(feature = "xous")]

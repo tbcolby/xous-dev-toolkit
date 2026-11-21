@@ -86,6 +86,16 @@ impl RandomSource for Trng {
     }
 }
 
+/// Lets core crates written against the fallible
+/// [`precursor_appkit_core::entropy::Entropy`] trait use the hardware TRNG.
+/// Errors become `EntropyError` (no panic), so the caller can show a message.
+#[cfg(feature = "xous")]
+impl precursor_appkit_core::entropy::Entropy for Trng {
+    fn try_u32(&mut self) -> Result<u32, precursor_appkit_core::entropy::EntropyError> {
+        self.inner.get_u32().map_err(|_| precursor_appkit_core::entropy::EntropyError)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

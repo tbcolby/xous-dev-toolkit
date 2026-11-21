@@ -20,7 +20,7 @@ RULES = [
      "Apple PUA arrow codes never arrive; use appkit::keys (U+2190..2193)"),
     ("menu-key-binding", r"'\\u\{2234\}'|'∴'",
      "GAM consumes ∴ in app contexts; apps never receive it (use Backspace/F4)"),
-    ("esc-key", r"'\\u\{0*1[bB]\}'|'\\x1[bB]'|\b0x1[bB]\b",
+    ("esc-key", r"'\\u\{0*1[bB]\}'|'\\x1[bB]'|(==|!=)\s*0x1[bB]\b|\b0x1[bB]\s*(=>|as char|==)",
      "No key produces ESC on Precursor or in Renode"),
     ("fail-open-rng", r"get_u(32|64)\(\)\s*\.\s*unwrap_or",
      "TRNG must fail closed; use appkit::rng::Trng"),
@@ -57,10 +57,26 @@ def strip_comments(line: str) -> str:
     return "".join(out)
 
 
+TEST_MOD = re.compile(r"#\[cfg\(test\)\]\s*(?:pub(?:\([^)]*\))?\s+)?mod\s+(\w+)\s*;")
+
+
+def test_only_files(repo: Path):
+    """Files pulled in by `#[cfg(test)] mod foo;` (foo.rs / foo/mod.rs) are test code."""
+    out = set()
+    for path in repo.rglob("*.rs"):
+        if "target" in path.parts:
+            continue
+        for name in TEST_MOD.findall(path.read_text(errors="ignore")):
+            base = path.parent if path.name in ("lib.rs", "main.rs", "mod.rs") else path.parent / path.stem
+            out |= {base / f"{name}.rs", base / name / "mod.rs"}
+    return out
+
+
 def lint_repo(repo: Path):
     findings = []
+    skip = test_only_files(repo)
     for path in sorted(repo.rglob("*.rs")):
-        if "target" in path.parts or "tests" in path.parts and "doc-snippets" in path.parts:
+        if "target" in path.parts or path in skip or "tests" in path.parts and "doc-snippets" in path.parts:
             continue
         in_test = False
         lines = path.read_text(errors="ignore").splitlines()

@@ -52,7 +52,7 @@ jobs:
         run: bin/integrate --xous-root ../xous-core --grade --json integrate.json ../apps/precursor-ci-smoke
       - name: appkit host unit tests
         working-directory: ../xous-core
-        run: cargo test -p precursor-appkit --no-default-features
+        run: cargo test -p precursor-appkit --no-default-features && cargo test -p precursor-appkit-core --features testing
       - name: Doc snippets compile
         run: |
           if [ -d tests/doc-snippets ]; then

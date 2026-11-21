@@ -198,3 +198,14 @@ def test_lint_template_is_clean(tmp_path):
     r = run_new_app(tmp_path, "lint-check", "Lint Check")
     assert r.returncode == 0
     assert lint.lint_repo(tmp_path / "precursor-lint-check") == []
+
+
+def test_lint_skips_cfg_test_module_files_and_esc_in_tables(tmp_path):
+    repo = tmp_path / "precursor-y"
+    (repo / "src").mkdir(parents=True)
+    (repo / "README.md").write_text("x")
+    (repo / "manifest-fragment.json").write_text("{}")
+    (repo / "src" / "lib.rs").write_text("#[cfg(test)]\nmod tests;\nconst T: [u8; 2] = [0x1B, 0x27];\n")
+    (repo / "src" / "tests.rs").write_text("const UP: char = '\\u{F700}';\n")
+    (repo / "src" / "keys.rs").write_text("fn f(c: u8) -> bool { c == 0x1b }\n")
+    assert [(f["file"], f["rule"]) for f in lint.lint_repo(repo)] == [("src/keys.rs", "esc-key")]

@@ -2,7 +2,7 @@
 //!
 //! Never hard-code 336x536. A `Framebuffer` canvas starts below the status
 //! bar, so its height is smaller than the panel. Always size from
-//! `gam.get_canvas_bounds(gid)` (see [`crate::screen::Screen`]).
+//! `gam.get_canvas_bounds(gid)` (see `precursor_appkit::screen::Screen`).
 
 /// Cursor + scroll state for a vertical list.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]

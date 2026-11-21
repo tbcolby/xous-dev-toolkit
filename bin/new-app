@@ -60,6 +60,8 @@ def main() -> int:
         if src.is_dir():
             continue
         out = dest / src.relative_to(TEMPLATE)
+        if out.suffix == ".tmpl":  # Cargo.toml.tmpl: hidden from cargo's git-source scan of this repo
+            out = out.with_suffix("")
         out.parent.mkdir(parents=True, exist_ok=True)
         text = src.read_text()
         for k, v in subs.items():

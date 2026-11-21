@@ -6,9 +6,13 @@ description = "Shared building blocks for Precursor (Xous) apps: correct key cod
 license = "Apache-2.0"
 
 # This crate lives at `xous-core/libs/precursor-appkit/` when integrated
-# (see `scripts/integrate.sh`). Paths below are relative to that location.
+# (see `bin/integrate`). Paths below are relative to that location.
 
 [dependencies]
+# Pure modules (keys, layout, entropy). Path works in the toolkit and, after
+# bin/integrate, in xous-core/libs/. App core/ crates use the git source, which
+# integrate patches to the same path so there is only one copy.
+precursor-appkit-core = { path = "../precursor-appkit-core" }
 log = "0.4.14"
 serde = { version = "1.0", default-features = false, features = ["derive", "alloc"] }
 serde_json = { version = "1.0", default-features = false, features = ["alloc"] }

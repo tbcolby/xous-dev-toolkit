@@ -28,6 +28,8 @@ from pathlib import Path
 
 TOOLKIT = Path(__file__).resolve().parent.parent
 APPKIT = TOOLKIT / "appkit"
+APPKIT_CORE = TOOLKIT / "precursor-appkit-core"
+TOOLKIT_GIT = "https://github.com/tbcolby/xous-dev-toolkit"
 
 # Service packages and features xtask selects for a hosted build at the anchor
 # commit (xtask `hosted-ci`). Selecting them is what turns on the `hosted`
@@ -83,13 +85,31 @@ def remove_member(root: Path, member: str):
         p.write_text(new)
 
 
+def ensure_patch(root: Path):
+    """Point the toolkit's git source at the in-tree appkit-core copy.
+
+    App core/ crates depend on precursor-appkit-core by git (so their host tests
+    run standalone); without this patch the workspace would build a second copy
+    whose Entropy trait differs from the one precursor-appkit implements."""
+    p = root / "Cargo.toml"
+    text = p.read_text()
+    header = f'[patch."{TOOLKIT_GIT}"]'
+    if header in text:
+        return
+    p.write_text(text.rstrip() + f'\n\n{header}\nprecursor-appkit-core = {{ path = "libs/precursor-appkit-core" }}\n')
+
+
 def copy_tree(src: Path, dst: Path):
     if dst.exists():
         shutil.rmtree(dst)
-    shutil.copytree(src, dst, ignore=shutil.ignore_patterns(".git", "target", "*.png", "screenshots"))
+    shutil.copytree(src, dst, ignore=shutil.ignore_patterns(".git", "target", "*.png", "screenshots", "Cargo.lock"))
 
 
 def integrate(root: Path, repos, warnings, broken):
+    if APPKIT_CORE.exists():
+        copy_tree(APPKIT_CORE, root / "libs" / "precursor-appkit-core")
+        add_member(root, "libs/precursor-appkit-core")
+        ensure_patch(root)
     copy_tree(APPKIT, root / "libs" / "precursor-appkit")
     add_member(root, "libs/precursor-appkit")
     manifest_p = root / "apps" / "manifest.json"

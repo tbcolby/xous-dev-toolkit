@@ -1,0 +1,15 @@
+[package]
+name = "precursor-appkit-core"
+version = "0.1.0"
+edition = "2021"
+description = "Pure, host-testable parts of precursor-appkit: key codes, list layout, fail-closed entropy"
+license = "Apache-2.0"
+
+# No dependencies on purpose: app `core/` crates depend on this by git, and
+# bin/integrate patches that git source to xous-core/libs/precursor-appkit-core
+# so the app, its core crate and precursor-appkit all share one copy.
+[dependencies]
+
+[features]
+# Exposes entropy::testing (deterministic / failing sources) to dev-dependencies.
+testing = []
