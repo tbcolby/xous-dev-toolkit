@@ -1,0 +1,24 @@
+[project]
+name = "xous-dev-toolkit"
+version = "0.2.0"
+description = "Renode automation and USB log tooling for Precursor / Xous app development"
+requires-python = ">=3.9"
+dependencies = []
+
+[project.optional-dependencies]
+serial = ["pyserial"]
+dev = ["pytest>=7", "ruff"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["scripts"]
+
+[tool.ruff]
+target-version = "py39"
+line-length = 120
+src = ["scripts", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+# typing.List/Tuple kept for readability alongside 3.9 support
+ignore = ["UP006", "UP035"]
