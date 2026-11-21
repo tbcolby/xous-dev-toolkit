@@ -39,6 +39,9 @@ def main() -> int:
     ap.add_argument("--xous-root", help="xous-core checkout for --check (default: $XOUS_ROOT)")
     a = ap.parse_args()
 
+    if a.repo_prefix and a.name.startswith(a.repo_prefix):
+        sys.exit(f"error: pass the package name without the repo prefix: "
+                 f"{a.name[len(a.repo_prefix):]!r} (the repo becomes {a.name!r})")
     if not NAME_RE.match(a.name):
         sys.exit(f"error: {a.name!r} is not a valid app name (lowercase letters, digits, '-'; 2-31 chars)")
     if a.name in RESERVED:

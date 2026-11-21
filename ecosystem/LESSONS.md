@@ -28,6 +28,8 @@ Format: **Lesson** · what happened · what changed in the toolkit.
 22. **Write core tests from the audit's measured numbers.** Round 5a turned each finding's measurement (vertex positions, side ratios, coverage) into an assertion; nearly every test passed first run after the fix and none needed debugging.
 23. **Don't give models a default canvas size.** Use `Option` or take the area from `Screen::content_area()`; `(336, 400)` literals trip `hardcoded-screen` and break on other displays.
 24. **The appkit-core git dependency tracks the toolkit's `main`.** Lockfiles are not committed, so builds pick up new toolkit commits. The toolkit only makes additive changes to appkit-core; breaking changes need a version bump and a pinned `rev`.
+25. **Keep fixed-point tests in debug, and keep them small.** Overflow checks only exist in debug; reaction's `b*b` overflow was caught there. Use small grids (≤48×48) and few steps in tests; tune parameters with a `--release` harness.
+26. **`cargo test` in `core/` needs the parent package to have a target.** During a rebuild, write a stub `src/main.rs` before testing core.
 9. **Run the gate early, not just at the end.** Gate failures found at the end cost a full rebuild cycle each. Run `bin/lint` and `core` tests continuously; run `--grade` after the shell compiles.
 
 ## Patterns (use these, don't reinvent)
@@ -53,6 +55,8 @@ Format: **Lesson** · what happened · what changed in the toolkit.
 | Parser/matcher correctness | differential tests against a mature crate as a **dev-dependency only** (regex-lab vs `regex` found 5 semantic bugs; qrcode vs `qrcode`) plus truncate/corrupt-every-position fuzz loops | regex-lab, rss-viewer, qrcode |
 | Side effects that need confirmation (hardware writes, network connects) | core returns `Vec<Effect>` from key handling; the shell performs I/O. "No write without confirm" becomes a unit test | hwtools, netscan |
 | LAN import with one-time code | copy flashcards' `xfer.rs` + `net.rs` (shared crate pending) | flashcards, gitlog, writer |
+| Animated app shell (no storage) | pump runs only while foreground **and** `App::animating()`; `set_interval(app.interval_ms())` on change — see life/reaction `main.rs` (template variant pending) | life, reaction, lissajous |
+| Progressive drawing of a long curve | index-computed points + a drawn counter (`advance(n)`), no growing buffer | lissajous, spirograph |
 | HP-style RPN, unary minus, overflow display | see calc `core/` (70 tests) | calc |
 | Timers that alert in background | pump keeps ticking while an alert is armed, no redraws; time from ticktimer deltas + wall-clock gap check | timers |
 | Text entry with a cursor | `precursor_appkit_core::text::TextField` (char-indexed cursor, max length, redacted Debug) | writer, qrcode |
@@ -71,6 +75,8 @@ Format: **Lesson** · what happened · what changed in the toolkit.
 - Modal confirm/menu overlay, right-aligned text, non-blocking alert thread (round 2a).
 
 ## Log
+
+- 2026-11-21 round 5b (lissajous, spirograph, reaction, life, death), Sonnet: 5/5 pass, 51 min / 89 tool calls under load avg 250–390 (other sessions); tests 13/11/13/16/17. reaction memory 172→70 KB; spirograph closes for all 780 R/r pairs vs an f64 reference. Toolkit: new-app rejects a `precursor-` prefixed name, lessons 25–26. Open: animated-shell template variant, shared Life-like grid, `Reveal` counter.
 
 - 2026-11-21 round 5a (flames → "IFS Fractals", penrose, kaleidoscope, sacred, moire), Sonnet: 5/5 pass, 25 min / 73 tool calls; tests 16/13/13/18/24. All local sine tables replaced by `fixed::`. Worker found a real appkit bug: `Screen::circles(fill=false)` filled Light and erased overlaps (fixed). Toolkit: `Screen::content_area`, lessons 22–24. Open: `run_loop` shell helper, bitmap→rects merge (moire, qrcode, life).
 
