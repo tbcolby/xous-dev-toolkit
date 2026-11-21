@@ -22,6 +22,7 @@
 pub mod clock;
 pub mod date;
 pub mod entropy;
+pub mod fixed;
 pub mod keys;
 pub mod layout;
 pub mod records;

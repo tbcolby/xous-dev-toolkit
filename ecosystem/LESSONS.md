@@ -39,6 +39,8 @@ Format: **Lesson** · what happened · what changed in the toolkit.
 | Today's date on device | `llio` local time → `Date`; fall back to the last date shown if the clock isn't set | planner `src/app.rs` |
 | Real elapsed time (suspend, unset/changed clock) | `precursor_appkit_core::clock::Timekeeper::elapsed_secs(wall_s, mono_ms)` — carries sub-second remainders; persist `last_wall_s()` | pet |
 | Seeded deterministic simulation | `entropy::SimRng::new(trng_seed)` (never for secrets) | fortress |
+| Trig, rotation, polar points, symmetric steps | `precursor_appkit_core::fixed` (`sin`/`cos` Q16.16 over 4096-unit turns, `polar`, `rotate`, `step_angle`, `isqrt`) — never a local sine table (audit X1) | — (round 5) |
+| Figures that may exceed the screen | `Screen::lines(segs, clip, width)` clips with `fixed::clip_line`; `Screen::circles` for real circles | — (round 5) |
 | HP-style RPN, unary minus, overflow display | see calc `core/` (70 tests) | calc |
 | Timers that alert in background | pump keeps ticking while an alert is armed, no redraws; time from ticktimer deltas + wall-clock gap check | timers |
 | Text entry with a cursor | `precursor_appkit_core::text::TextField` (char-indexed cursor, max length, redacted Debug) | writer, qrcode |

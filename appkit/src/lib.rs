@@ -17,7 +17,7 @@
 //! usable from an app's `core/` crate); `rng::unbiased_below` is pure too.
 //! All are unit-tested on the host with `cargo test --no-default-features`. The rest need Xous services.
 
-pub use precursor_appkit_core::{clock, date, entropy, keys, layout, records, text};
+pub use precursor_appkit_core::{clock, date, entropy, fixed, keys, layout, records, text};
 pub mod rng;
 
 #[cfg(feature = "xous")]

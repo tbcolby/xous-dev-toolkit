@@ -177,6 +177,52 @@ impl Screen {
         self.gam.draw_list(list).ok();
     }
 
+    /// Draw many line segments (dark, `width` px) in batched GAM messages.
+    /// Each segment is clipped to `clip` (inclusive corners; usually the
+    /// content area) with `fixed::clip_line`, so a figure larger than the
+    /// screen is cut at the edge instead of losing whole segments.
+    pub fn lines(
+        &self,
+        segs: impl IntoIterator<Item = ((i32, i32), (i32, i32))>,
+        clip: ((i32, i32), (i32, i32)),
+        width: isize,
+    ) {
+        let style = DrawStyle::new(PixelColor::Dark, PixelColor::Dark, width);
+        let mut list = gam::GamObjectList::new(self.gid);
+        for (a, b) in segs {
+            let Some((a, b)) = precursor_appkit_core::fixed::clip_line(a, b, clip.0, clip.1) else { continue };
+            let line = Line::new_with_style(
+                Point::new(a.0 as isize, a.1 as isize),
+                Point::new(b.0 as isize, b.1 as isize),
+                style,
+            );
+            if let Err(obj) = list.push(gam::GamObjectType::Line(line)) {
+                self.gam.draw_list(list).ok();
+                list = gam::GamObjectList::new(self.gid);
+                list.push(obj).ok();
+            }
+        }
+        self.gam.draw_list(list).ok();
+    }
+
+    /// Draw many circle outlines (`width` px; `fill` fills them dark) in
+    /// batched GAM messages. Items are `(center, radius)`. Use this instead of
+    /// approximating circles with polygons.
+    pub fn circles(&self, items: impl IntoIterator<Item = ((i32, i32), i32)>, width: isize, fill: bool) {
+        let fillc = if fill { PixelColor::Dark } else { PixelColor::Light };
+        let style = DrawStyle::new(fillc, PixelColor::Dark, width);
+        let mut list = gam::GamObjectList::new(self.gid);
+        for (c, r) in items {
+            let circ = Circle::new_with_style(Point::new(c.0 as isize, c.1 as isize), r as isize, style);
+            if let Err(obj) = list.push(gam::GamObjectType::Circ(circ)) {
+                self.gam.draw_list(list).ok();
+                list = gam::GamObjectList::new(self.gid);
+                list.push(obj).ok();
+            }
+        }
+        self.gam.draw_list(list).ok();
+    }
+
     /// Wrapped text between `y` and `bottom` with the standard margins.
     /// Returns the next free y (with a small gap), or `y` if there's no room.
     pub fn para(&self, y: isize, bottom: isize, style: GlyphStyle, text: &str) -> isize {
