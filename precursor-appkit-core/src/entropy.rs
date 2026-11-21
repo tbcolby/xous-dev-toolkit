@@ -93,7 +93,11 @@ pub mod testing {
         fn try_u32(&mut self) -> Result<u32, EntropyError> { Err(EntropyError) }
     }
 
-    /// Always returns the same word, like a stuck source.
+    /// Always returns the same word, like a stuck source. Note: `below` rejects
+    /// low draws to avoid modulo bias, so `Stuck(0)` makes `below(n)` fail for
+    /// most `n` (the rejection limit reports it as broken). For "lowest
+    /// outcome" tests use a small non-zero word, e.g. `Stuck(1000)`, which maps
+    /// to 0 for any `n` up to ~4 million; use `Seq` for exact sequences.
     pub struct Stuck(pub u32);
     impl Entropy for Stuck {
         fn try_u32(&mut self) -> Result<u32, EntropyError> { Ok(self.0) }

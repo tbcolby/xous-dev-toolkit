@@ -16,6 +16,9 @@ Format: **Lesson** · what happened · what changed in the toolkit.
 10. **Tests must model the device, not the test harness.** Budget/planner created a fresh seeded test RNG per keypress, so every save drew the same "random" key and silently overwrote the previous record — and the tests passed. · Toolkit: `records::fresh_key` and `Store::create_record` refuse keys already in use; test with one long-lived entropy source and assert distinct keys.
 11. **In an R rebuild, delete the old shell files.** Unused `src/ui.rs`/`src/cpu.rs` from the old app were still scanned by lint and confused reviewers. `git rm` anything the new shell doesn't `mod`.
 12. **`bin/integrate -v` shows lint findings** (added round 2b); you don't need a separate `bin/lint` run to see why the gate failed.
+13. **Clippy in `core/` first.** Most round-3a gate failures were `uninlined_format_args` in core crates; `cd core && cargo clippy --all-targets -- -D warnings` catches them in seconds, a `--grade` cycle takes 4–5 minutes.
+14. **`git reset` before building commits.** Twice a staged `git rm` of the old shell leaked into the "core" commit, so that commit didn't build. Stage each commit explicitly (`git add core/` etc.) from a clean index.
+15. **`precursor_appkit` re-exports `text`, `records`, `date`** (fixed after round 3a; it used to re-export only entropy/keys/layout and `use precursor_appkit::text` failed with E0432).
 9. **Run the gate early, not just at the end.** Gate failures found at the end cost a full rebuild cycle each. Run `bin/lint` and `core` tests continuously; run `--grade` after the shell compiles.
 
 ## Patterns (use these, don't reinvent)
@@ -25,6 +28,8 @@ Format: **Lesson** · what happened · what changed in the toolkit.
 | Randomness for secrets | `precursor_appkit_core::entropy` (fallible; `Trng` implements `Entropy`) | keygen `core/src/gen.rs` |
 | Randomness for games | `appkit::rng::Trng::below/shuffle` (panics on TRNG failure) | template |
 | Many saved items | `Store::create_record(prefix, &mut trng, bytes)` + `Store::load_records(prefix, parse)` → `records::Loaded { items: (key, T, basis), unreadable }`; never overwrite unreadable keys | contacts, cipher |
+| Settings next to records in one dict | name records with `records::new_key(prefix, ..)`; any key failing `records::is_key(prefix, name)` (e.g. `meta`) is skipped by `load_records` | decide, carse |
+| One-time code for LAN transfer | TRNG one-time code, worker thread, 2-minute timeout, cancel key, 3-strike limit; README says plaintext | flashcards, writer |
 | One settings blob | `appkit::store::Store::save/load` with a `version` field; read-only on parse error | template `src/app.rs` |
 | Secrets in memory | `zeroize` on drop, redacted `Debug`, clear the screen on Background | keygen `core/src/secret.rs`, otp |
 | Encoder correctness | reference vectors from the standard + differential tests against a crate in `[dev-dependencies]` only | qrcode (`qrcode` 0.12), barcode (reportlab vectors) |
@@ -49,6 +54,8 @@ Format: **Lesson** · what happened · what changed in the toolkit.
 - Modal confirm/menu overlay, right-aligned text, non-blocking alert thread (round 2a).
 
 ## Log
+
+- 2026-11-21 round 3a (carse, decide, mines, flashcards), Sonnet: 4/4 pass first submission, 24 min / 87 tool calls; tests 46/48/28/27. Toolkit: appkit re-exports text/records/date, `Stuck(0)` documented, lessons 13–15, two patterns. Open: shared one-time-code TCP transfer helper (writer + flashcards), foreground `Clock`, pixel digit font.
 
 - 2026-11-21 round 2b (othello, c64, gameboy) — first Sonnet round: 3/3 pass first submission, 12 min / 45 tool calls (othello and c64 resumed from WIP). Gate tests: 59/90/51. Toolkit: `-v` prints lint findings, template ignores `Cargo.lock`, lesson 11. Open: Key match helper where Backspace is input and F4 exits (c64 run mode).
 
