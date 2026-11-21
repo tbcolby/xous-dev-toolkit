@@ -13,6 +13,7 @@ Format: **Lesson** · what happened · what changed in the toolkit.
 6. **Use a private `CARGO_HOME` when `~/.cargo` is locked.** Other sessions on this machine hold the package-cache lock for long stretches; a cargo command then hangs with no output. Seed one per worker with an APFS clone (cheap): `cp -cR ~/.cargo/registry <scratch>/cargo-home-wN/registry && export CARGO_HOME=<scratch>/cargo-home-wN`. A crate with no dependencies needs only an empty `CARGO_HOME` plus `--offline`.
 7. **Every commit should build.** A round-2a commit removed the old shell before the new one landed, so bisecting would hit a broken tree. Order commits core → shell → docs, each compiling, or squash.
 8. **Don't overload the machine.** Two worker builds plus the orchestrator's verification pushed load past 40 on 8 cores (other sessions' jobs too). Orchestrator verification runs one build at a time.
+10. **Tests must model the device, not the test harness.** Budget/planner created a fresh seeded test RNG per keypress, so every save drew the same "random" key and silently overwrote the previous record — and the tests passed. · Toolkit: `records::fresh_key` and `Store::create_record` refuse keys already in use; test with one long-lived entropy source and assert distinct keys.
 9. **Run the gate early, not just at the end.** Gate failures found at the end cost a full rebuild cycle each. Run `bin/lint` and `core` tests continuously; run `--grade` after the shell compiles.
 
 ## Patterns (use these, don't reinvent)
@@ -26,6 +27,8 @@ Format: **Lesson** · what happened · what changed in the toolkit.
 | Secrets in memory | `zeroize` on drop, redacted `Debug`, clear the screen on Background | keygen `core/src/secret.rs`, otp |
 | Encoder correctness | reference vectors from the standard + differential tests against a crate in `[dev-dependencies]` only | qrcode (`qrcode` 0.12), barcode (reportlab vectors) |
 | Drawing many cells/modules | `Screen::fill_rects(iter of (tl, br), color)` batches GAM calls | qrcode `src/ui.rs` |
+| Dates, month grids, recurrence | `precursor_appkit_core::date` (`Date`, `YearMonth`, `add_months`, `month_grid`, weekdays; `serde` feature) | planner, budget |
+| Today's date on device | `llio` local time → `Date`; fall back to the last date shown if the clock isn't set | planner `src/app.rs` |
 | HP-style RPN, unary minus, overflow display | see calc `core/` (70 tests) | calc |
 | Timers that alert in background | pump keeps ticking while an alert is armed, no redraws; time from ticktimer deltas + wall-clock gap check | timers |
 | Text entry with a cursor | `precursor_appkit_core::text::TextField` (char-indexed cursor, max length, redacted Debug) | writer, qrcode |
@@ -42,6 +45,8 @@ Format: **Lesson** · what happened · what changed in the toolkit.
 - Modal confirm/menu overlay, right-aligned text, non-blocking alert thread (round 2a).
 
 ## Log
+
+- 2026-11-20 round 1b (budget, planner): pass first submission; ~59 min for 2 apps (longest so far, machine heavily loaded). Toolkit: `date` module (was copied into both), `records::fresh_key` collision guard used by `Store::create_record`; lesson 10.
 
 - 2026-11-20 round 2a (calc, writer, timers): all pass first submission; 46 min, 151 tool calls for 3 apps; ~/.cargo lock contention cost the most time. Toolkit: added `text::{TextField, wrap, Pager}`, `records`, `Store::{load_records, create_record}`, `Screen::{fill_rects, para}`; lessons 6–8.
 

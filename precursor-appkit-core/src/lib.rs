@@ -19,6 +19,7 @@
 
 
 
+pub mod date;
 pub mod entropy;
 pub mod keys;
 pub mod layout;

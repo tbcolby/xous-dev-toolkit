@@ -5,11 +5,14 @@ edition = "2021"
 description = "Pure, host-testable parts of precursor-appkit: key codes, list layout, fail-closed entropy"
 license = "Apache-2.0"
 
-# No dependencies on purpose: app `core/` crates depend on this by git, and
+# No required dependencies on purpose: app `core/` crates depend on this by git, and
 # bin/integrate patches that git source to xous-core/libs/precursor-appkit-core
 # so the app, its core crate and precursor-appkit all share one copy.
 [dependencies]
+serde = { version = "1.0", default-features = false, features = ["derive"], optional = true }
 
 [features]
 # Exposes entropy::testing (deterministic / failing sources) to dev-dependencies.
 testing = []
+# Serialize/Deserialize for date::Date and friends.
+serde = ["dep:serde"]

@@ -157,15 +157,19 @@ impl Store {
     }
 
     /// Write `bytes` as a new record under a fresh random key and return the
-    /// key. Fails (writing nothing) if the entropy source fails.
+    /// key. Never reuses an existing key. Fails (writing nothing) if the
+    /// entropy source fails or keeps repeating.
     pub fn create_record<E: precursor_appkit_core::entropy::Entropy + ?Sized>(
         &self,
         prefix: &str,
         entropy: &mut E,
         bytes: &[u8],
     ) -> Result<String> {
-        let key = precursor_appkit_core::records::new_key(prefix, entropy)
-            .map_err(|_| std::io::Error::other("entropy source failed; record not created"))?;
+        // fresh_key retries on a collision so an existing record is never overwritten.
+        let key = precursor_appkit_core::records::fresh_key(prefix, entropy, |k| {
+            !matches!(self.basis_of(k), Ok(None))
+        })
+        .map_err(|_| std::io::Error::other("entropy source failed; record not created"))?;
         self.write_bytes(&key, bytes)?;
         Ok(key)
     }
