@@ -21,7 +21,7 @@ bin/integrate --grade <repo>            # the 10/10 gate: build, clippy, host te
 bin/lint <repo>                         # banned patterns only (fast, no cargo)
 ```
 
-The full bar for an app is in `ecosystem/REMEDIATION.md` ("What 10/10 means").
+The full bar for an app is in `ecosystem/REMEDIATION.md` ("What 10/10 means"). Read `ecosystem/LESSONS.md` before starting app work: it lists the patterns and reference apps to copy, and the mistakes earlier rounds made.
 
 Build new apps on `precursor-appkit` (`appkit/`). Its pure parts (`keys`, `layout`, fail-closed `entropy`) live in `precursor-appkit-core/`, which an app's `core/` crate depends on by git (`precursor-appkit-core = { git = "https://github.com/tbcolby/xous-dev-toolkit" }`, plus `features = ["testing"]` in dev-dependencies for deterministic/failing entropy sources). `bin/integrate` patches that git source to the in-tree copy so app, core and appkit share one crate; don't copy `entropy.rs` into apps. Only drop to raw GAM/PDDB APIs for things the kit doesn't cover, and follow the rules below when you do.
 
