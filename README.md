@@ -67,8 +67,10 @@ Host unit tests: `cargo test -p precursor-appkit --no-default-features` inside a
 
 ## Setup (macOS ARM64)
 
+Hosted mode (`cargo xtask run`) is for fast UI iteration only. It can't validate: PDDB behaviour (hosted PDDB isn't representative), anything using `File`/tokio/`socket2`, real timing, suspend, or 32-bit `usize` overflow paths in non-`core` code. Check those on Renode or hardware. If hosted builds break after a toolchain change, `cargo xtask install-toolkit --force` and `rm -r target` are the official fixes; on Linux install `libxkbcommon-dev`.
+
 1. **Renode**: download the ARM64 portable package from [Renode releases](https://github.com/renode/renode/releases) into `/Applications/`.
-2. **Rust**: `rustup install stable`. For device and Renode images, install the Xous sysroot matching your rustc from [betrusted-io/rust releases](https://github.com/betrusted-io/rust/releases) into `~/.rustup/toolchains/stable-aarch64-apple-darwin/lib/rustlib/riscv32imac-unknown-xous-elf/`. Hosted builds need no sysroot.
+2. **Rust**: `rustup install stable`. For device and Renode images, install the Xous sysroot matching your rustc from [betrusted-io/rust releases](https://github.com/betrusted-io/rust/releases) into `~/.rustup/toolchains/stable-aarch64-apple-darwin/lib/rustlib/riscv32imac-unknown-xous-elf/`. `cargo xtask` checks for this sysroot even for hosted builds (it generates the GAM app table only after `ensure_compiler` passes), so install it once with `cargo xtask install-toolkit` from your xous-core checkout.
 3. **Flash backing file for Renode** (128 MiB of 0xFF):
    ```bash
    cd $XOUS_ROOT && python3 -c "open('tools/pddb-images/renode.bin','wb').write(b'\xff'*(128<<20))"

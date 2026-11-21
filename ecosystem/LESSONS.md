@@ -37,6 +37,8 @@ Format: **Lesson** · what happened · what changed in the toolkit.
 
 ## Lint
 
+- `manifest-locales` (added after the docs audit): every `menu_name` entry needs `en`, `en-tts`, `fr`, `ja`, `zh`; `locales/build.rs` panics on a missing language. Copy the English text for untranslated ones. App strings in `locales/i18n.json` follow the same rule.
+
 - `#[cfg(test)] mod tests;` files and `0x1B` inside data tables used to be false positives; fixed in round 1a.
 
 ## Open (not yet automated)
@@ -45,6 +47,8 @@ Format: **Lesson** · what happened · what changed in the toolkit.
 - Modal confirm/menu overlay, right-aligned text, non-blocking alert thread (round 2a).
 
 ## Log
+
+- 2026-11-21 docs audit (`ecosystem/DOCS_AUDIT.md`, toolkit vs Xous Book + source): fixed 7 contradictions (`--app-feature`, `generated.rs`, `update_progress`, manifest locales, members note, `KeypadEnter` = `∴`, stale script name); documented i18n, `submenu`, IPC (try_send, deferred responses, memory messages, limits), ticktimer/susres, app-loader dev loop, `std::fs` PDDB, `menu_matic`, hosted-mode limits; new lint rule `manifest-locales`.
 
 - 2026-11-20 round 1b (budget, planner): pass first submission; ~59 min for 2 apps (longest so far, machine heavily loaded). Toolkit: `date` module (was copied into both), `records::fresh_key` collision guard used by `Store::create_record`; lesson 10.
 

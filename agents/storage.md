@@ -496,3 +496,7 @@ Provide to Build/Testing:
 3. Required pddb/serde dependencies
 4. Data migration needs (if updating existing app)
 5. Basis requirements (if using separate encrypted partitions)
+
+## Alternative: `std::fs` paths (device and Renode only)
+
+The PDDB also implements `std::fs` for paths of the form `dict:key` (Xous Book ch09-04). It's lighter for simple blobs but only accurate on hardware and Renode (hosted mode differs), and has no truncate-on-open, rename or copy. Stick to `appkit::store` unless you need `std::fs` interop. Name limits: dictionary 110 bytes, key 94 bytes (`services/pddb/src/api.rs:29,31`).

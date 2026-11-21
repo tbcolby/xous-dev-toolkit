@@ -694,3 +694,22 @@ Provide to Graphics/Storage/Networking:
 5. Service connection requirements
 6. Memory message types (if any)
 7. Shared state types (Arc/Mutex/Atomic)
+
+## IPC rules the examples above don't show
+
+Verified against xous-core 31fbe23; the Xous Book (ch07) covers the same ground with older signatures.
+
+- **`send_message` blocks; `try_send_message` doesn't.** `send_message` waits while the receiver's queue is full (`xous-rs/src/syscall.rs:1574`); `try_send_message` returns an error instead (`:1530`). From a UI thread, prefer `try_send_message` for fire-and-forget scalars to a server that might be busy or stuck, and decide what to do on `Err` (drop, retry later). `modals.update_progress` does exactly this (`services/modals/src/lib.rs:516-532`).
+- **Deferred responses.** A server can answer a blocking request later: keep `msg.sender` (blocking scalar) and call `xous::return_scalar(sender, v)` when the answer is ready, or keep the whole `MessageEnvelope` (memory message) in an `Option`/`Vec` and drop it after `replace`-ing the reply. The caller stays blocked until then, so never defer from inside the caller's own thread.
+- **Memory messages.** Buffers are page-sized and page-aligned. `Buffer::lend` (`xous-ipc/src/buffer.rs:151`) and `lend_mut` (`:133`) borrow and the pages return to the caller when the receiver drops the envelope; `send` (`:162`) consumes the buffer. A receiver can't re-lend pages it was lent. For `lend_mut` replies the receiver writes with `buffer.replace(value)` (`:297`).
+- **Limits.** 32 threads per process, 32 connections per process, 128 servers system-wide (Book ch02-00, ch07-01). Don't spawn a thread per request.
+
+## Time and suspend
+
+- **Monotonic time:** `Ticktimer::elapsed_ms()` (`api/xous-api-ticktimer/src/lib.rs:32`) for deltas, timers and timeouts. Wall-clock time can jump (user sets the clock, RTC sync).
+- **Waiting:** `sleep_ms` (`:50`) for pumps; `wait_condition(condvar, Some(timeout))` (`:137`) with `notify_condition` is a cleaner "sleep until woken or timeout" than a polling thread.
+- **Suspend/resume:** the device suspends when idle. Elapsed time across a suspend shows up as a jump; timers should compare against stored deadlines, not count ticks (see timers). Apps that must flush before sleep can register with `xous-api-susres` (`Susres::new(..)`, `suspend_until_resume(token)` at `api/xous-api-susres/src/lib.rs:71,124`) and call `pddb.sync()` there; `set_suspendable(false)` (`:170`) blocks suspend during a critical write. Few upstream apps do this; most rely on saving when dirty.
+
+## Developer loop on hardware without reflashing
+
+`apps/app-loader` can load separately compiled apps over the network when the image is built with `--feature unsafe-app-loading` (GAM allows dynamic app names only then, `services/gam/src/tokens.rs:82-102`): build the loader image with `cargo xtask app-image-xip --app app-loader --feature unsafe-app-loading`, then serve apps with `tools/app_server.py`. Apps load once per boot. Dev-only: the feature weakens GAM's name checks.

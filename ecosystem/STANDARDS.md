@@ -132,6 +132,8 @@ nominal.
 
 ## 4. Opcode Conventions
 
+This banding is a toolkit convention, not an upstream rule: `apps/hello` and `apps/ball` use implicit discriminants from 0. Either works; be consistent within an app.
+
 ```rust
 // compiled (as part of a larger enum) in tests/doc-snippets/src/arch.rs
 #[derive(Debug, num_derive::FromPrimitive, num_derive::ToPrimitive)]

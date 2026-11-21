@@ -107,12 +107,25 @@ Add to `apps/manifest.json`:
     "menu_name": {
       "appmenu.myapp": {
         "en": "My App",
-        "en-tts": "My App"
+        "en-tts": "My App",
+        "fr": "My App",
+        "ja": "My App",
+        "zh": "My App"
       }
     }
   }
 }
 ```
+
+Every `menu_name` entry needs **all five** locales (`en`, `en-tts`, `fr`, `ja`, `zh`); untranslated ones may repeat the English text. `locales/build.rs` panics with "Missing language" when a build selects a locale an entry lacks (`--feature xous/lang-fr|ja|zh`), and `locales/README.md` says so. `bin/lint` enforces this.
+
+Optional fields: `submenu: <n>` generates `APP_MENU_<i>_<KEY>` constants for apps that register extra `UxType::Menu` contexts (`xtask/src/app_manifest.rs:11-14,59-70`; used by `app-loader`). `context_name` is limited to 64 characters and must be unique (`apps/README.md`).
+
+**`members` vs `default-members`:** `apps/README.md` step 2 says to add apps to both lists, but the actual `Cargo.toml` at the anchor keeps every app out of `default-members`. Follow the `Cargo.toml` (members only); the README step is stale.
+
+### App strings (i18n)
+
+Put user-visible strings in `locales/i18n.json` inside the app directory and read them with `locales::t!("key", locales::LANG)` (`apps/hello/src/main.rs:7,102`, `apps/hello/locales/i18n.json`; dependency `locales = { path = "../../locales" }`). The locales build globs `**/i18n.json`; regenerate with `cargo xtask generate-locales`. Each key needs all five languages for the same reason as the manifest.
 
 ### Critical Naming Rules
 
@@ -244,7 +257,7 @@ The build system generates:
 |------|---------|
 | `services/gam/src/apps.rs` | `APP_NAME_*` constants |
 | `services/status/src/app_autogen.rs` | Menu dispatch logic |
-| `locales/src/generated/` | Locale strings |
+| `locales/src/generated.rs` | Locale strings (one file; `cargo xtask generate-locales`) |
 
 **These are regenerated on each build** — don't edit manually.
 
@@ -282,8 +295,10 @@ cargo xtask renode-image myapp --no-timestamp
 
 ### Features
 ```bash
-# Per-app conditional compilation
-cargo xtask renode-image myapp --app-feature my_feature
+# Per-crate feature (generic --feature; e.g. a feature of your app crate)
+cargo xtask renode-image myapp --feature myapp/my_feature
+# NOTE: --app-feature only applies to detached apps on board-dabao builds
+# (xtask/src/main.rs:226-229, builder.rs:1171-1177); Precursor images ignore it.
 
 # Kernel features
 cargo xtask renode-image myapp --kernel-feature some_kernel_flag

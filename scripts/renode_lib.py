@@ -79,7 +79,7 @@ SCANCODES = frozenset(
         "ShiftL", "OemComma", "Space", "OemPeriod", "ShiftR",
         "F1", "F2", "F3", "F4",
         "Up", "Down", "Left", "Right",
-        "KeypadEnter", "OemPipe", "Home",
+        "OemPipe", "Home",
     ]
 )
 

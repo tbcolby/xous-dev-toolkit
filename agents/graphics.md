@@ -459,12 +459,11 @@ let modals = modals::Modals::new(&xns).unwrap();
 // Start (blocking — takes focus)
 modals.start_progress("Syncing data...", 0, 100, 0)?;
 
-// Update (non-blocking — may overflow queue, that's OK)
+// Update (non-blocking). update_progress uses try_send_message and yields
+// itself when the queue is full; it always returns Ok (modals/src/lib.rs:516-532).
 for i in 0..100u32 {
     do_work(i);
-    if modals.update_progress(i).is_err() {
-        xous::yield_slice(); // Queue full, yield
-    }
+    modals.update_progress(i).ok();
 }
 
 // Close (blocking)
@@ -588,3 +587,8 @@ Provide to Build/Testing:
 3. Font usage summary
 4. Any custom components created
 5. Modal dialog types used (for testing flows)
+
+
+## App menus (`menu_matic`)
+
+For an F1-style menu use `gam::menu_matic` (`services/gam/src/menu.rs:511`) with `MenuItem { name, action_conn, action_opcode, action_payload, close_on_select }` (name ≤ 64 bytes; payloads are scalar-only), then `gam.raise_menu(name)`. The menu needs its own `UxType::Menu` context, which means a `submenu` count in the app's manifest entry (see `agents/build.md`). A modal or menu takes focus: expect `Background` then `Foreground`, and redraw on return.

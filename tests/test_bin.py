@@ -209,3 +209,13 @@ def test_lint_skips_cfg_test_module_files_and_esc_in_tables(tmp_path):
     (repo / "src" / "tests.rs").write_text("const UP: char = '\\u{F700}';\n")
     (repo / "src" / "keys.rs").write_text("fn f(c: u8) -> bool { c == 0x1b }\n")
     assert [(f["file"], f["rule"]) for f in lint.lint_repo(repo)] == [("src/keys.rs", "esc-key")]
+
+
+def test_lint_requires_all_manifest_locales(tmp_path):
+    repo = tmp_path / "precursor-z"
+    repo.mkdir()
+    (repo / "README.md").write_text("x")
+    (repo / "manifest-fragment.json").write_text(json.dumps(
+        {"z": {"context_name": "Z", "menu_name": {"appmenu.z": {"en": "Z", "en-tts": "Z"}}}}))
+    f = lint.lint_repo(repo)
+    assert [x["rule"] for x in f] == ["manifest-locales"] and "fr, ja, zh" in f[0]["msg"]

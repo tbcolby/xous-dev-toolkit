@@ -40,6 +40,8 @@ RULES = [
      "use appkit::store (rewrites in the key's own basis)"),
 ]
 
+LOCALES = ["en", "en-tts", "fr", "ja", "zh"]
+
 ALLOW = re.compile(r"lint-allow\(([a-z-]+)\)")
 
 
@@ -95,6 +97,22 @@ def lint_repo(repo: Path):
                         continue
                     findings.append({"file": str(path.relative_to(repo)), "line": n, "rule": rule, "msg": msg,
                                      "text": raw.strip()[:120]})
+    frag = repo / "manifest-fragment.json"
+    if frag.exists():
+        try:
+            data = json.loads(frag.read_text())
+        except ValueError as e:
+            findings.append({"file": frag.name, "line": 0, "rule": "manifest-locales",
+                             "msg": f"invalid JSON: {e}", "text": ""})
+            data = {}
+        for app, entry in data.items():
+            for menu_key, langs in (entry.get("menu_name") or {}).items():
+                missing = [lang for lang in LOCALES if lang not in langs]
+                if missing:
+                    findings.append({"file": frag.name, "line": 0, "rule": "manifest-locales",
+                                     "msg": f"{app}/{menu_key} lacks {', '.join(missing)}; locales/build.rs panics "
+                                            "when a build selects a missing language (copy the English text)",
+                                     "text": ""})
     for need in ["manifest-fragment.json", "README.md"]:
         if not (repo / need).exists():
             findings.append({"file": need, "line": 0, "rule": "missing-file", "msg": f"{need} is required", "text": ""})

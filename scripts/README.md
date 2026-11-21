@@ -79,7 +79,7 @@ with RenodeSession(xous_root) as s:                 # always terminates Renode
     ctl.screenshot("out.png")
 ```
 
-- **Scancodes** (`SCANCODES`) are exactly what `emulation/peripherals/keyboard.cs` maps: `A`-`Z`, `Number0`-`Number9`, `Enter`, `KeypadEnter`, `BackSpace`, `Space`, `ShiftL`, `ShiftR`, `F1`-`F4`, `Up`, `Down`, `Left`, `Right`, `Home` (the menu key), `Tilde`, `OemComma`, `OemPeriod`, `OemQuestion`, `OemPipe`. There is no `Return`, `Escape`, `Tab`, Ctrl or Alt. Anything outside this set raises `ValueError`, where Renode would silently drop it.
+- **Scancodes** (`SCANCODES`) are exactly what `emulation/peripherals/keyboard.cs` maps: `A`-`Z`, `Number0`-`Number9`, `Enter`, `BackSpace`, `Space`, `ShiftL`, `ShiftR`, `F1`-`F4`, `Up`, `Down`, `Left`, `Right`, `Home` (the menu key), `Tilde`, `OemComma`, `OemPeriod`, `OemQuestion`, `OemPipe`. There is no `Return`, `Escape`, `Tab`, Ctrl or Alt. `KeypadEnter` is deliberately excluded: `keyboard.cs` maps it to the same matrix position as `Home` (`∴`, which opens the main menu), not to Enter. Anything outside this set raises `ValueError`, where Renode would silently drop it.
 - **`timed_key(key, hold_ms=1)`** pauses emulation, presses, runs `hold_ms` of emulated time, releases and resumes. `hold_ms` must be between 1 and 499 (500 ms and above is a long press). Release and `start` are always sent.
 - **Injection** (`inject_line`, `inject_string`, `inject_key`) skips key timing entirely. Only characters up to U+00FF work, because the keyboard service keeps only the low byte.
 - **Screenshots** drain stale output, take the last inline image, stop on its BEL terminator or after a 0.4 s idle gap, and check for the PNG signature and the IEND chunk.

@@ -4,7 +4,10 @@
         "menu_name": {
             "appmenu.{{name}}": {
                 "en": "{{display}}",
-                "en-tts": "{{display}}"
+                "en-tts": "{{display}}",
+                "fr": "{{display}}",
+                "ja": "{{display}}",
+                "zh": "{{display}}"
             }
         }
     }
