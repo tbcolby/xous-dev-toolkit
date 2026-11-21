@@ -73,7 +73,8 @@ Package renames needed for G4: `cipher` → `cipher-workshop` (crate collision; 
 4. [ ] Rounds 3b, 4a, 4b, 5a, 5b (table above) — 22 apps not started.
 5. [ ] After each round: fold worker Retro into `LESSONS.md` + toolkit; `bin/integrate --grade --json ecosystem/status.json <all>`; `bin/status ecosystem/status.json --update ecosystem/TRACKER.md`; commit.
 6. [ ] Renode capture runs for every app (needs Renode installed); until then READMEs say "Renode capture not yet run".
-7. [ ] Remaining appkit candidates (LESSONS "Open"): modal confirm/menu overlay, right-aligned text, non-blocking alert thread, device-clock → `Date` helper.
+7. [ ] Final pass, every repo: README rebuilt around real Renode screenshots from `capture.py` (hero shot + one per screen, key table, honest limitations). Screenshots must come from a passing capture run (exit 0, app visible, not Shellchat); remove the "not yet run" notes only then.
+8. [ ] Remaining appkit candidates (LESSONS "Open"): modal confirm/menu overlay, right-aligned text, non-blocking alert thread, device-clock → `Date` helper.
 
 **How to run workers** (see `LESSONS.md`): model Sonnet; brief = REMEDIATION + LESSONS + CLAUDE.md + reference apps; one private xous-core tree and `CARGO_HOME` per worker; max two concurrent builds; orchestrator re-runs `--grade` and reviews against the audit before counting an app done; toolkit edits only in a `git worktree`.
 
