@@ -111,6 +111,24 @@ impl TextField {
     }
 }
 
+/// A multi-line window onto a single-line [`TextField`]: the text is
+/// hard-wrapped every `cols` chars and the `rows`-line window scrolls so the
+/// cursor stays visible. Returns the visible lines and the cursor's
+/// `(row, col)` inside the window. Four round-4a apps wrote this by hand.
+pub fn input_view(field: &TextField, cols: usize, rows: usize) -> (Vec<String>, (usize, usize)) {
+    let cols = cols.max(1);
+    let rows = rows.max(1);
+    let chars: Vec<char> = field.as_str().chars().collect();
+    // A cursor at the very end of a full line sits at the start of the next.
+    let total_lines = (chars.len() / cols) + 1;
+    let cur_line = field.cursor() / cols;
+    let top = (cur_line + 1).saturating_sub(rows).min(total_lines.saturating_sub(rows));
+    let lines = (top..(top + rows).min(total_lines))
+        .map(|l| chars[(l * cols).min(chars.len())..((l + 1) * cols).min(chars.len())].iter().collect())
+        .collect();
+    (lines, (cur_line - top, field.cursor() % cols))
+}
+
 /// Greedy word wrap to at most `width` chars per line. Words longer than
 /// `width` are split. Existing newlines are kept. `width == 0` is treated as 1.
 pub fn wrap(text: &str, width: usize) -> Vec<String> {
@@ -250,6 +268,22 @@ mod tests {
     fn debug_does_not_leak_contents() {
         let f = TextField::new().with_text("hunter2");
         assert!(!format!("{f:?}").contains("hunter2"));
+    }
+
+    #[test]
+    fn input_view_scrolls_to_cursor() {
+        let f = TextField::new().with_text("abcdefghij"); // cursor at 10
+        let (lines, cur) = input_view(&f, 4, 2);
+        assert_eq!(lines, ["efgh", "ij"]);
+        assert_eq!(cur, (1, 2));
+        let mut g = f.clone();
+        g.home();
+        let (lines, cur) = input_view(&g, 4, 2);
+        assert_eq!(lines, ["abcd", "efgh"]);
+        assert_eq!(cur, (0, 0));
+        let h = TextField::new().with_text("abcd"); // cursor wraps to a new empty line
+        assert_eq!(input_view(&h, 4, 3), (vec!["abcd".to_string(), String::new()], (1, 0)));
+        assert_eq!(input_view(&TextField::new(), 4, 2), (vec![String::new()], (0, 0)));
     }
 
     #[test]

@@ -173,14 +173,20 @@ def integrate(root: Path, repos, warnings, broken):
     return pkgs
 
 
-def check(root: Path, pkgs, verbose, broken, strict=False):
+def check(root: Path, pkgs, verbose, broken, strict=False, quick=False):
     # One xtask run generates gam's apps.rs / i18n for the whole set; we ignore
     # its build result and check each app individually afterwards.
     print(f"generating app tables for {len(pkgs)} apps…", flush=True)
     buildable = [p for p in pkgs if p not in broken]
-    gen = sh(["cargo", "xtask", "hosted-ci", *buildable], cwd=root, capture=True)
     apps_rs = root / "services" / "gam" / "src" / "apps.rs"
     table = apps_rs.read_text() if apps_rs.exists() else ""
+    have = all(f"APP_NAME_{p.upper().replace('-', '_')}:" in table for p in buildable)
+    if quick and have:
+        print("  --quick: GAM app table already lists these apps; skipping xtask", flush=True)
+        gen = subprocess.CompletedProcess([], 0, "", "")
+    else:
+        gen = sh(["cargo", "xtask", "hosted-ci", *buildable], cwd=root, capture=True)
+        table = apps_rs.read_text() if apps_rs.exists() else ""
     missing = [p for p in buildable if f"APP_NAME_{p.upper().replace('-', '_')}:" not in table]
     if missing:
         print(f"error: xtask did not generate GAM app names for {missing}. xtask output (tail):", file=sys.stderr)
@@ -251,6 +257,8 @@ def main() -> int:
     ap.add_argument("--check", action="store_true", help="hosted cargo check per app")
     ap.add_argument("--strict", action="store_true", help="clippy instead of check; warnings fail")
     ap.add_argument("--test", action="store_true", help="run host tests for core/, *-core/, libs/* crates")
+    ap.add_argument("--quick", action="store_true",
+                    help="skip regenerating the GAM app table when it already lists these apps (inner loop)")
     ap.add_argument("--grade", action="store_true", help="--check --strict --test plus bin/lint (the 10/10 gate)")
     ap.add_argument("--json", metavar="FILE", help="write results JSON")
     ap.add_argument("-v", "--verbose", action="store_true")
@@ -299,7 +307,7 @@ def main() -> int:
     if not a.check:
         return 0
 
-    results = check(root, pkgs, a.verbose, broken, strict=a.strict)
+    results = check(root, pkgs, a.verbose, broken, strict=a.strict, quick=a.quick)
     by_pkg = {}
     for repo in repos:
         if (repo / "Cargo.toml").exists():

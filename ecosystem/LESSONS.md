@@ -20,6 +20,9 @@ Format: **Lesson** · what happened · what changed in the toolkit.
 14. **`git reset` before building commits.** Twice a staged `git rm` of the old shell leaked into the "core" commit, so that commit didn't build. Stage each commit explicitly (`git add core/` etc.) from a clean index.
 15. **`precursor_appkit` re-exports `text`, `records`, `date`** (fixed after round 3a; it used to re-export only entropy/keys/layout and `use precursor_appkit::text` failed with E0432).
 16. **Carry remainders when converting time units.** pet truncated each `elapsed` call to whole seconds and reset the baseline, losing up to 1 s per sync (~3% slow at a 30 s pump with the wall clock unset, worse with key-triggered syncs). Its tests passed because none called it more often than once a second. · Toolkit: shared `clock::Timekeeper` with a carry and a frequent-call regression test.
+17. **Stack-size tests need `--release`.** A 128 KiB-stack recursion test overflowed in debug (bigger frames) but passed in release, which is what runs on device. Test stack limits under `cargo test --release`, or scale the debug budget.
+18. **The pump is optional.** Apps that only change on a key press don't need `appkit::pump`; say so in `main.rs` rather than carrying an idle pump.
+19. **Inner loop for the hosted build: `bin/integrate --check --strict --quick <repo>`** skips regenerating the GAM app table when it already lists the app (saves the xtask run). Use the full `--grade` before pushing. The gate takes 3–5 min: run it in the background and wait, don't fight a 120 s tool timeout.
 9. **Run the gate early, not just at the end.** Gate failures found at the end cost a full rebuild cycle each. Run `bin/lint` and `core` tests continuously; run `--grade` after the shell compiles.
 
 ## Patterns (use these, don't reinvent)
@@ -41,6 +44,8 @@ Format: **Lesson** · what happened · what changed in the toolkit.
 | Seeded deterministic simulation | `entropy::SimRng::new(trng_seed)` (never for secrets) | fortress |
 | Trig, rotation, polar points, symmetric steps | `precursor_appkit_core::fixed` (`sin`/`cos` Q16.16 over 4096-unit turns, `polar`, `rotate`, `step_angle`, `isqrt`) — never a local sine table (audit X1) | — (round 5) |
 | Figures that may exceed the screen | `Screen::lines(segs, clip, width)` clips with `fixed::clip_line`; `Screen::circles` for real circles | — (round 5) |
+| Multi-line view of a text field | `text::input_view(&field, cols, rows)` → (visible lines, cursor row/col) | json-viewer, regex-lab, rss-viewer, sql-explorer |
+| Parser/matcher correctness | differential tests against a mature crate as a **dev-dependency only** (regex-lab vs `regex` found 5 semantic bugs; qrcode vs `qrcode`) plus truncate/corrupt-every-position fuzz loops | regex-lab, rss-viewer, qrcode |
 | HP-style RPN, unary minus, overflow display | see calc `core/` (70 tests) | calc |
 | Timers that alert in background | pump keeps ticking while an alert is armed, no redraws; time from ticktimer deltas + wall-clock gap check | timers |
 | Text entry with a cursor | `precursor_appkit_core::text::TextField` (char-indexed cursor, max length, redacted Debug) | writer, qrcode |
@@ -59,6 +64,8 @@ Format: **Lesson** · what happened · what changed in the toolkit.
 - Modal confirm/menu overlay, right-aligned text, non-blocking alert thread (round 2a).
 
 ## Log
+
+- 2026-11-21 round 4a (json-viewer, regex-lab, rss-viewer, sql-explorer), Sonnet: 4/4 pass first submission, 37 min / 81 tool calls; tests 38/35/38/39. Toolkit: `text::input_view`, `integrate --quick`, lessons 17–19, differential-testing pattern. rss/sqlite packages renamed to stop overclaiming (pending Tyler's OK).
 
 - 2026-11-21 round 3b (mathdrill, zork, fortress, pet), Sonnet: 4/4 pass first submission, 36 min / 80 tool calls; tests 33/19/27/30. Orchestrator review found a time-truncation bug in pet's clock the gate missed → shared `clock::Timekeeper` (lesson 16) and `entropy::SimRng`. Open: `Screen::bar`, text-grid camera.
 
