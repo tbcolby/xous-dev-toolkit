@@ -59,6 +59,29 @@ pub fn fill<E: Entropy + ?Sized>(e: &mut E, dest: &mut [u8]) -> Result<(), Entro
     Ok(())
 }
 
+/// Deterministic xorshift32 generator for **simulations only** (procedural
+/// worlds, replayable games): seed it once from the TRNG, then draw many
+/// values cheaply and reproducibly. Never use it for keys, pads or anything
+/// secret — use `Trng` directly. A zero seed is replaced with a fixed
+/// non-zero constant (xorshift would otherwise stay at 0 forever).
+#[derive(Debug, Clone)]
+pub struct SimRng(u32);
+
+impl SimRng {
+    pub fn new(seed: u32) -> Self { Self(if seed == 0 { 0x9E37_79B9 } else { seed }) }
+}
+
+impl Entropy for SimRng {
+    fn try_u32(&mut self) -> Result<u32, EntropyError> {
+        let mut x = self.0;
+        x ^= x << 13;
+        x ^= x >> 17;
+        x ^= x << 5;
+        self.0 = x;
+        Ok(x)
+    }
+}
+
 /// Deterministic and failing sources for host tests.
 #[cfg(any(test, feature = "testing"))]
 pub mod testing {
@@ -174,6 +197,14 @@ mod tests {
         assert_eq!(s, (0..50).collect::<Vec<_>>());
         assert_ne!(v, s);
         assert_eq!(shuffle(&mut Broken, &mut v), Err(EntropyError));
+    }
+
+    #[test]
+    fn sim_rng_is_reproducible_and_survives_zero_seed() {
+        let a: Vec<u32> = (0..5).map(|_| 0).scan(SimRng::new(42), |r, _| Some(r.try_u32().unwrap())).collect();
+        let b: Vec<u32> = (0..5).map(|_| 0).scan(SimRng::new(42), |r, _| Some(r.try_u32().unwrap())).collect();
+        assert_eq!(a, b);
+        assert_ne!(SimRng::new(0).try_u32().unwrap(), 0);
     }
 
     #[test]

@@ -19,6 +19,7 @@ Format: **Lesson** · what happened · what changed in the toolkit.
 13. **Clippy in `core/` first.** Most round-3a gate failures were `uninlined_format_args` in core crates; `cd core && cargo clippy --all-targets -- -D warnings` catches them in seconds, a `--grade` cycle takes 4–5 minutes.
 14. **`git reset` before building commits.** Twice a staged `git rm` of the old shell leaked into the "core" commit, so that commit didn't build. Stage each commit explicitly (`git add core/` etc.) from a clean index.
 15. **`precursor_appkit` re-exports `text`, `records`, `date`** (fixed after round 3a; it used to re-export only entropy/keys/layout and `use precursor_appkit::text` failed with E0432).
+16. **Carry remainders when converting time units.** pet truncated each `elapsed` call to whole seconds and reset the baseline, losing up to 1 s per sync (~3% slow at a 30 s pump with the wall clock unset, worse with key-triggered syncs). Its tests passed because none called it more often than once a second. · Toolkit: shared `clock::Timekeeper` with a carry and a frequent-call regression test.
 9. **Run the gate early, not just at the end.** Gate failures found at the end cost a full rebuild cycle each. Run `bin/lint` and `core` tests continuously; run `--grade` after the shell compiles.
 
 ## Patterns (use these, don't reinvent)
@@ -36,6 +37,8 @@ Format: **Lesson** · what happened · what changed in the toolkit.
 | Drawing many cells/modules | `Screen::fill_rects(iter of (tl, br), color)` batches GAM calls | qrcode `src/ui.rs` |
 | Dates, month grids, recurrence | `precursor_appkit_core::date` (`Date`, `YearMonth`, `add_months`, `month_grid`, weekdays; `serde` feature) | planner, budget |
 | Today's date on device | `llio` local time → `Date`; fall back to the last date shown if the clock isn't set | planner `src/app.rs` |
+| Real elapsed time (suspend, unset/changed clock) | `precursor_appkit_core::clock::Timekeeper::elapsed_secs(wall_s, mono_ms)` — carries sub-second remainders; persist `last_wall_s()` | pet |
+| Seeded deterministic simulation | `entropy::SimRng::new(trng_seed)` (never for secrets) | fortress |
 | HP-style RPN, unary minus, overflow display | see calc `core/` (70 tests) | calc |
 | Timers that alert in background | pump keeps ticking while an alert is armed, no redraws; time from ticktimer deltas + wall-clock gap check | timers |
 | Text entry with a cursor | `precursor_appkit_core::text::TextField` (char-indexed cursor, max length, redacted Debug) | writer, qrcode |
@@ -54,6 +57,8 @@ Format: **Lesson** · what happened · what changed in the toolkit.
 - Modal confirm/menu overlay, right-aligned text, non-blocking alert thread (round 2a).
 
 ## Log
+
+- 2026-11-21 round 3b (mathdrill, zork, fortress, pet), Sonnet: 4/4 pass first submission, 36 min / 80 tool calls; tests 33/19/27/30. Orchestrator review found a time-truncation bug in pet's clock the gate missed → shared `clock::Timekeeper` (lesson 16) and `entropy::SimRng`. Open: `Screen::bar`, text-grid camera.
 
 - 2026-11-21 round 3a (carse, decide, mines, flashcards), Sonnet: 4/4 pass first submission, 24 min / 87 tool calls; tests 46/48/28/27. Toolkit: appkit re-exports text/records/date, `Stuck(0)` documented, lessons 13–15, two patterns. Open: shared one-time-code TCP transfer helper (writer + flashcards), foreground `Clock`, pixel digit font.
 
