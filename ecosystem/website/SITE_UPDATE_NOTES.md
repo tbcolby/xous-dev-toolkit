@@ -1,5 +1,11 @@
 # colbysdatamovers.com: Precursor update notes
 
+> **Status 2026-11-21: applied and live** (site commits 415a63b, 9f2c863). `precursor-apps.html` rewritten (40 apps); new post `blog/2026-11-21-precursor-40-of-40.html`; launch and calc posts annotated with update boxes and inline corrections; sitemap lastmod bumped; unescaped `<...>` in code blocks fixed on the launch post and three Salesforce posts.
+>
+> **Correction to §1/§3.4 below:** the Precursor posts are *deliberately* `noindex` and absent from `blog/index.html` and `sitemap.xml`. Tyler parked the Precursor and commerce blog cluster on 2026-07-14 (site commit bca53b3) as off-identity for the Salesforce practice. That is not a bug. The new post follows the same parking and is linked only from the showcase page. To un-park any post, delete its `<meta name="robots" content="noindex, nofollow">` line and add it to the index and sitemap.
+>
+> **Defaults used for §6** (revisit any time): display names as the apps ship them; LAN transfers disclosed as plaintext with a one-time code (and c64's listener as code-free); Game Boy presented as a CPU debugger; no specific FPGA part names; the January roadmap marked "as written, not updated". Still open: Renode screenshots (then replace the calc post's v0.1 images), and the LoRa / C64-games roadmap status.
+
 Written 2026-11-21, after all 40 Precursor apps reached the toolkit's 10/10 gate. This file is the brief for updating every Precursor page and blog post on colbysdatamovers.com. Nothing on the site has been changed yet.
 
 **Sources (all in this repo, all current):**
