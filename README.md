@@ -9,7 +9,9 @@ Everything here is verified against xous-core at the commit in [`XOUS_CORE_ANCHO
 | Path | What it is |
 |---|---|
 | [`bin/new-app`](bin/new-app) | Scaffold a new app repo that builds, registers with GAM correctly, and uses `precursor-appkit` |
-| [`bin/integrate`](bin/integrate) | Copy app repos into a xous-core tree (manifest, workspace, libs) and hosted-check each one; pass/fail table + JSON |
+| [`bin/integrate`](bin/integrate) | Copy app repos into a xous-core tree (manifest, workspace, libs) and check each one. `--grade` = build + clippy + host tests + lint (the 10/10 gate) |
+| [`bin/lint`](bin/lint) | Fast scan for patterns that broke real apps (PUA arrows, `∴` bindings, fail-open TRNG, `set_len`, `invert`, invented APIs, …) |
+| [`bin/status`](bin/status) | Render integrate JSON as the generated status table in `ecosystem/TRACKER.md` |
 | [`appkit/`](appkit/) | `precursor-appkit`: shared crate with correct key codes, GAM drawing helpers, PDDB JSON store, fail-closed TRNG, focus-aware pump |
 | [`templates/app/`](templates/app/) | The app template `new-app` instantiates |
 | [`scripts/`](scripts/README.md) | Renode automation (`renode_lib.py`, `renode_capture.py`) and the USB log monitor |

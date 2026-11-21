@@ -17,7 +17,7 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - run: pip install pytest ruff
-      - run: ruff check scripts tests bin/new-app bin/integrate bin/status
+      - run: ruff check scripts tests bin/new-app bin/integrate bin/status bin/lint
       - run: python -m pytest -q
 
   xous:
@@ -46,7 +46,7 @@ jobs:
       - name: Scaffold a throwaway app
         run: bin/new-app ci-smoke "CI Smoke" --dir ../apps
       - name: Integrate + hosted check (scaffold + appkit)
-        run: bin/integrate --xous-root ../xous-core --check --json integrate.json ../apps/precursor-ci-smoke
+        run: bin/integrate --xous-root ../xous-core --grade --json integrate.json ../apps/precursor-ci-smoke
       - name: appkit host unit tests
         working-directory: ../xous-core
         run: cargo test -p precursor-appkit --no-default-features

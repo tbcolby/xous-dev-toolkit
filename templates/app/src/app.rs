@@ -1,16 +1,15 @@
-//! App state and rendering. Pure logic lives here so it can be unit-tested;
-//! main.rs only routes messages.
+//! Rendering and input for {{display}}. State and rules live in the
+//! `{{name}}-core` crate (host-tested); this file only maps keys to core
+//! operations, persists, and draws.
 
 use gam::GlyphStyle;
 use precursor_appkit::keys::Key;
 use precursor_appkit::layout::ListState;
 use precursor_appkit::screen::Screen;
 use precursor_appkit::store::Store;
-use serde::{Deserialize, Serialize};
+use {{name_snake}}_core::{LoadError, Saved, Tally};
 
 const STATE_KEY: &str = "state";
-/// Bump when the stored format changes; old records are migrated in `reload`.
-const STATE_VERSION: u32 = 1;
 
 #[derive(PartialEq, Eq)]
 pub enum Action {
@@ -18,34 +17,25 @@ pub enum Action {
     Leave,
 }
 
-#[derive(Serialize, Deserialize, Default)]
-struct Saved {
-    version: u32,
-    counts: Vec<u32>,
-}
-
 pub struct App {
     screen: Screen,
     store: Store,
-    items: Vec<&'static str>,
-    counts: Vec<u32>,
+    tally: Tally,
     list: ListState,
     visible_rows: usize,
     seconds: u64,
     dirty: bool,
-    /// Set when saved data couldn't be read; blocks saves so it isn't overwritten.
+    /// Set when saved data couldn't be used; blocks saves so it isn't overwritten.
     read_only: bool,
     status: String,
 }
 
 impl App {
     pub fn new(screen: Screen, store: Store) -> Self {
-        let items = vec!["Alpha", "Bravo", "Charlie", "Delta", "Echo"];
         let mut app = Self {
             screen,
             store,
-            counts: vec![0; items.len()],
-            items,
+            tally: Tally::new(&["Alpha", "Bravo", "Charlie", "Delta", "Echo"]),
             list: ListState::default(),
             visible_rows: 1,
             seconds: 0,
@@ -62,26 +52,21 @@ impl App {
     /// (Re)load persisted state. Called at start and whenever the set of open
     /// PDDB bases changes, so nothing from a just-locked basis stays on screen.
     pub fn reload(&mut self) {
+        let names: Vec<String> = (0..self.tally.len()).map(|i| self.tally.name(i).to_string()).collect();
+        let names: Vec<&str> = names.iter().map(|s| s.as_str()).collect();
+        self.tally = Tally::new(&names);
+        self.read_only = false;
+        self.status.clear();
         match self.store.load::<Saved>(STATE_KEY) {
-            Ok(Some(s)) if s.version == STATE_VERSION => {
-                self.counts = s.counts;
-                self.counts.resize(self.items.len(), 0);
-                self.read_only = false;
-                self.status.clear();
-            }
             Ok(Some(s)) => {
-                log::warn!("unknown state version {}; starting fresh without overwriting", s.version);
-                self.counts = vec![0; self.items.len()];
-                self.read_only = true;
-                self.status = "Saved data is from a newer version".into();
+                if let Err(LoadError::NewerVersion(v)) = self.tally.from_saved(s) {
+                    log::warn!("state version {} is newer than this app", v);
+                    self.read_only = true;
+                    self.status = "Saved data is from a newer version".into();
+                }
             }
-            Ok(None) => {
-                self.counts = vec![0; self.items.len()];
-                self.read_only = false;
-                self.status.clear();
-            }
+            Ok(None) => {}
             Err(e) => {
-                // Corrupt or unreadable: keep it on disk, don't overwrite on next save.
                 log::error!("couldn't load state: {:?}", e);
                 self.read_only = true;
                 self.status = "Couldn't read saved data".into();
@@ -95,8 +80,7 @@ impl App {
         if !self.dirty || self.read_only {
             return;
         }
-        let s = Saved { version: STATE_VERSION, counts: self.counts.clone() };
-        match self.store.save(STATE_KEY, &s) {
+        match self.store.save(STATE_KEY, &self.tally.to_saved()) {
             Ok(()) => {
                 self.dirty = false;
                 self.status.clear();
@@ -110,14 +94,14 @@ impl App {
 
     pub fn on_key(&mut self, key: Key) -> Action {
         match key {
-            Key::Up => self.list.step(-1, self.items.len(), self.visible_rows),
-            Key::Down => self.list.step(1, self.items.len(), self.visible_rows),
+            Key::Up => self.list.step(-1, self.tally.len(), self.visible_rows),
+            Key::Down => self.list.step(1, self.tally.len(), self.visible_rows),
             Key::Enter => {
-                self.counts[self.list.selected] = self.counts[self.list.selected].saturating_add(1);
+                self.tally.bump(self.list.selected);
                 self.dirty = true;
             }
             Key::F(1) => {
-                self.counts[self.list.selected] = 0;
+                self.tally.reset(self.list.selected);
                 self.dirty = true;
             }
             k if k.is_back() => {
@@ -160,12 +144,7 @@ impl App {
         self.screen.clear();
         let top = self.screen.header("{{display}}");
         let bottom = self.screen.footer("↑↓ move · ⏎ +1 · F1 reset · ⌫ back");
-        let labels: Vec<String> = self
-            .items
-            .iter()
-            .zip(&self.counts)
-            .map(|(name, n)| format!("{:<10} {:>5}", name, n))
-            .collect();
+        let labels: Vec<String> = (0..self.tally.len()).map(|i| self.tally.label(i)).collect();
         let status_h = if self.status.is_empty() { 0 } else { self.screen.line_height(GlyphStyle::Small) };
         self.visible_rows = self.screen.list(top, bottom - status_h, &labels, &self.list);
         if !self.status.is_empty() {

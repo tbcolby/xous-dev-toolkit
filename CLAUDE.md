@@ -8,8 +8,8 @@ Verified against xous-core at the commit in `XOUS_CORE_ANCHOR`. When in doubt, r
 
 An app is not done until all of these are true. Don't mark anything shipped on assertion alone.
 
-1. `bin/integrate --check <repo>` passes with 0 errors at the anchor commit.
-2. Pure logic (parsers, game rules, encoders, math) has host unit tests that pass.
+1. `bin/integrate --grade <repo>` passes at the anchor commit: hosted build with 0 errors, clippy clean, host tests in `core/` pass, `bin/lint` clean.
+2. Pure logic (parsers, game rules, encoders, math) lives in `core/` (`<pkg>-core`, no Xous deps) with unit tests, including a regression test for every bug fixed.
 3. A Renode capture run (`scripts/renode_capture.py`) exits 0 and its screenshots show the app, not Shellchat.
 4. The README's claims match what the code does (no "secure", "production-ready", "network" features that aren't there).
 
@@ -17,8 +17,11 @@ An app is not done until all of these are true. Don't mark anything shipped on a
 
 ```bash
 bin/new-app <name> "<Display Name>"      # scaffold; builds on first try
-bin/integrate --check <repo>            # hosted build at the anchor
+bin/integrate --grade <repo>            # the 10/10 gate: build, clippy, host tests, lint
+bin/lint <repo>                         # banned patterns only (fast, no cargo)
 ```
+
+The full bar for an app is in `ecosystem/REMEDIATION.md` ("What 10/10 means").
 
 Build new apps on `precursor-appkit` (`appkit/`). Only drop to raw GAM/PDDB APIs for things the kit doesn't cover, and follow the rules below when you do.
 

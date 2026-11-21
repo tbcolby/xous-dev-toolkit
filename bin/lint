@@ -1,0 +1,109 @@
+#!/usr/bin/env python3
+"""Scan Precursor app repos for patterns that broke real apps.
+
+    bin/lint ~/Dev/precursor/precursor-*          # human-readable
+    bin/lint --json out.json repo...              # machine-readable
+
+Each rule was a recurring defect in the 2026-11 portfolio audit. Suppress a
+finding on one line with a trailing comment `// lint-allow(<rule>): reason`.
+Exit code = number of findings (capped at 100).
+"""
+import argparse
+import json
+import re
+import sys
+from pathlib import Path
+
+# (rule, regex, message). Regexes run on Rust source with string literals kept.
+RULES = [
+    ("pua-arrows", r"\\u\{F70[0-3]\}|'\uF700'|'\uF701'|'\uF702'|'\uF703'",
+     "Apple PUA arrow codes never arrive; use appkit::keys (U+2190..2193)"),
+    ("menu-key-binding", r"'\\u\{2234\}'|'∴'",
+     "GAM consumes ∴ in app contexts; apps never receive it (use Backspace/F4)"),
+    ("esc-key", r"'\\u\{0*1[bB]\}'|'\\x1[bB]'|\b0x1[bB]\b",
+     "No key produces ESC on Precursor or in Renode"),
+    ("fail-open-rng", r"get_u(32|64)\(\)\s*\.\s*unwrap_or",
+     "TRNG must fail closed; use appkit::rng::Trng"),
+    ("set-len", r"\.set_len\(", "PddbKey has no set_len; use appkit::store or delete-then-rewrite"),
+    ("invert-text", r"\.invert\s*=\s*true", "GAM ignores invert for apps; use a border/marker"),
+    ("graphics-server", r"\bgraphics_server::", "apps must use gam::menu::* re-exports, not graphics_server"),
+    ("invented-api", r"RawkeysEvent|\bgam\.clear\(|draw_textview|set_alarm|PddbError|xous::String::from_str",
+     "API does not exist in xous-core"),
+    ("hardcoded-screen", r"\b(336|536)\b\s*(as\s+[iu]size)?\s*[;,)]",
+     "size from gam.get_canvas_bounds(), not 336/536"),
+    ("terminate-on-quit", r"terminate_process",
+     "apps aren't respawned; leave with relinquish_focus (appkit::app::leave). Only shutdown paths may terminate"),
+    ("destroy-server-safe", r"xous::destroy_server\(",
+     "destroy_server is unsafe; wrap with a safety comment"),
+    ("default-basis-secret", r"\.get\([^;]*,\s*None\s*,\s*true\s*,\s*true",
+     "creating keys with basis None writes to whichever basis is newest; "
+     "use appkit::store (rewrites in the key's own basis)"),
+]
+
+ALLOW = re.compile(r"lint-allow\(([a-z-]+)\)")
+
+
+def strip_comments(line: str) -> str:
+    # remove // comments that are not inside a string literal (good enough for lint)
+    out, in_str, i = [], False, 0
+    while i < len(line):
+        c = line[i]
+        if c == '"' and (i == 0 or line[i - 1] != "\\"):
+            in_str = not in_str
+        if not in_str and line.startswith("//", i):
+            break
+        out.append(c)
+        i += 1
+    return "".join(out)
+
+
+def lint_repo(repo: Path):
+    findings = []
+    for path in sorted(repo.rglob("*.rs")):
+        if "target" in path.parts or "tests" in path.parts and "doc-snippets" in path.parts:
+            continue
+        in_test = False
+        lines = path.read_text(errors="ignore").splitlines()
+        for n, raw in enumerate(lines, 1):
+            if "#[cfg(test)]" in raw:
+                in_test = True  # rules apply to shipped code only
+            if in_test:
+                continue
+            allowed = set(ALLOW.findall(raw))
+            line = strip_comments(raw)
+            for rule, rx, msg in RULES:
+                if rule in allowed:
+                    continue
+                if re.search(rx, line):
+                    if rule == "destroy-server-safe" and any("unsafe" in x for x in lines[max(0, n - 3):n]):
+                        continue
+                    findings.append({"file": str(path.relative_to(repo)), "line": n, "rule": rule, "msg": msg,
+                                     "text": raw.strip()[:120]})
+    for need in ["manifest-fragment.json", "README.md"]:
+        if not (repo / need).exists():
+            findings.append({"file": need, "line": 0, "rule": "missing-file", "msg": f"{need} is required", "text": ""})
+    return findings
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("repos", nargs="+")
+    ap.add_argument("--json", metavar="FILE")
+    a = ap.parse_args()
+    report, total = {}, 0
+    for r in a.repos:
+        repo = Path(r).expanduser().resolve()
+        f = lint_repo(repo)
+        report[repo.name] = f
+        total += len(f)
+        status = "clean" if not f else f"{len(f)} finding(s)"
+        print(f"{repo.name}: {status}")
+        for x in f:
+            print(f"  {x['file']}:{x['line']}: [{x['rule']}] {x['msg']}")
+    if a.json:
+        Path(a.json).write_text(json.dumps(report, indent=2))
+    return min(total, 100)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

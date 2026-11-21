@@ -170,4 +170,31 @@ def test_status_block_replacement(tmp_path):
     status.main()  # second run replaces, not appends
     text = md.read_text()
     assert text.count(status.BEGIN) == 1 and "keep me" in text
-    assert "**1/2 build.**" in text and "\\|" in text
+    assert "**1/2 pass.**" in text and "\\|" in text
+
+
+lint = load("lint")
+
+
+def test_lint_flags_known_defects_and_honours_allow(tmp_path):
+    repo = tmp_path / "precursor-x"
+    (repo / "src").mkdir(parents=True)
+    (repo / "README.md").write_text("x")
+    (repo / "manifest-fragment.json").write_text("{}")
+    (repo / "src" / "main.rs").write_text(
+        "const UP: char = '\\u{F700}';\n"
+        "let r = trng.get_u32().unwrap_or(0);\n"
+        "key.set_len(3); // lint-allow(set-len): test\n"
+        "unsafe {\n    xous::destroy_server(sid).unwrap();\n}\n"
+        "xous::destroy_server(sid2).unwrap();\n"
+        "// '\\u{F700}' in a comment is fine\n"
+        "#[cfg(test)]\nmod t { const X: char = '\\u{F701}'; }\n"
+    )
+    rules = sorted(f["rule"] for f in lint.lint_repo(repo))
+    assert rules == ["destroy-server-safe", "fail-open-rng", "pua-arrows"]
+
+
+def test_lint_template_is_clean(tmp_path):
+    r = run_new_app(tmp_path, "lint-check", "Lint Check")
+    assert r.returncode == 0
+    assert lint.lint_repo(tmp_path / "precursor-lint-check") == []

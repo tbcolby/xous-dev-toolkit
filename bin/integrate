@@ -153,17 +153,19 @@ def integrate(root: Path, repos, warnings, broken):
     return pkgs
 
 
-def check(root: Path, pkgs, verbose, broken):
+def check(root: Path, pkgs, verbose, broken, strict=False):
     # One xtask run generates gam's apps.rs / i18n for the whole set; we ignore
     # its build result and check each app individually afterwards.
     print(f"generating app tables for {len(pkgs)} apps…", flush=True)
     buildable = [p for p in pkgs if p not in broken]
     sh(["cargo", "xtask", "hosted-ci", *buildable], cwd=root, capture=True)
-    base = ["cargo", "check", "--release", "--message-format", "short"]
+    base = ["cargo", "clippy" if strict else "check", "--release", "--message-format", "short"]
     for p in HOSTED_PKGS:
         base += ["--package", p]
     for f in HOSTED_FEATURES:
         base += ["--features", f]
+    # upstream crates trip deny-by-default lints we don't own; only app lines are counted
+    tail = ["--", "--cap-lints", "warn"] if strict else []
     results = {}
     for pkg in pkgs:
         if pkg in broken:
@@ -171,12 +173,12 @@ def check(root: Path, pkgs, verbose, broken):
             print(f"  FAIL  {pkg:<20}   - packaging ({broken[pkg]})", flush=True)
             continue
         t0 = time.monotonic()
-        r = sh(base + ["--package", pkg], cwd=root, capture=True)
+        r = sh(base + ["--package", pkg] + tail, cwd=root, capture=True)
         mine = [ln for ln in r.stderr.splitlines() if f"apps/{pkg}/" in ln]
         errors = [ln for ln in mine if ": error" in ln]
         warns = [ln for ln in mine if ": warning" in ln]
-        ok = r.returncode == 0
-        if not ok and not errors:
+        ok = r.returncode == 0 and not errors and (not strict or not warns)
+        if r.returncode != 0 and not errors:
             errors = [ln for ln in r.stderr.splitlines() if ln.startswith("error")][:5]
         results[pkg] = {"ok": ok, "errors": len(errors), "warnings": len(warns),
                         "seconds": round(time.monotonic() - t0, 1), "first_errors": errors[:5]}
@@ -187,6 +189,30 @@ def check(root: Path, pkgs, verbose, broken):
     return results
 
 
+def host_tests(repo: Path, target_dir: Path):
+    """Run `cargo test` for each pure crate in the repo (core/, *-core/, libs/*/)."""
+    crates = [d for d in [repo / "core", *repo.glob("*-core"), *(repo / "libs").glob("*")]
+              if (d / "Cargo.toml").exists()]
+    out = {"crates": [], "ok": bool(crates), "passed": 0, "failed": 0}
+    for d in crates:
+        r = sh(["cargo", "test", "--quiet", "--target-dir", str(target_dir)], cwd=d, capture=True)
+        passed = sum(int(m) for m in re.findall(r"test result: \w+\. (\d+) passed", r.stdout))
+        failed = sum(int(m) for m in re.findall(r"(\d+) failed", r.stdout))
+        ok = r.returncode == 0
+        out["crates"].append({"crate": d.name, "ok": ok, "passed": passed, "failed": failed,
+                              "error": "" if ok else (r.stderr.strip().splitlines() or ["?"])[-1][:200]})
+        out["passed"] += passed
+        out["failed"] += failed
+        out["ok"] = out["ok"] and ok
+    return out
+
+
+def lint(repo: Path):
+    from importlib.machinery import SourceFileLoader
+    mod = SourceFileLoader("tk_lint", str(TOOLKIT / "bin" / "lint")).load_module()
+    return mod.lint_repo(repo)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("repos", nargs="+", help="app repo directories")
@@ -194,6 +220,9 @@ def main() -> int:
     g.add_argument("--xous-root", help="existing xous-core checkout (default: $XOUS_ROOT)")
     g.add_argument("--clone", metavar="DIR", help="clone xous-core at the anchor commit into DIR")
     ap.add_argument("--check", action="store_true", help="hosted cargo check per app")
+    ap.add_argument("--strict", action="store_true", help="clippy instead of check; warnings fail")
+    ap.add_argument("--test", action="store_true", help="run host tests for core/, *-core/, libs/* crates")
+    ap.add_argument("--grade", action="store_true", help="--check --strict --test plus bin/lint (the 10/10 gate)")
     ap.add_argument("--json", metavar="FILE", help="write results JSON")
     ap.add_argument("-v", "--verbose", action="store_true")
     a = ap.parse_args()
@@ -230,12 +259,36 @@ def main() -> int:
     if not pkgs:
         print("error: nothing was integrated", file=sys.stderr)
         return 100
+    if a.grade:
+        a.check = a.strict = a.test = True
     if not a.check:
         return 0
 
-    results = check(root, pkgs, a.verbose, broken)
+    results = check(root, pkgs, a.verbose, broken, strict=a.strict)
+    by_pkg = {}
+    for repo in repos:
+        if (repo / "Cargo.toml").exists():
+            by_pkg[package_name(repo / "Cargo.toml")] = repo
+    if a.test or a.grade:
+        tdir = root / "target" / "host-tests"
+        for pkg in pkgs:
+            ht = host_tests(by_pkg[pkg], tdir)
+            results[pkg]["tests"] = ht
+            print(f"  {'PASS' if ht['ok'] else 'FAIL'}  {pkg:<20} host tests: {ht['passed']} passed, "
+                  f"{ht['failed']} failed, {len(ht['crates'])} crate(s)", flush=True)
+            if not ht["ok"]:
+                results[pkg]["ok"] = False
+    if a.grade:
+        for pkg in pkgs:
+            f = lint(by_pkg[pkg])
+            results[pkg]["lint"] = len(f)
+            results[pkg]["lint_rules"] = sorted({x["rule"] for x in f})
+            if f:
+                results[pkg]["ok"] = False
+            print(f"  {'PASS' if not f else 'FAIL'}  {pkg:<20} lint: {len(f)} finding(s)", flush=True)
     failed = [p for p, r in results.items() if not r["ok"]]
-    print(f"\n{len(pkgs) - len(failed)}/{len(pkgs)} apps pass hosted check at xous-core {head or '?'}")
+    gate = "10/10 gate" if a.grade else "hosted check"
+    print(f"\n{len(pkgs) - len(failed)}/{len(pkgs)} apps pass {gate} at xous-core {head or '?'}")
     if a.json:
         Path(a.json).write_text(json.dumps({"xous_core": head, "anchor": anchor, "warnings": warnings,
                                             "results": results}, indent=2))

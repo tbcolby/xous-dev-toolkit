@@ -36,6 +36,6 @@ jobs:
       - name: Host tests for pure crates
         run: |
           shopt -s nullglob
-          for d in app/*-core app/libs/*; do
+          for d in app/core app/*-core app/libs/*; do
             [ -f "$d/Cargo.toml" ] && (cd "$d" && cargo test)
           done
