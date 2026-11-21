@@ -82,6 +82,7 @@ fn start_server(port: u16) -> Result<(), std::io::Error> {
 
 ```rust
 use std::net::UdpSocket;
+use std::time::Duration;
 
 fn udp_example() -> Result<(), std::io::Error> {
     let socket = UdpSocket::bind("0.0.0.0:0")?;  // Bind to any port
@@ -105,7 +106,7 @@ fn udp_example() -> Result<(), std::io::Error> {
 ```toml
 # Cargo.toml
 [dependencies]
-ureq = { version = "2.9.4", default-features = false, features = ["json"] }
+ureq = { version = "2.9.4", features = ["json"] }   # as in apps/mtxchat, apps/chat-test
 tls = { path = "../../libs/tls" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
@@ -113,9 +114,9 @@ serde_json = "1.0"
 
 ### HTTP Agent Setup
 ```rust
-use ureq;
-use tls::xtls::TlsConnector;
 use std::sync::Arc;
+use std::time::Duration;
+use tls::xtls::TlsConnector;
 
 fn create_http_agent() -> ureq::Agent {
     ureq::builder()
@@ -148,13 +149,11 @@ fn post_json<T: serde::Serialize, R: serde::de::DeserializeOwned>(
     body: &T,
 ) -> Result<R, ureq::Error> {
     let agent = create_http_agent();
-    let json = serde_json::to_string(body)?;
-
+    // send_json serializes and sets Content-Type (a serde_json::Error can't `?` into ureq::Error)
     let response = agent
         .post(url)
-        .set("Content-Type", "application/json")
         .set("Accept", "application/json")
-        .send_string(&json)?;
+        .send_json(body)?;
 
     let data: R = response.into_json()?;
     Ok(data)
@@ -180,6 +179,7 @@ fn fetch_with_auth(url: &str, token: &str) -> Result<serde_json::Value, ureq::Er
 
 ### ureq Errors
 ```rust
+// inside fn ... -> Result<(), ureq::Error>
 match agent.get(url).call() {
     Ok(response) => {
         let body: serde_json::Value = response.into_json()?;
@@ -215,25 +215,20 @@ match agent.get(url).call() {
 fn fetch_with_retry<T: serde::de::DeserializeOwned>(
     agent: &ureq::Agent,
     url: &str,
-    max_retries: usize,
+    max_retries: u32,
 ) -> Result<T, ureq::Error> {
-    let mut last_error = None;
-
-    for attempt in 0..max_retries {
+    let mut attempt = 0;
+    loop {
         match agent.get(url).call() {
             Ok(resp) => return Ok(resp.into_json()?),
+            Err(e) if attempt + 1 >= max_retries => return Err(e),
             Err(e) => {
                 log::warn!("Attempt {}/{} failed: {:?}", attempt + 1, max_retries, e);
-                last_error = Some(e);
-
-                // Exponential backoff
-                let delay = Duration::from_millis(100 * (2_u64.pow(attempt as u32)));
-                std::thread::sleep(delay);
+                std::thread::sleep(Duration::from_millis(100 * 2_u64.pow(attempt))); // exponential backoff
+                attempt += 1;
             }
         }
     }
-
-    Err(last_error.unwrap())
 }
 ```
 
@@ -244,30 +239,13 @@ fn fetch_with_retry<T: serde::de::DeserializeOwned>(
 fn spawn_fetch(cid: xous::CID, url: String) {
     std::thread::spawn(move || {
         let agent = create_http_agent();
-
-        match agent.get(&url).call() {
-            Ok(response) => {
-                if let Ok(body) = response.into_string() {
-                    // Send success back to main thread
-                    // Note: Can't send String directly via scalar
-                    // Store in shared state or PDDB, signal completion
-                    xous::send_message(cid,
-                        xous::Message::new_scalar(
-                            NetworkOp::FetchComplete as usize,
-                            1, body.len(), 0, 0
-                        )
-                    ).ok();
-                }
-            }
-            Err(_) => {
-                xous::send_message(cid,
-                    xous::Message::new_scalar(
-                        NetworkOp::FetchComplete as usize,
-                        0, 0, 0, 0
-                    )
-                ).ok();
-            }
-        }
+        // Scalars carry 4 usizes only: put the body in shared state (Arc<Mutex<..>>) or
+        // send it as a memory message (xous_ipc::Buffer), then signal completion.
+        let (ok, len) = match agent.get(&url).call().map(|r| r.into_string()) {
+            Ok(Ok(body)) => (1, body.len()),
+            _ => (0, 0),
+        };
+        xous::send_message(cid, xous::Message::new_scalar(NetworkOp::FetchComplete as usize, ok, len, 0, 0)).ok();
     });
 }
 ```
@@ -283,7 +261,7 @@ struct SyncThread {
 }
 
 impl SyncThread {
-    fn start(cid: xous::CID, interval_secs: u64) -> Self {
+    fn start(cid: xous::CID, interval_ms: usize) -> Self {
         let running = Arc::new(AtomicBool::new(true));
         let data = Arc::new(Mutex::new(None));
 
@@ -291,6 +269,7 @@ impl SyncThread {
         let data_clone = data.clone();
 
         std::thread::spawn(move || {
+            let tt = ticktimer_server::Ticktimer::new().unwrap();
             let agent = create_http_agent();
 
             while running_clone.load(Ordering::Relaxed) {
@@ -308,8 +287,8 @@ impl SyncThread {
                     }
                 }
 
-                // Sleep between syncs
-                std::thread::sleep(Duration::from_secs(interval_secs));
+                // Sleep between syncs; stop() takes effect after the current sleep
+                tt.sleep_ms(interval_ms).ok();
             }
         });
 
@@ -344,6 +323,7 @@ fn spawn_tcp_receiver(cid: xous::CID, port: u16) {
             match listener.accept() {
                 Ok((mut stream, addr)) => {
                     log::info!("Connection from {}", addr);
+                    stream.set_read_timeout(Some(Duration::from_secs(30))).ok();
 
                     let mut data = Vec::new();
                     if stream.read_to_end(&mut data).is_ok() {
@@ -370,13 +350,12 @@ fn spawn_tcp_receiver(cid: xous::CID, port: u16) {
 
 First connection to a new host may prompt user to trust the certificate:
 
-```rust
-// First request to new host:
-// - Xous probes certificate chain
-// - May show trust dialog to user
-// - Trusted certs stored in PDDB under tls.trusted
-
-// Subsequent requests use cached trust
+```text
+First request to a new host:
+- tls::xtls::TlsConnector probes the certificate chain
+- may show a trust dialog to the user
+- trusted certs are stored in the PDDB
+Subsequent requests use the cached trust.
 ```
 
 ## WiFi Status
@@ -385,11 +364,10 @@ For WiFi hardware control (scanning, enable/disable), see the **System Agent** (
 
 ```rust
 // Check if WiFi is connected using the net service
-use net::Net;
-let net = Net::new(&xns)?;
+let netmgr = net::NetManager::new(); // no args; NOT net::Net::new(&xns)
 
-if let Some(ipv4) = net.get_ipv4_config() {
-    log::info!("Connected, IP: {:?}", ipv4);
+if let Some(ipv4) = netmgr.get_ipv4_config() {
+    log::info!("Connected, IP: {:?}", ipv4.addr);
     // Proceed with network operations
 } else {
     log::warn!("No network connection");
@@ -415,17 +393,9 @@ impl SyncQueue {
     }
 
     fn flush(&mut self, agent: &ureq::Agent) {
-        let mut succeeded = Vec::new();
-        for (i, req) in self.pending.iter().enumerate() {
-            match req.execute(agent) {
-                Ok(_) => succeeded.push(i),
-                Err(_) => break,  // Stop on first failure
-            }
-        }
-        // Remove successful items (reverse order to preserve indices)
-        for i in succeeded.into_iter().rev() {
-            self.pending.remove(i);
-        }
+        // Requests are sent in order; stop at the first failure and keep the rest.
+        let sent = self.pending.iter().take_while(|req| req.execute(agent).is_ok()).count();
+        self.pending.drain(..sent);
         self.save_to_pddb();
     }
 }
@@ -451,7 +421,7 @@ fn fetch_or_cache(pddb: &Pddb, agent: &ureq::Agent, url: &str) -> Option<Data> {
 
 ## Battery-Aware Networking
 
-WiFi is the biggest power consumer. Adjust behavior based on power state (see System Agent for `com.is_charging()`):
+WiFi is the biggest power consumer. Adjust behavior based on power state (see System Agent for `com.is_charging()?`):
 
 | Scenario | Poll Interval | WiFi |
 |----------|--------------|------|
@@ -475,7 +445,7 @@ fn sync_interval_ms(&self) -> usize {
 ```toml
 [dependencies]
 # For HTTPS
-ureq = { version = "2.9.4", default-features = false, features = ["json"] }
+ureq = { version = "2.9.4", features = ["json"] }
 tls = { path = "../../libs/tls" }
 
 # For JSON

@@ -14,7 +14,7 @@ Tasks:
 1. Define the problem statement and Precursor fit
 2. MoSCoW feature prioritization (Must/Should/Could/Won't)
 3. Screen flow diagram (state transitions)
-4. Keyboard mapping (using STANDARDS.md conventions)
+4. Keyboard mapping (only keys from the STANDARDS.md section 1 table; nothing on `∴` or ESC)
 5. PDDB schema design (dictionaries, keys, serialization)
 6. TCP port assignment (from STANDARDS.md allocation)
 7. Complexity estimate (LOC, modules, threading needs)
@@ -76,14 +76,15 @@ Tasks:
 **Output**: Compiling, registered app
 
 Tasks:
-1. Assemble Cargo.toml with pinned dependency versions
-2. Wire main.rs event loop (message dispatch)
-3. Create manifest.json entry
-4. Verify workspace integration paths
-5. Build: `cargo build -p {name} --target riscv32imac-unknown-xous-elf`
+1. Assemble Cargo.toml with the pinned dependency versions (STANDARDS.md section 11, anchor xous-core 31fbe23)
+2. Wire main.rs event loop (message dispatch); register with `gam::APP_NAME_{KEY}`
+3. Create manifest.json entry (key == package name)
+4. Add the app to workspace `members` only (never `default-members`)
+5. Build: `cargo xtask hosted-ci {name}`, then `cargo xtask renode-image {name}`
 6. Fix all compiler warnings
 
-**Quality gate**: Clean build with zero warnings.
+**Quality gate**: Clean build with zero warnings, run against the anchor commit, with the command
+output kept as evidence. A stage is not "done" on assertion.
 
 ---
 
@@ -93,14 +94,14 @@ Tasks:
 **Output**: Screenshots, capture script, validation
 
 Tasks:
-1. Write capture function for renode_capture.py
+1. Write the app's capture sequence (`capture.py` in the app repo, `run(ctl, outdir)`; see CLAUDE.md "Renode automation")
 2. Run through all app states with automation
 3. Capture numbered screenshots (01_initial.png, 02_..., etc.)
 4. Validate key interactions work
 5. Test edge cases (empty state, full storage, rapid input)
 6. Verify focus change behavior (background/foreground)
 
-**Quality gate**: All screenshots captured, all states reachable.
+**Quality gate**: Capture run exits 0 and the screenshots show the app (not Shellchat or a PIN dialog).
 
 ---
 
@@ -151,7 +152,9 @@ After each app ships, we evolve the agent architecture:
 - What could be automated?
 
 ### 8b: Evolve Existing Agents
-- Update toolkit agents (graphics.md, storage.md, etc.) with new patterns
+- Update toolkit agents (graphics.md, storage.md, etc.) with new patterns; any new Rust snippet must
+  be added to `tests/doc-snippets/` and compile (`cargo xtask hosted-ci docsnip`), or be marked
+  `rust,ignore` with a reason
 - Add to discoveries.md with debugging insights
 - Update STANDARDS.md if conventions need refinement
 
@@ -160,7 +163,8 @@ New specialist agents born from specific app types:
 
 | App Type | Potential Specialist Agent |
 |----------|--------------------------|
-| QR/Barcode | `agents/encoding.md` — barcode/QR encoding patterns |
+| QR/Barcode | `agents/encoding.md` — barcode/QR encoding patterns (exists) |
+| Randomness | `agents/randomness.md` — TRNG, shuffles, weighted picks (exists) |
 | Crypto apps | `agents/crypto.md` — cipher implementations, key management |
 | Visual/Art apps | `agents/framebuffer-art.md` — parametric curves, fractals, dithering |
 | Game apps | `agents/game-engine.md` — grid games, AI opponents, scoring |
@@ -170,7 +174,7 @@ New specialist agents born from specific app types:
 | Simulation apps | `agents/simulation.md` — grid simulations, physics, cellular automata |
 
 ### 8d: Update Automation
-- Add capture function to renode_capture.py
+- Keep the app's `capture.py` current
 - Add any new renode_lib.py utilities discovered
 - Update test patterns
 

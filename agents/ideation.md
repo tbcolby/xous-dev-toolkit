@@ -71,14 +71,17 @@ UNLIKE: [Current alternatives and their limitations]
 - **List → Detail**: Deck list → Card view (Flashcards)
 - **Mode Select → Mode**: Choose timer type → Timer running (Timers)
 - **Document List → Editor**: File browser → Edit view (Writer)
-- **Menu Tree**: Hierarchical menus with Home key
+- **Menu Tree**: Hierarchical menus opened with F1 (the `∴`/Home key belongs to the GAM main menu)
 
 ### Keyboard Conventions
+Full table (what apps actually receive, Renode scancodes): `ecosystem/STANDARDS.md` section 1.
+
 | Key | Common Action |
 |-----|---------------|
-| Home (∴) | Open menu / Select item |
-| Enter | Confirm / Submit |
-| Q | Quit / Back |
+| Enter | Confirm / Submit / Select item |
+| F1 | App menu / Help |
+| Q | Leave app (`gam.relinquish_focus()`) |
+| Backspace / F4 | Back |
 | Arrows | Navigate |
 | Space | Toggle / Flip / Pause |
 | N | New item |
@@ -173,7 +176,7 @@ Usable content area after system UI: **336 x 486 px** (536 minus 30px header, 20
 
 ### Quick Layout Math
 ```
-Header:     30px (Bold or Large font, inverted bar)
+Header:     30px (Bold or Large font, light bar + rule; apps can't draw inverted text)
 Content:    variable (depends on layout)
 Footer:     20-40px (Small font, key hints)
 Margins:    8px left/right typical
@@ -216,19 +219,9 @@ Precursor frequently operates without WiFi. Always design for offline use first:
 
 ## Keyboard Input Codes (Xous)
 
-Apps receiving `rawkeys` get these Unicode characters:
-
-| Key | Xous Char | Code |
-|-----|-----------|------|
-| Up arrow | `'↑'` | U+2191 |
-| Down arrow | `'↓'` | U+2193 |
-| Left arrow | `'←'` | U+2190 |
-| Right arrow | `'→'` | U+2192 |
-| Menu key | `'∴'` | U+2234 |
-| Enter | `'\r'` | U+000D |
-| Backspace | `'\u{08}'` | U+0008 |
-
-**Do NOT use Apple PUA codes** (`\u{F700}`-`\u{F703}`) — those are macOS-specific, not Xous.
+See the single key table in `ecosystem/STANDARDS.md` section 1. In short: arrows are U+2190–U+2193,
+Enter `'\r'`, Backspace 0x08, F1–F4 0x11–0x14. `'∴'` (U+2234) is consumed by the GAM and never reaches
+apps; no key produces ESC (0x1B); Apple PUA codes (U+F700–F703) never arrive.
 
 ## Handoff to Architecture
 

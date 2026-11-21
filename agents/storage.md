@@ -16,14 +16,20 @@ The PDDB provides encrypted key-value storage with plausible deniability:
 
 ```
 Basis (secret partition)
-  └── Dictionary (namespace, max 111 chars)
-        └── Key (data item, max 95 chars)
+  └── Dictionary (namespace, max 110 bytes)
+        └── Key (data item, max 94 bytes)
               └── Value (arbitrary bytes)
 ```
 
 ### Key Properties
 - All data encrypted at rest
 - Basis allows hidden partitions
+- Reads see the **union** of all open bases; with `basis: None`, new keys go to the **most recently
+  unlocked** basis (`services/pddb/src/backend/basis.rs:291`)
+- All errors are `std::io::Error` (match on `e.kind()`); there is no `PddbError` type
+- `PddbKey` implements `Read`/`Write`/`Seek` but has **no `set_len`/truncate**
+
+Prefer `precursor_appkit::store` (JSON store with delete-then-write and basis watch). The raw API follows.
 - Dictionary/key names are also encrypted
 - No size limits on values (but RAM constraints apply)
 
@@ -32,84 +38,81 @@ Basis (secret partition)
 ### Setup
 ```rust
 use pddb::Pddb;
-use std::io::{Read, Write, Seek, SeekFrom};
+use std::io::{ErrorKind, Read, Seek, SeekFrom, Write};
 
 let pddb = Pddb::new();
+pddb.is_mounted_blocking(); // wait for the user to unlock (does not spin)
 ```
 
-### Write Data
+### Write a New Key
 ```rust
-match pddb.get(
-    "myapp.settings",       // dictionary (max 111 chars)
-    "config",               // key (max 95 chars)
-    None,                   // basis (None = default)
-    true,                   // create dict if missing
-    true,                   // create key if missing
-    Some(256),              // size hint (optional)
-    None::<fn()>,           // basis change callback
-) {
-    Ok(mut key) => {
-        key.write_all(b"data here")?;
-        pddb.sync()?;  // Flush to disk
-    }
-    Err(e) => log::warn!("Write failed: {:?}", e),
+fn write_new(pddb: &Pddb) -> std::io::Result<()> {
+    let mut key = pddb.get(
+        "myapp.settings", // dictionary (max 110 bytes)
+        "config",         // key (max 94 bytes)
+        None,             // basis: None = most recently unlocked basis
+        true,             // create dict if missing
+        true,             // create key if missing
+        Some(256),        // alloc hint (optional)
+        None::<fn()>,     // key-changed callback
+    )?;
+    key.write_all(b"data here")?; // writes at offset 0; does NOT truncate an existing longer value
+    pddb.sync()
 }
 ```
 
 ### Read Data
 ```rust
-match pddb.get(
-    "myapp.settings",
-    "config",
-    None,
-    false,  // don't create dict
-    false,  // don't create key
-    None,
-    None::<fn()>,
-) {
-    Ok(mut key) => {
-        let mut data = Vec::new();
-        key.read_to_end(&mut data)?;
-        // Process data
-    }
-    Err(e) => {
-        // Key doesn't exist or other error
+fn read(pddb: &Pddb) -> std::io::Result<Option<Vec<u8>>> {
+    match pddb.get("myapp.settings", "config", None, false, false, None, None::<fn()>) {
+        Ok(mut key) => {
+            let mut data = Vec::new();
+            key.read_to_end(&mut data)?;
+            Ok(Some(data))
+        }
+        Err(e) if e.kind() == ErrorKind::NotFound => Ok(None), // dict or key missing
+        Err(e) => Err(e),
     }
 }
 ```
 
-### Update Data (Overwrite)
+### Update Data (Overwrite): delete, then recreate in the same basis
+There is no truncate, so writing a shorter value over a longer one leaves stale trailing bytes (and
+corrupt JSON). Pattern from `apps/vault/src/storage.rs:144-170, 252-264`:
 ```rust
-match pddb.get("myapp.data", "item", None, false, false, None, None::<fn()>) {
-    Ok(mut key) => {
-        key.seek(SeekFrom::Start(0))?;
-        key.write_all(&new_data)?;
-        // Truncate if new data is shorter
-        let pos = key.stream_position()?;
-        key.set_len(pos)?;
-        pddb.sync()?;
+fn store(pddb: &Pddb, dict: &str, key: &str, data: &[u8]) -> std::io::Result<()> {
+    // Which basis holds the key now? (reads see a union of all open bases)
+    let basis: Option<String> = match pddb.get(dict, key, None, false, false, None, None::<fn()>) {
+        Ok(existing) => Some(existing.attributes()?.basis),
+        Err(e) if e.kind() == ErrorKind::NotFound => None,
+        Err(e) => return Err(e),
+    };
+    if let Some(b) = basis.as_deref() {
+        pddb.delete_key(dict, key, Some(b))?;
     }
-    Err(_) => { /* Key doesn't exist */ }
+    {
+        // Recreate in the same basis (None => most recently unlocked basis)
+        let mut k = pddb.get(dict, key, basis.as_deref(), true, true, Some(data.len()), None::<fn()>)?;
+        k.write_all(data)?;
+    }
+    pddb.sync()
 }
 ```
+Write-side calls with `basis: None` target only the newest open basis (`select_basis`), so a delete
+with `None` misses a key that lives in an older basis and the rewrite leaves two copies. Always delete
+and recreate in the basis that `attributes().basis` reports.
 
-### Delete Key
+### Delete / List
 ```rust
 pddb.delete_key("myapp.data", "old_item", None)?;
 pddb.sync()?;
-```
 
-### List Keys
-```rust
-let keys = pddb.list_keys("myapp.data", None)?;
+let keys: Vec<String> = pddb.list_keys("myapp.data", None)?;
 for key_name in keys {
     log::info!("Found key: {}", key_name);
 }
-```
 
-### List Dictionaries
-```rust
-let dicts = pddb.list_dict(None)?;
+let dicts: Vec<String> = pddb.list_dict(None)?;
 ```
 
 ## Naming Conventions
@@ -137,69 +140,69 @@ Examples:
 - `entry_2024_01_15`
 
 ### Limits
+The checks are `len > LEN - 1` (`services/pddb/src/lib.rs:545-548`), and `len` is the UTF-8 byte length.
+
 | Element | Max Length |
 |---------|-----------|
-| Dictionary name | 111 characters |
-| Key name | 95 characters |
+| Dictionary name | 110 bytes |
+| Key name | 94 bytes |
+| Basis name | 63 bytes |
 
 ## Serialization Patterns
 
 ### JSON (Recommended for Complex Data)
 ```rust
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Default)]
 struct AppSettings {
     theme: String,
     font_size: u8,
     notifications: bool,
 }
 
-// Save
-let settings = AppSettings { theme: "dark".into(), font_size: 14, notifications: true };
-let json = serde_json::to_vec(&settings)?;
-let mut key = pddb.get("myapp.settings", "config", None, true, true,
-                       Some(json.len()), None::<fn()>)?;
-key.write_all(&json)?;
-pddb.sync()?;
+fn save_settings_json(pddb: &Pddb, settings: &AppSettings) -> std::io::Result<()> {
+    let json = serde_json::to_vec(settings)?; // serde_json::Error converts into io::Error
+    store(pddb, "myapp.settings", "config", &json) // delete-then-write (above)
+}
 
-// Load
-let mut key = pddb.get("myapp.settings", "config", None, false, false, None, None::<fn()>)?;
-let mut buf = Vec::new();
-key.read_to_end(&mut buf)?;
-let settings: AppSettings = serde_json::from_slice(&buf)?;
+fn load_settings_json(pddb: &Pddb) -> AppSettings {
+    let mut buf = Vec::new();
+    match pddb.get("myapp.settings", "config", None, false, false, None, None::<fn()>) {
+        Ok(mut key) => match key.read_to_end(&mut buf) {
+            Ok(_) => serde_json::from_slice(&buf).unwrap_or_default(), // corrupt -> defaults
+            Err(_) => AppSettings::default(),
+        },
+        Err(_) => AppSettings::default(), // missing -> defaults
+    }
+}
 ```
 
 ### Binary (For Simple/Fixed Data)
 ```rust
-// Save settings as fixed bytes
-fn save_settings(pddb: &Pddb, vibrate: bool, notify: bool, volume: u8) -> Result<()> {
+fn save_settings(pddb: &Pddb, vibrate: bool, notify: bool, volume: u8) -> std::io::Result<()> {
     let data = [vibrate as u8, notify as u8, volume];
-    let mut key = pddb.get("myapp.settings", "config", None, true, true,
-                           Some(3), None::<fn()>)?;
+    // Fixed-length record: overwriting in place is safe because the length never changes.
+    let mut key = pddb.get("myapp.settings", "flags", None, true, true, Some(3), None::<fn()>)?;
+    key.seek(SeekFrom::Start(0))?;
     key.write_all(&data)?;
-    pddb.sync()?;
-    Ok(())
+    pddb.sync()
 }
 
-// Load settings
 fn load_settings(pddb: &Pddb) -> (bool, bool, u8) {
-    match pddb.get("myapp.settings", "config", None, false, false, None, None::<fn()>) {
-        Ok(mut key) => {
-            let mut buf = [0u8; 3];
-            if key.read_exact(&mut buf).is_ok() {
-                return (buf[0] != 0, buf[1] != 0, buf[2]);
-            }
+    if let Ok(mut key) = pddb.get("myapp.settings", "flags", None, false, false, None, None::<fn()>) {
+        let mut buf = [0u8; 3];
+        if key.read_exact(&mut buf).is_ok() {
+            return (buf[0] != 0, buf[1] != 0, buf[2]);
         }
-        Err(_) => {}
     }
-    // Defaults
-    (true, true, 50)
+    (true, true, 50) // Defaults
 }
 ```
 
 ### Length-Prefixed Strings
 ```rust
+// Write into a freshly created key (see store()); there is no truncate.
 fn write_string_list(key: &mut pddb::PddbKey, strings: &[String]) -> std::io::Result<()> {
     // Write count
     let count = strings.len() as u32;
@@ -220,7 +223,7 @@ fn read_string_list(key: &mut pddb::PddbKey) -> std::io::Result<Vec<String>> {
     key.read_exact(&mut count_buf)?;
     let count = u32::from_le_bytes(count_buf) as usize;
 
-    let mut strings = Vec::with_capacity(count);
+    let mut strings = Vec::with_capacity(count.min(1024)); // don't trust a corrupt count
     for _ in 0..count {
         let mut len_buf = [0u8; 4];
         key.read_exact(&mut len_buf)?;
@@ -237,39 +240,25 @@ fn read_string_list(key: &mut pddb::PddbKey) -> std::io::Result<Vec<String>> {
 ## Data Patterns
 
 ### Single Settings Object
-```rust
-// One dictionary, one key for all settings
-pddb.get("myapp.settings", "config", ...)
-```
+One dictionary, one `config` key for all settings (see JSON above).
 
 ### Collection of Items
 ```rust
-// Dictionary per collection, key per item
-// Dictionary: myapp.items
-// Keys: item_001, item_002, ...
-
-// List all items
-let keys = pddb.list_keys("myapp.items", None)?;
-
-// Add item with unique key
-let key_name = format!("item_{:03}", next_id);
-pddb.get("myapp.items", &key_name, None, true, true, ...)?;
+// Dictionary per collection, key per item: myapp.items / item_001, item_002, ...
+fn add_item(pddb: &Pddb, next_id: u32, data: &[u8]) -> std::io::Result<()> {
+    let keys = pddb.list_keys("myapp.items", None)?; // all items
+    let key_name = format!("item_{:03}", next_id);
+    store(pddb, "myapp.items", &key_name, data)
+}
 ```
 
 ### Indexed Collection
 ```rust
-// Store index separately for ordering
 // myapp.items/index -> JSON array of key names in order
 // myapp.items/item_001 -> item data
-// myapp.items/item_002 -> item data
-
-fn save_index(pddb: &Pddb, order: &[String]) -> Result<()> {
+fn save_index(pddb: &Pddb, order: &[String]) -> std::io::Result<()> {
     let json = serde_json::to_vec(order)?;
-    let mut key = pddb.get("myapp.items", "index", None, true, true,
-                           Some(json.len()), None::<fn()>)?;
-    key.write_all(&json)?;
-    pddb.sync()?;
-    Ok(())
+    store(pddb, "myapp.items", "index", &json)
 }
 ```
 
@@ -284,60 +273,52 @@ fn date_key(prefix: &str) -> String {
     format!("{}_{}", prefix, now)
 }
 
-// Or with formatted date
-fn date_key_formatted(prefix: &str) -> String {
-    // Assuming you have date/time available
-    format!("{}_{}", prefix, "2024_01_15")
-}
 ```
 
 ## Error Handling
 
+PDDB returns `std::io::Result`; there is no `pddb::PddbError`.
 ```rust
-use pddb::PddbError;
-
-match pddb.get(...) {
+match pddb.get("myapp.settings", "config", None, false, false, None, None::<fn()>) {
     Ok(key) => { /* success */ }
-    Err(PddbError::KeyNotFound) => {
-        // Key doesn't exist - create or use default
-    }
-    Err(PddbError::DictNotFound) => {
-        // Dictionary doesn't exist
-    }
-    Err(e) => {
-        log::error!("PDDB error: {:?}", e);
-    }
+    Err(e) => match e.kind() {
+        ErrorKind::NotFound => { /* dict or key missing: create or use default */ }
+        ErrorKind::InvalidInput => { /* name too long */ }
+        ErrorKind::OutOfMemory => { /* PDDB full */ }
+        _ => log::error!("PDDB error: {:?}", e),
+    },
 }
 ```
 
 ## Performance Guidelines
 
 ### Batching Writes
-```rust
-// BAD: Sync after every write
+```rust,ignore
+// Illustrative: `pddb.get(...)` stands for the full 7-argument call.
+// BAD: sync after every write
 for item in items {
-    pddb.get(...).write_all(...)?;
-    pddb.sync()?;  // Expensive!
+    pddb.get(...)?.write_all(...)?;
+    pddb.sync()?; // Expensive!
 }
 
-// GOOD: Batch writes, sync once
+// GOOD: batch writes, sync once
 for item in items {
-    pddb.get(...).write_all(...)?;
+    pddb.get(...)?.write_all(...)?;
 }
-pddb.sync()?;  // One sync at the end
+pddb.sync()?;
 ```
 
 ### Size Hints
-```rust
-// Provide size hint for better allocation
+```rust,ignore
+// Illustrative fragment (see store() for the full call)
 let data = serde_json::to_vec(&large_struct)?;
 pddb.get(dict, key, None, true, true, Some(data.len()), None::<fn()>)?;
 ```
 
 ### Lazy Loading
-```rust
-// Don't load all data at startup
-// Load on-demand when user accesses item
+```rust,ignore
+// Illustrative: self.cache / load_from_pddb are app-defined.
+// Don't load all data at startup; load on demand when the user accesses an item
 fn load_item(&mut self, key: &str) -> Option<Item> {
     if !self.cache.contains_key(key) {
         if let Some(item) = self.load_from_pddb(key) {
@@ -361,33 +342,37 @@ serde_json = "1.0"
 
 ## Basis Management
 
-A basis is an independently encrypted partition within PDDB. The default basis is always open after unlock. Additional bases provide compartmentalized storage (e.g., Vault uses separate bases for Password, FIDO, TOTP).
+A basis is an independently encrypted partition within PDDB. The `.System` basis is open after the
+boot PIN unlock; additional bases are unlocked by the user with their own password and give
+compartmentalized, deniable storage.
 
 ### Creating and Opening Bases
+On Precursor (gen1) the PDDB service itself pops up the password dialog for create/unlock.
 ```rust
-// Create a new encrypted basis
-pddb.create_basis("myapp.secrets")?;
-
-// Unlock/open a basis (prompts user for passphrase)
-pddb.unlock_basis("myapp.secrets", None)?;
-
-// Lock/close a basis
+pddb.create_basis("myapp.secrets")?;           // prompts for a new password
+pddb.unlock_basis("myapp.secrets", None)?;     // prompts; None = default retention policy
 pddb.lock_basis("myapp.secrets")?;
-
-// Delete a basis permanently
-pddb.delete_basis("myapp.secrets")?;
+pddb.delete_basis("myapp.secrets")?;           // permanent
 ```
 
 ### Listing and Monitoring
 ```rust
-// List all currently open bases
-let bases = pddb.list_basis();
-
-// Get most recently opened basis
-let latest = pddb.latest_basis();  // Option<String>
-
-// Block until basis order changes (useful for detecting lock/unlock)
-let new_order = pddb.monitor_basis();  // Blocks, returns Vec<String>
+let bases: Vec<String> = pddb.list_basis();     // all open bases
+let latest: Option<String> = pddb.latest_basis(); // most recently opened (where basis=None writes go)
+```
+`monitor_basis()` blocks until the open-basis list changes; run it on its own thread and tell the main
+loop to reload (pattern from `services/status/src/main.rs:955`):
+```rust
+fn spawn_basis_watch(cid_to_main: xous::CID, reload_opcode: usize) {
+    std::thread::spawn(move || {
+        let pddb = pddb::Pddb::new();
+        loop {
+            let bases = pddb.monitor_basis(); // blocks until the open-basis list changes
+            log::info!("bases now: {:?}", bases);
+            xous::send_message(cid_to_main, xous::Message::new_scalar(reload_opcode, 0, 0, 0, 0)).ok();
+        }
+    });
+}
 ```
 
 ### Use Cases
@@ -397,26 +382,30 @@ let new_order = pddb.monitor_basis();  // Blocks, returns Vec<String>
 
 ## Bulk Operations
 
-### Delete Entire Dictionary
 ```rust
+// Delete an entire dictionary
 pddb.delete_dict("myapp.old_data", None)?;
-pddb.sync()?;
-```
 
-### Bulk Key Deletion
-```rust
-let keys_to_delete = vec!["item_001", "item_002", "item_003"];
-pddb.delete_key_list("myapp.items", &keys_to_delete, None)?;
+// Bulk key deletion: takes Vec<String> by value
+let keys_to_delete: Vec<String> = vec!["item_001".into(), "item_002".into(), "item_003".into()];
+pddb.delete_key_list("myapp.items", keys_to_delete, None)?;
 pddb.sync()?;
-```
 
-### Read Entire Dictionary
-```rust
-// Returns an iterator over all keys in a dictionary
-let iter = pddb.read_dict("myapp.items", None)?;
-for (key_name, data) in iter {
+// Read an entire dictionary: read_dict(dict, basis, size_limit) -> Vec<PddbKeyRecord>
+// (default limit 32 KiB of data total; records past the limit come back with data = None)
+for rec in pddb.read_dict("myapp.items", None, None)? {
+    let data = match rec.data {
+        Some(d) => d,
+        None if rec.len == 0 => continue, // empty key
+        None => {
+            // over the bulk limit: read it individually
+            let mut k = pddb.get("myapp.items", &rec.name, Some(&rec.basis), false, false, None, None::<fn()>)?;
+            let mut d = Vec::new();
+            k.read_to_end(&mut d)?;
+            d
+        }
+    };
     let item: Item = serde_json::from_slice(&data)?;
-    // process item
 }
 ```
 
@@ -438,7 +427,7 @@ fn ensure_migrated(pddb: &Pddb) {
         migrate_v1_to_v2(pddb);
     }
 
-    save_version(pddb, CURRENT_VERSION);
+    save_version(pddb, CURRENT_VERSION).ok();
 }
 
 fn load_version(pddb: &Pddb) -> Option<u32> {
@@ -448,11 +437,8 @@ fn load_version(pddb: &Pddb) -> Option<u32> {
     Some(u32::from_le_bytes(buf))
 }
 
-fn save_version(pddb: &Pddb, version: u32) {
-    let mut key = pddb.get("myapp.meta", "version", None, true, true, Some(4), None::<fn()>).unwrap();
-    key.seek(SeekFrom::Start(0)).ok();
-    key.write_all(&version.to_le_bytes()).ok();
-    pddb.sync().ok();
+fn save_version(pddb: &Pddb, version: u32) -> std::io::Result<()> {
+    store(pddb, "myapp.meta", "version", &version.to_le_bytes())
 }
 ```
 
@@ -464,11 +450,12 @@ PDDB operations are serialized through the PDDB service process via IPC. Multipl
 ### Key Change Callback
 The `key_changed_cb` parameter fires when a basis lock invalidates an open key:
 ```rust
-let mut key = pddb.get(
+let key = pddb.get(
     "myapp.settings", "config", None, false, false, None,
     Some(|| {
+        // Runs on a PDDB callback thread when a basis lock invalidates the key.
+        // Keep it tiny: send a message to your main loop and re-read there.
         log::warn!("Key invalidated by basis lock! Re-read needed.");
-        // This runs in a callback thread — signal main thread to reload
     }),
 )?;
 ```
@@ -476,20 +463,22 @@ let mut key = pddb.get(
 ## Mount Lifecycle
 
 ```rust
-// Block until PDDB is mounted (no CPU spinning)
-pddb.is_mounted_blocking();
+pddb.is_mounted_blocking(); // block until mounted (no CPU spinning)
 
-// Non-blocking mount check
-let (mounted, retry_count) = pddb.try_mount();
+// Instantaneous, never-blocking check (separate poller server)
+let poller = pddb::PddbMountPoller::new();
+let mounted: bool = poller.is_mounted_nonblocking();
 
-// Proper flush sequence
-pddb.sync()?;           // Write to flash
-pddb.sync_cleanup()?;   // Cleanup journal
+pddb.sync()?; // flush to flash
 ```
+`pddb.try_mount()` is **not** a check: it attempts a mount and may pop up the PIN dialog.
+`pddb.sync_cleanup()` is an fsck-like repair pass, not part of a normal save.
 
 ## Quality Criteria
 
-- [ ] Dictionary/key names within length limits
+- [ ] Dictionary/key names within length limits (110/94 bytes)
+- [ ] Overwrites use delete-then-recreate in the key's basis (no `set_len`; it doesn't exist)
+- [ ] Errors matched via `std::io::ErrorKind` (no `PddbError`)
 - [ ] Consistent naming convention
 - [ ] Error handling for missing keys
 - [ ] `pddb.sync()` called after writes

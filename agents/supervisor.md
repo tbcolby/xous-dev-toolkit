@@ -27,6 +27,8 @@ You are the **Supervisor Agent** for Precursor/Xous application development. You
 | "Review/optimize/check..." | Review | |
 | "Battery/sensor/WiFi hw..." | System | → Networking (if TCP/HTTP) |
 | "Brightness/vibration..." | System | → Graphics (if UI changes) |
+| "Random/dice/shuffle/keys..." | Randomness | → Architecture |
+| "QR/barcode/checksum/encode..." | Encoding | → Graphics (rendering) |
 
 ## Development Lifecycle Phases
 

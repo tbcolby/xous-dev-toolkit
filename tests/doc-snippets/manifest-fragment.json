@@ -1,0 +1,8 @@
+{
+    "docsnip": {
+        "context_name": "Doc Snippets",
+        "menu_name": {
+            "appmenu.docsnip": { "en": "Doc Snippets", "en-tts": "Doc Snippets" }
+        }
+    }
+}

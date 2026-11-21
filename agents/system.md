@@ -13,11 +13,11 @@ You are the **System Agent** for Precursor/Xous application development. You spe
 
 ## COM Service Connection
 
+Every `Com` method returns `Result<_, xous::Error>`; some (e.g. `get_batt_stats_blocking`) take
+`&mut self`, so bind it `mut`. Snippets below run inside a fn returning `Result<(), xous::Error>`.
 ```rust
-use com::Com;
-
 let xns = xous_names::XousNames::new().unwrap();
-let com = Com::new(&xns).unwrap();
+let mut com = com::Com::new(&xns)?;
 ```
 
 ### Cargo Dependency
@@ -30,32 +30,28 @@ com = { path = "../../services/com" }
 
 ### Battery Status
 ```rust
-// Blocking call — returns current battery stats
-let stats = com.get_batt_stats_blocking()?;
-// BattStats contains: voltage, current, state_of_charge, etc.
+let stats: com::BattStats = com.get_batt_stats_blocking()?; // &mut self
+log::info!("{} mV, {}%, {} mA, {} mAh left", stats.voltage, stats.soc, stats.current, stats.remaining_capacity);
 
-// Check charging status
-if com.is_charging() {
+if com.is_charging()? {
     log::info!("Device is charging");
 }
 
-// Request charging enable (if USB connected)
-com.request_charging();
+com.request_charging()?; // ask the EC to enable charging (if USB connected)
 ```
 
 ### Power Management
 ```rust
-// Enable power boost mode (higher performance, more power draw)
-com.set_boost(true);
+com.set_boost(true)?; // boost mode on (more power draw)
 
-// Get standby current draw (for power optimization)
-if let Some(current_ma) = com.get_standby_current() {
+// Standby current draw: Result<Option<i16>>
+if let Some(current_ma) = com.get_standby_current()? {
     log::info!("Standby draw: {}mA", current_ma);
 }
 ```
 
 ### Power-Aware Design Guidelines
-- Check `is_charging()` to decide sync aggressiveness
+- Check `is_charging()?` to decide sync aggressiveness
 - Disable WiFi scanning when not needed (`com.wifi_disable()`)
 - Use longer poll intervals on battery (30s+) vs charging (5s+)
 - Stop animation pumps when backgrounded (saves CPU and battery)
@@ -63,12 +59,11 @@ if let Some(current_ma) = com.get_standby_current() {
 
 ## Sensors
 
-### Accelerometer / Gyroscope
+### Accelerometer
 ```rust
-// Read sensor data (blocks if accessed too frequently)
-let (x, y, z, temp) = com.gyro_read_blocking();
-// x, y, z: acceleration/rotation values (u16)
-// temp: temperature reading (u16)
+// Raw two's-complement samples as u16; the 4th value is the IMU id, not a temperature
+let (x, y, z, _id) = com.gyro_read_blocking()?;
+let (x, y, z) = (x as i16, y as i16, z as i16);
 ```
 
 **Rate limiting**: The gyro service blocks if polled faster than its hardware sample rate. Typical usage is 20-50ms intervals via a pump thread.
@@ -81,25 +76,25 @@ let (x, y, z, temp) = com.gyro_read_blocking();
 
 ### Backlight Control
 ```rust
-// Set LCD brightness (0-255 for each)
+// Set backlight brightness (0-255 for each)
 com.set_backlight(
     200,  // main display brightness
     0,    // secondary (keyboard backlight)
-);
+)?;
 ```
 
 ### Haptic Feedback
 ```rust
 // Enable/disable vibration motor (via GAM)
 let gam = gam::Gam::new(&xns)?;
-gam.set_vibe(true);   // Buzz
-gam.set_vibe(false);  // Stop
+gam.set_vibe(true)?;  // Buzz
+gam.set_vibe(false)?; // Stop
 ```
 
 ### LCD Test Pattern
 ```rust
 // Display built-in test pattern for diagnostics
-gam.selftest(2000);  // Show for 2000ms
+gam.selftest(2000); // Show for 2000 ms (returns ())
 ```
 
 ## WiFi Hardware Control
@@ -108,61 +103,51 @@ Low-level WiFi hardware management (for TCP/HTTP networking, see the Networking 
 
 ### WiFi Power
 ```rust
-// Disable WiFi radio (saves significant power)
-com.wifi_disable();
-
-// Reset WiFi module (recovers from stuck states)
-com.wifi_reset();
+com.wifi_disable()?;            // radio off (saves significant power)
+let _rev = com.wifi_reset()?;   // reset the WF200 (recovers from stuck states); Result<usize>
 ```
 
 ### SSID Scanning
+`com.ssid_scan_updated()` and `com.ssid_fetch_as_string()` are `#[deprecated]`; read the aggregated
+scan results from the connection manager instead:
 ```rust
-// Enable AP scanning
-com.set_ssid_scanning(true);
-
-// Check if scan results are fresh
-if com.ssid_scan_updated() {
-    // Get available networks as (signal_strength, ssid) pairs
-    let networks = com.ssid_fetch_as_list();
-    for (rssi, ssid) in &networks {
-        log::info!("  {} (signal: {})", ssid, rssi);
-    }
-
-    // Or get as pre-formatted string (for display)
-    let list_str = com.ssid_fetch_as_string();
+com.set_ssid_scanning(true)?;
+let netmgr = net::NetManager::new();
+let (ssids, scan_state) = netmgr.wifi_get_ssid_list()?; // (Vec<SsidRecord>, ScanState)
+for r in &ssids {
+    log::info!("  {} (rssi -{} dBm)", r.name, r.rssi); // rssi is reported as a positive u8
 }
-
-// Disable scanning when not needed
-com.set_ssid_scanning(false);
+com.set_ssid_scanning(false)?;
 ```
 
 ### WiFi State Notifications (via Net Service)
+The type is `net::NetManager` (constructor takes no args). State updates arrive as **memory**
+messages carrying `com::WlanStatusIpc`, not scalars.
 ```rust
-use net::Net;
+let mut netmgr = net::NetManager::new();
 
-let net = Net::new(&xns)?;
-
-// Subscribe to WiFi state changes
-net.wifi_state_subscribe(connection_id, AppOp::WifiChanged as u32)?;
-
-// In message handler:
-Some(AppOp::WifiChanged) => xous::msg_scalar_unpack!(msg, state, _, _, _, {
-    // state indicates connected/disconnected/connecting
-    log::info!("WiFi state changed: {}", state);
-}),
+// Subscribe (needs &mut self; one subscription per NetManager)
+netmgr.wifi_state_subscribe(xous::connect(sid)?, AppOp::WifiChanged.to_u32().unwrap())?;
 
 // Connection manager control
-net.connection_manager_run();       // Start auto-connect
-net.wifi_on_and_run();              // Enable WiFi + start manager
-net.wifi_off_and_stop();            // Disable WiFi + stop manager
+netmgr.connection_manager_run()?;               // start auto-connect
+netmgr.connection_manager_wifi_on_and_run()?;   // WiFi on + manager
+netmgr.connection_manager_wifi_off_and_stop()?; // WiFi off + stop manager
 
-// Get current IP configuration
-if let Some(ipv4) = net.get_ipv4_config() {
-    log::info!("IP: {:?}", ipv4);
+// Current IP configuration (None = not connected)
+if let Some(ipv4) = netmgr.get_ipv4_config() {
+    log::info!("IP: {:?}", ipv4.addr);
 }
 
-// Unsubscribe when done
-net.wifi_state_unsubscribe();
+netmgr.wifi_state_unsubscribe()?;
+```
+In the message handler (`msg: &xous::MessageEnvelope`):
+```rust
+Some(AppOp::WifiChanged) => {
+    let buffer = unsafe { xous_ipc::Buffer::from_memory_message(msg.body.memory_message().unwrap()) };
+    let status = com::WlanStatus::from_ipc(buffer.to_original::<com::WlanStatusIpc, _>().unwrap());
+    log::info!("WiFi state: {:?}, ssid {:?}", status.link_state, status.ssid.map(|s| s.name.to_string()));
+}
 ```
 
 ### Net Service Dependency
@@ -173,11 +158,11 @@ net = { path = "../../services/net" }
 ## Device Information
 
 ```rust
-// EC firmware git revision
+// EC firmware git revision: Result<(u32, bool)>
 let (revision, is_dirty) = com.get_ec_git_rev()?;
 log::info!("EC rev: {:08x}{}", revision, if is_dirty { " (dirty)" } else { "" });
 
-// EC firmware version
+// EC firmware version: Result<SemVer> (implements Display)
 let semver = com.get_ec_sw_tag()?;
 log::info!("EC version: {}", semver);
 ```

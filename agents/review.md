@@ -15,35 +15,47 @@ You are the **Review Agent** for Precursor/Xous application development. You spe
 ### App Structure
 - [ ] Uses `#![cfg_attr(target_os = "none", no_std)]`
 - [ ] Uses `#![cfg_attr(target_os = "none", no_main)]`
-- [ ] `main()` returns `!` (diverging)
-- [ ] Proper cleanup with `xous::terminate_process(0)`
+- [ ] `main()` returns `!` (diverging); the main loop never exits
+- [ ] User "quit" calls `gam.relinquish_focus()`, NOT `xous::terminate_process` (apps aren't respawned)
+- [ ] Any `xous::destroy_server` is wrapped in `unsafe { }` with a safety comment (it is `unsafe` in xous 0.9.71)
 
 ### Naming Conventions
-- [ ] `SERVER_NAME` has underscores: `"_MyApp_"`
-- [ ] `APP_NAME` has no underscores: `"MyApp"`
-- [ ] `APP_NAME` matches `context_name` in manifest.json exactly
+- [ ] `UxRegistration.app_name` is `gam::APP_NAME_<KEY>` (generated from `apps/manifest.json`; KEY = package name uppercased, `-` -> `_`), never a hand-typed string
+- [ ] xous-names server name (`register_name`) is a separate, unique string; it is not the app name
 - [ ] Opcode enum derives `FromPrimitive`/`ToPrimitive`
 
 ### Service Registration
 ```rust
-// Correct pattern:
-const SERVER_NAME: &str = "_MyApp_";
-const APP_NAME: &str = "MyApp";
+const SERVER_NAME: &str = "_MyApp_"; // xous-names server name: any unique string
 
-let sid = xns.register_name(SERVER_NAME, None)?;  // Uses underscored
-
-let token = gam.register_ux(gam::UxRegistration {
-    app_name: String::from(APP_NAME),  // Uses plain name
-    // ...
-})?;
+let sid = xns.register_name(SERVER_NAME, None)?;
+let token = gam
+    .register_ux(gam::UxRegistration {
+        // Generated from apps/manifest.json: key "myapp" -> APP_NAME_MYAPP, value = its context_name
+        app_name: String::from(gam::APP_NAME_MYAPP),
+        ux_type: gam::UxType::Framebuffer,
+        predictor: None,
+        listener: sid.to_array(),
+        redraw_id: AppOp::Redraw.to_u32().unwrap(),
+        gotinput_id: None,
+        audioframe_id: None,
+        rawkeys_id: Some(AppOp::Rawkeys.to_u32().unwrap()),
+        focuschange_id: Some(AppOp::FocusChange.to_u32().unwrap()),
+    })?
+    .expect("GAM rejected app_name (not in EXPECTED_APP_CONTEXTS)");
 ```
 
 ### Graphics
-- [ ] Imports from `gam::menu::*` not `ux-api` directly
-- [ ] Uses `gam::GlyphStyle` not `blitstr2::GlyphStyle`
+- [ ] Imports from `gam::menu::*` / `gam::GlyphStyle` (preferred; direct ux-api/blitstr2 also builds, don't mix)
+- [ ] No `TextView.invert = true` (the GAM refuses inverted text from apps; nothing is drawn)
+- [ ] None of the do-not-use APIs: `graphics_server::*`, `gam::RawkeysEvent`, `gam.clear()`, `gam.draw_textview()`, `Canvas`
 - [ ] `gam.redraw()` called after drawing operations
 - [ ] Screen cleared before full redraws
 - [ ] `Point` coordinates are `isize`
+
+### Keys
+- [ ] Only keys apps actually receive are bound (table in `ecosystem/STANDARDS.md` section 1)
+- [ ] Nothing bound to `'∴'` (GAM consumes it), ESC/0x1B (no key produces it) or Apple PUA U+F700-F703
 
 ### Focus Management
 - [ ] Handles `FocusChange` messages
@@ -57,7 +69,9 @@ let token = gam.register_ux(gam::UxRegistration {
 - [ ] Unknown opcodes logged, not panicked
 
 ### PDDB
-- [ ] Dictionary/key names within limits (111/95 chars)
+- [ ] Dictionary/key names within limits (110/94 bytes)
+- [ ] No `key.set_len()` / `pddb::PddbError` (neither exists); overwrite = delete in the key's basis, then recreate
+- [ ] Errors matched via `std::io::ErrorKind`
 - [ ] `pddb.sync()` called after writes
 - [ ] Error handling for missing keys
 - [ ] Size hints provided for large data
@@ -68,10 +82,17 @@ let token = gam.register_ux(gam::UxRegistration {
 - [ ] Errors handled gracefully
 - [ ] Main thread notified via messages
 
+### Timers & Randomness
+- [ ] No `Ticktimer::set_alarm` (doesn't exist); periodic work uses the pump pattern
+- [ ] TRNG wrappers fail closed (no `unwrap_or(0)`)
+
 ## Common Pitfalls
 
+The pitfall snippets below are illustrative WRONG/CORRECT fragments (marked `rust,ignore`); the
+patterns they point to are compiled in `tests/doc-snippets/`.
+
 ### P1: Forgetting gam.redraw()
-```rust
+```rust,ignore
 // WRONG
 gam.draw_rectangle(...)?;
 gam.post_textview(&mut tv)?;
@@ -83,31 +104,31 @@ gam.post_textview(&mut tv)?;
 gam.redraw()?;  // REQUIRED
 ```
 
-### P2: Wrong Name Constants
-```rust
-// WRONG - same name for both
-const NAME: &str = "MyApp";
-let sid = xns.register_name(NAME, None)?;  // Should be underscored
-gam.register_ux(... app_name: String::from(NAME) ...)?;
+### P2: Hand-Typed App Name
+```rust,ignore
+// WRONG - GAM rejects any name not in the generated EXPECTED_APP_CONTEXTS list
+gam.register_ux(UxRegistration { app_name: String::from("My App"), .. })?;
 
-// CORRECT - different names
+// CORRECT - use the generated constant; server name is a separate unique string
 const SERVER_NAME: &str = "_MyApp_";
-const APP_NAME: &str = "MyApp";
+let sid = xns.register_name(SERVER_NAME, None)?;
+gam.register_ux(UxRegistration { app_name: String::from(gam::APP_NAME_MYAPP), .. })?;
 ```
 
-### P3: Direct ux-api Import
-```rust
-// WRONG - needs feature flags
+### P3: Mixing Import Routes
+```rust,ignore
+// Builds (apps/hello does it), but couples the app to ux-api/blitstr2 layout:
 use ux_api::minigfx::Point;
 use blitstr2::GlyphStyle;
 
-// CORRECT - use gam re-exports
+// PREFERRED - gam re-exports (one route per app)
 use gam::menu::Point;
 use gam::GlyphStyle;
+use gam::{GamObjectList, GamObjectType}; // these live at the gam root, not gam::menu
 ```
 
 ### P4: Not Handling FocusChange
-```rust
+```rust,ignore
 // WRONG - draws even when backgrounded, wastes CPU
 loop {
     let msg = xous::receive_message(sid)?;
@@ -134,7 +155,7 @@ loop {
 ```
 
 ### P5: Blocking Main Thread
-```rust
+```rust,ignore
 // WRONG - blocks message handling
 fn handle_sync(&mut self) {
     let data = fetch_from_network();  // Blocks!
@@ -152,7 +173,7 @@ fn start_sync(&mut self) {
 ```
 
 ### P6: Large Stack Allocations
-```rust
+```rust,ignore
 // WRONG - may overflow stack
 fn process() {
     let buffer = [0u8; 1_000_000];  // 1MB on stack!
@@ -165,7 +186,7 @@ fn process() {
 ```
 
 ### P7: Panicking on Errors
-```rust
+```rust,ignore
 // WRONG - crashes app
 let data = pddb.get(...).unwrap();
 
@@ -180,7 +201,7 @@ match pddb.get(...) {
 ```
 
 ### P8: Missing PDDB Sync
-```rust
+```rust,ignore
 // WRONG - data may not persist
 key.write_all(&data)?;
 // App exits, data lost!
@@ -188,6 +209,34 @@ key.write_all(&data)?;
 // CORRECT
 key.write_all(&data)?;
 pddb.sync()?;  // Flush to disk
+```
+
+### P9: Inverted Text
+```rust,ignore
+// WRONG - GAM logs "Attempt to draw inverted text without sufficient trust level" and draws nothing
+tv.invert = true;
+
+// CORRECT - outline/marker selection (graphics.md "Selection Highlight")
+draw_selection(gam, gid, y, height);
+```
+
+### P10: Truncating a PDDB Key
+```rust,ignore
+// WRONG - PddbKey has no set_len; a shorter rewrite leaves stale bytes
+key.seek(SeekFrom::Start(0))?; key.write_all(&json)?; key.set_len(json.len() as u64)?;
+
+// CORRECT - storage.md store(): delete in attributes().basis, then recreate
+store(&pddb, "myapp.settings", "config", &json)?;
+```
+
+### P11: Exiting the App
+```rust,ignore
+// WRONG - app is gone until reboot; also destroy_server is unsafe
+xous::destroy_server(sid).unwrap();
+xous::terminate_process(0);
+
+// CORRECT - hand focus back to the main menu, keep the loop running
+gam.relinquish_focus().unwrap();
 ```
 
 ## Performance Review
@@ -211,8 +260,10 @@ pddb.sync()?;  // Flush to disk
 
 ## Code Style
 
+Fragments in this section are style illustrations, not compilable code (`rust,ignore`).
+
 ### Imports
-```rust
+```rust,ignore
 // Group and order
 use std::...;                    // Standard library
 use xous::{...};                 // Xous core
@@ -222,7 +273,7 @@ use num_traits::FromPrimitive;   // Derive support
 ```
 
 ### Error Handling
-```rust
+```rust,ignore
 // Prefer explicit handling over .unwrap()
 // Use .ok() for fire-and-forget messages
 // Log errors before returning
@@ -237,7 +288,7 @@ match operation() {
 ```
 
 ### Logging
-```rust
+```rust,ignore
 // Use appropriate levels
 log::error!("Fatal: {}", e);       // Things that shouldn't happen
 log::warn!("Recoverable: {}", e);  // Handled errors
@@ -329,7 +380,7 @@ log::trace!("Very verbose");        // Only when needed
 
 - [ ] All critical issues resolved
 - [ ] No compiler warnings
-- [ ] App builds with `cargo xtask renode-image`
+- [ ] App builds with `cargo xtask renode-image <app>` (and `cargo xtask hosted-ci <app>` in CI)
 - [ ] Screenshots captured and verified
 - [ ] Basic functionality tested
 - [ ] Focus/background handling works

@@ -29,41 +29,45 @@ python3 renode_capture.py --app myapp
 
 **Cause**: App registration pattern doesn't match Xous conventions.
 
-**Solution**: Use separate names for xous-names server and GAM UX registration:
-```rust
-// CORRECT pattern (matches Writer, Flashcards, Timers):
-const SERVER_NAME: &str = "_MyApp_";  // Underscored - for xous names server
-const APP_NAME: &str = "MyApp";       // No underscores - for GAM, matches manifest
+**Solution**: Register with the GAM using the constant generated from `apps/manifest.json`, and give
+the xous-names server its own unique name:
+```rust,ignore
+const SERVER_NAME: &str = "_MyApp_"; // xous-names server name: any unique string
 
-// In main():
-let sid = xns.register_name(SERVER_NAME, None)?;  // Uses _MyApp_
+let sid = xns.register_name(SERVER_NAME, None)?;
 let token = gam.register_ux(gam::UxRegistration {
-    app_name: String::from(APP_NAME),  // Uses MyApp
-    // ...
+    app_name: String::from(gam::APP_NAME_MYAPP), // generated; never retype the string
+    // ... (full struct: agents/architecture.md "App Lifecycle")
 })?;
 ```
+(Fragment: the full, compiled version is `register()` in `tests/doc-snippets/src/review.rs`.)
 
 **Why this matters**:
-- `SERVER_NAME` with underscores prevents name collisions in the xous names server
-- `APP_NAME` without underscores must match `context_name` in `manifest.json`
-- The GAM uses `APP_NAME` to match against the auto-generated `apps.rs` constants
+- The GAM only accepts names in the generated `EXPECTED_APP_CONTEXTS` (`services/gam/src/apps.rs`),
+  and only apps named on the xtask command line get a constant
+- `APP_NAME_MYAPP` comes from the manifest key (`"myapp"`, uppercased, `-` -> `_`); its value is the
+  manifest `context_name`
+- The underscores in `"_MyApp_"` are just a convention; the server name is unrelated to the app name
 
 #### 3. System Reboots During Capture
 **Symptom**: Uptime in screenshots jumps backwards (e.g., 0:17:24 → 0:00:30); later screenshots show different state (PIN dialog, Shellchat).
 
 **Cause**: App crash or panic during key handling. Often triggered by:
-- Pressing Enter which triggers unexpected menu actions
+- Pressing a key the app doesn't guard, triggering unexpected menu actions
 - Memory issues during complex operations
 - Bugs in state machine transitions
 
 **Solution**:
 - Use direct keyboard shortcuts instead of menu navigation where possible
-- Avoid Enter key for navigation; use app-specific keys (e.g., 'N' for New Game, '1' for select)
+- Prefer direct app-specific keys (e.g., 'N' for New Game, '1' for select) over long menu walks
 - Take debug screenshots at each step to identify where failure occurs
 - Check for panics in app code triggered by specific key sequences
 
 #### 4. Keys Not Working / Wrong Characters
 **Symptom**: Navigation keys (Home, Down, Up) don't work; character keys produce wrong output (a→@).
+Also: `timed_key('Return')` / `timed_key('Escape')` do nothing, because those scancodes are not in the
+Renode keyboard's `MatrixMapping` (`emulation/peripherals/keyboard.cs`); unmapped keys are dropped.
+Use `Enter` (or `inject_line("")`). There is no Escape key at all. Full table: `ecosystem/STANDARDS.md` section 1.
 
 **Cause**: Keyboard hold timing issue. Keys held >500ms emulated time produce hold variants or nothing.
 
@@ -94,7 +98,15 @@ def timed_key(key, hold_ms=1, after=1.0):
 
 #### Writer
 - Mode selection responds to Enter
-- Uses Esc-prefix commands (Esc+P for preview, Esc+Q to quit)
+- **Known bug**: commands use an ESC prefix (Esc+P preview, Esc+Q quit). No Precursor key produces
+  0x1B, Renode has no Escape scancode, and the keyboard inject path eats 0x1B as the start of an ANSI
+  sequence, so these commands are unreachable on hardware and in Renode (captures named after them
+  show the editor with a literal `p`/`q`). Fix: move to an F-key prefix (`agents/architecture.md`
+  "Command-Prefix Pattern").
+
+#### Menu key
+- `'∴'` (Renode `Home`) is always consumed by the GAM for app contexts (`services/gam/src/contexts.rs:741`):
+  it opens the main menu and the app never sees it. Never bind Menu/Back/Quit to it.
 
 #### Flashcards
 - Deck list responds to Enter to open deck
@@ -103,10 +115,10 @@ def timed_key(key, hold_ms=1, after=1.0):
 ## App Registration
 
 ### Manifest Entry
-```json
+```jsonc
 {
-  "myapp": {
-    "context_name": "MyApp",  // Must match APP_NAME in code (no underscores)
+  "myapp": {                  // must equal the Cargo package name -> gam::APP_NAME_MYAPP
+    "context_name": "MyApp",  // becomes the value of APP_NAME_MYAPP (any display string)
     "menu_name": {
       "appmenu.myapp": {
         "en": "My App",
@@ -126,8 +138,8 @@ The `context_name` from manifest becomes the `APP_NAME_*` constant value.
 
 ### Debugging Registration Issues
 1. Check `apps.rs` contains your app constant
-2. Verify `context_name` in manifest matches `APP_NAME` in code exactly
-3. Ensure app is added to both `members` and `default-members` in root Cargo.toml
+2. Verify the code passes `gam::APP_NAME_MYAPP` (not a hand-typed string)
+3. Ensure the app is in `members` (only) in the root Cargo.toml; never `default-members`
 4. Rebuild with `cargo xtask renode-image myapp` to regenerate auto files
 
 ## Graphics API
@@ -135,7 +147,8 @@ The `context_name` from manifest becomes the `APP_NAME_*` constant value.
 ### Type Mismatches
 Common error: Circle/DrawStyle parameters expect `isize`, not `u16`.
 
-```rust
+```rust,ignore
+// Illustrative wrong/right pair
 // Wrong:
 Circle::new_with_style(center, radius as u16, style)
 
@@ -145,7 +158,7 @@ Circle::new_with_style(center, radius, style)
 ```
 
 ### DrawStyle stroke_width
-The `stroke_width` field is `isize`, not `u16`:
+The `stroke_width` field is `isize`, not `u16` (compiled in `tests/doc-snippets/src/gfx.rs`):
 ```rust
 DrawStyle {
     fill_color: None,
@@ -159,7 +172,8 @@ DrawStyle {
 ### Mutating Self While Borrowing State
 Common pattern when you need to extract data from state, then mutate self:
 
-```rust
+```rust,ignore
+// Illustrative (`..` elides fields); compiled variant: `App::finish` in tests/doc-snippets/src/review.rs
 // Wrong - borrow checker error:
 if let AppState::Playing { game, mode, .. } = &self.state {
     self.update_stats(*mode);  // Error: can't mutate while borrowing
@@ -186,6 +200,29 @@ if let Some((game, mode)) = data {
 - First access to a key after mount: may have slight delay
 
 ### Key/Dictionary Naming
-- Dictionary names: max 111 characters
-- Key names: max 95 characters
+- Dictionary names: max 110 bytes (check is `len > 111 - 1`)
+- Key names: max 94 bytes (check is `len > 95 - 1`)
 - Use dots for namespacing: `myapp.settings`, `myapp.data`
+
+### Overwrites
+`PddbKey` has no `set_len`/truncate. Writing a shorter value over a longer one leaves stale trailing
+bytes (broken JSON). Rewrite = `delete_key` in the basis reported by `key.attributes()?.basis`, then
+recreate (pattern from `apps/vault/src/storage.rs`). Errors are `std::io::Error`; there is no `PddbError`.
+
+## API Drift and Hallucinations
+
+### xous 0.9.71: destroy_server is unsafe
+```rust,ignore
+// Fragment: `sid` is your server
+// safety: server has no pending blocking messages or lent pages
+unsafe { xous::destroy_server(sid).unwrap() };
+```
+This one line was the only build error in calc, c64, timers, writer and othello against xous-core 31fbe23.
+
+### Do-not-use list (agents hallucinated these; none exist for apps)
+`graphics_server::*` in apps, `gam::RawkeysEvent`, `gam.clear()`, `gam.draw_textview()`, `Canvas` as an
+app type, `Ticktimer::set_alarm`, `xous::String::from_str`, `PddbKey::set_len`, `pddb::PddbError`,
+`TextView.invert = true` (exists, but the GAM refuses it for apps).
+
+### Leaving an app
+Apps are started once and not respawned. Quit = `gam.relinquish_focus()`; never `xous::terminate_process`.

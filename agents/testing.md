@@ -126,7 +126,8 @@ elif args.app == 'myapp':
 ### timed_key() — For Navigation
 ```python
 # Safe key press with exact 1ms hold time
-# Use for: Home, Down, Up, Left, Right, Space, F1-F4
+# Use for: Home, Down, Up, Left, Right, Space, BackSpace, F1-F4, Enter (never 'Return'/'Escape')
+# Scancode table: ecosystem/STANDARDS.md section 1
 ctl.timed_key('Home', after=3.0)
 ctl.timed_key('Down', after=1.0)
 ctl.timed_key('Space', after=2.0)
@@ -243,7 +244,7 @@ python3 usb_log_monitor.py --filter myapp --save test_log.txt
 ### Wrong App Launched
 **Symptom**: Shellchat appears instead of your app
 **Cause**: Wrong app_index or registration issue
-**Fix**: Check menu order, verify APP_NAME matches manifest
+**Fix**: Check menu order; verify the app registers with `gam::APP_NAME_<KEY>` (manifest key == package name)
 
 ### Screenshots Show Wrong State
 **Symptom**: Screenshot shows previous screen
@@ -330,7 +331,7 @@ if image_hash('/tmp/before.png') == image_hash('/tmp/after.png'):
 The `renode_lib.py` RenodeController has `wait_for_screen_change()`:
 ```python
 # Wait until screen changes (e.g., after triggering a long operation)
-ctl.timed_key('Return', after=0.5)
+ctl.timed_key('Enter', after=0.5)   # 'Return'/'Escape' are not Renode scancodes (silently dropped)
 if ctl.wait_for_screen_change(timeout=60, interval=5):
     print("Operation completed (screen changed)")
 else:

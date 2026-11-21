@@ -14,7 +14,13 @@ Implement true random number generation patterns for Precursor apps using the ha
 
 ## Key Patterns
 
-### TRNG Wrapper
+Prefer `precursor_appkit::rng` (fail-closed TRNG with unbiased range). The raw patterns follow; all
+are compiled in `tests/doc-snippets/src/rng.rs`.
+
+### TRNG Wrapper (fail closed)
+A TRNG error must never turn into a constant. `unwrap_or(0)` would make `range()` return 0 forever
+(0 is always under the rejection threshold), silently making every roll, shuffle, key or pad
+deterministic. Panic (or propagate the error) instead.
 ```rust
 pub struct Rng {
     trng: trng::Trng,
@@ -25,18 +31,23 @@ impl Rng {
         Self { trng: trng::Trng::new(xns).expect("can't connect to TRNG") }
     }
 
+    /// Fails closed: a TRNG error must never silently become a constant.
     pub fn u32(&self) -> u32 {
-        self.trng.get_u32().unwrap_or(0)
+        self.trng.get_u32().expect("TRNG read failed")
+    }
+
+    pub fn flip(&self) -> bool {
+        self.u32() & 1 == 1
     }
 }
 ```
 
 ### Rejection Sampling (REQUIRED for range())
-Never use raw modulo — it introduces bias when `max` doesn't evenly divide `u32::MAX`.
+Never use raw modulo — it introduces bias when `max` doesn't evenly divide 2^32.
 ```rust
 pub fn range(&self, max: u32) -> u32 {
     if max <= 1 { return 0; }
-    let threshold = u32::MAX - (u32::MAX % max);
+    let threshold = u32::MAX - (u32::MAX % max); // a multiple of max
     loop {
         let val = self.u32();
         if val < threshold {
@@ -59,10 +70,14 @@ pub fn shuffle<T>(&self, items: &mut [T]) {
 ```
 
 ### Weighted Selection
-Cumulative weight scan — works with any positive weight values.
+Cumulative weight scan — works with any non-negative weights whose sum fits in `u32`
+(a plain `.sum()` would panic on overflow in debug and wrap in release).
 ```rust
 pub fn weighted_pick(&self, weights: &[u32]) -> usize {
-    let total: u32 = weights.iter().sum();
+    let total: u32 = weights
+        .iter()
+        .try_fold(0u32, |acc, &w| acc.checked_add(w))
+        .expect("weights sum overflows u32");
     if total == 0 { return 0; }
     let mut roll = self.range(total);
     for (i, &w) in weights.iter().enumerate() {
@@ -74,6 +89,7 @@ pub fn weighted_pick(&self, weights: &[u32]) -> usize {
 ```
 
 ## Quality Criteria
+- TRNG errors fail closed (panic or propagate) — never `unwrap_or(0)` or any default value
 - Rng wrapper has NO GAM/PDDB dependencies (extractable as library)
 - Rejection sampling MUST be used for `range()` — never raw modulo
 - Fisher-Yates iterates in reverse (standard algorithm)

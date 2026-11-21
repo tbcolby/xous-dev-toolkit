@@ -32,6 +32,7 @@ xous-core/
 ## Cargo.toml (App)
 
 ### Minimal Template
+Versions match `apps/hello/Cargo.toml` at the pinned xous-core commit (see `ecosystem/STANDARDS.md` section 11).
 ```toml
 [package]
 name = "myapp"
@@ -42,17 +43,17 @@ description = "Short description of the app"
 
 [dependencies]
 # Core Xous (required)
-xous = "0.9.69"
-xous-ipc = "0.10.9"
+xous = "0.9.71"
+xous-ipc = "0.10.11"
 log = "0.4.14"
-log-server = { package = "xous-api-log", version = "0.1.68" }
-xous-names = { package = "xous-api-names", version = "0.9.70" }
+log-server = { package = "xous-api-log", version = "0.1.70" }
+xous-names = { package = "xous-api-names", version = "0.9.72" }
 
 # Graphics (required for UI apps)
 gam = { path = "../../services/gam" }
 
 # Timing (usually needed)
-ticktimer-server = { package = "xous-api-ticktimer", version = "0.9.68" }
+ticktimer-server = { package = "xous-api-ticktimer", version = "0.9.71" }
 
 # Opcode serialization (required)
 num-derive = { version = "0.4.2", default-features = false }
@@ -67,11 +68,14 @@ pddb = { path = "../../services/pddb" }
 # Modal dialogs
 modals = { path = "../../services/modals" }
 
-# Device hardware (vibration, LEDs)
-llio = { path = "../../services/llio" }
+# Battery, backlight, accelerometer, WiFi radio
+com = { path = "../../services/com" }
+
+# Hardware RNG
+trng = { path = "../../services/trng" }
 
 # HTTP client
-ureq = { version = "2.9.4", default-features = false, features = ["json"] }
+ureq = { version = "2.9.4", features = ["json"] }
 tls = { path = "../../libs/tls" }
 
 # Serialization
@@ -82,11 +86,14 @@ serde_json = "1.0"
 myapp-core = { path = "../../libs/myapp-core" }
 ```
 
-### Important: Do NOT Include
+### ux-api / blitstr2: optional
+Upstream `apps/hello` depends on both directly and builds fine. The preferred route is the GAM
+re-exports (`gam::menu::*`, `gam::GlyphStyle`), which insulate the app from the next refactor; pick
+one route per app.
 ```toml
-# WRONG - these require feature flags managed by xtask
-ux-api = { path = "../../libs/ux-api" }    # Use gam::menu::* instead
-blitstr2 = { path = "../../libs/blitstr2" } # Use gam::GlyphStyle instead
+# Optional; only if you import ux_api::/blitstr2:: directly
+ux-api = { path = "../../libs/ux-api" }
+blitstr2 = { path = "../../libs/blitstr2" }
 ```
 
 ## manifest.json Entry
@@ -111,41 +118,29 @@ Add to `apps/manifest.json`:
 
 | Field | Value | Notes |
 |-------|-------|-------|
-| JSON key | `"myapp"` | Lowercase, matches Cargo.toml package name |
-| `context_name` | `"MyApp"` | Matches `APP_NAME` const in code, no underscores |
+| JSON key | `"myapp"` | Must equal the Cargo.toml package name; generates `gam::APP_NAME_MYAPP` (uppercased, `-` -> `_`) |
+| `context_name` | `"MyApp"` | Becomes the *value* of `APP_NAME_MYAPP`; any display string |
 | `appmenu.myapp` | Locale key | Used for translations |
 | `en` | `"My App"` | Displayed in menu |
 | `en-tts` | `"My App"` | Text-to-speech variant |
 
-**The `context_name` must exactly match the `APP_NAME` constant in your Rust code (the one passed to `gam.register_ux()`)**
+**Pass `gam::APP_NAME_MYAPP` as `UxRegistration.app_name`.** Never retype the string: the GAM only
+accepts names in the generated `EXPECTED_APP_CONTEXTS` list (`services/gam/src/tokens.rs:84-102`).
+The xous-names server name passed to `xns.register_name()` is unrelated and just needs to be unique.
 
 ## Workspace Integration
 
 ### Add to root Cargo.toml
 
-Find both arrays and add your app:
+Add the app (and any library crate it owns) to **`members` only**. Upstream apps are not in
+`default-members` (`Cargo.toml:2-31`); adding them there makes one broken app break a bare
+`cargo build`/`cargo check` of the whole tree. xtask builds apps explicitly by name.
 
 ```toml
 [workspace]
-default-members = [
-    # ... existing entries ...
-    "apps/myapp",
-]
 members = [
     # ... existing entries ...
-    "apps/myapp",
-]
-```
-
-### Library Crate (if applicable)
-```toml
-[workspace]
-default-members = [
-    "libs/myapp-core",
-    "apps/myapp",
-]
-members = [
-    "libs/myapp-core",
+    "libs/myapp-core",   # if applicable
     "apps/myapp",
 ]
 ```
@@ -179,7 +174,10 @@ cargo xtask run myapp
 
 ### Check Build Without Image
 ```bash
-# Just compile, don't create image
+# Fastest full check: hosted build of the services + your app (no image, no Renode)
+cargo xtask hosted-ci myapp
+
+# Cross-compile only the app (needs the riscv32imac-unknown-xous-elf toolchain installed)
 cargo build -p myapp --target riscv32imac-unknown-xous-elf
 ```
 
@@ -215,11 +213,16 @@ error[E0432]: unresolved import `gam::menu`
 ```
 **Fix**: Check gam dependency path is correct relative to app location
 
-### "feature X is required"
+### "unsafe call" on destroy_server
 ```
-error: the `precursor` feature must be enabled
+error[E0133]: call to unsafe function `destroy_server` is unsafe and requires unsafe block
 ```
-**Fix**: Don't import `ux-api` or `blitstr2` directly; use `gam` re-exports
+**Fix**: `unsafe { xous::destroy_server(sid).unwrap() }` with a `// safety:` comment (see `apps/ball`).
+Better: apps shouldn't tear down their main server at all; leave with `gam.relinquish_focus()`.
+
+### "unresolved import graphics_server" / "no RawkeysEvent in gam"
+**Fix**: these APIs don't exist for apps. Use `gam::menu::*` drawing types and the `rawkeys_id`
+scalar callback (four `char`s as `usize`). See the do-not-use list in `agents/graphics.md`.
 
 ### "duplicate lang item"
 ```
@@ -229,9 +232,9 @@ error: duplicate lang item `panic_impl`
 
 ### "app not in menu"
 **Fix**: Verify:
-1. App in manifest.json
-2. `context_name` matches `APP_NAME` in code exactly
-3. Rebuilt with `cargo xtask renode-image myapp`
+1. App in manifest.json, key == Cargo package name
+2. Code passes `gam::APP_NAME_MYAPP` as `app_name` (check `services/gam/src/apps.rs` after a build)
+3. App named on the xtask command line: `cargo xtask renode-image myapp`
 
 ## Auto-Generated Files
 
@@ -252,9 +255,9 @@ Before handing off to Testing:
 - [ ] `cargo xtask renode-image myapp` succeeds
 - [ ] No compiler warnings (or justified with `#[allow(...)]`)
 - [ ] App appears in manifest.json
-- [ ] App added to both workspace arrays
+- [ ] App added to workspace `members` (not `default-members`)
 - [ ] Dependencies use correct paths
-- [ ] No direct ux-api/blitstr2 imports
+- [ ] One import route (gam re-exports preferred over direct ux-api/blitstr2)
 
 ## Build Output
 
@@ -308,14 +311,15 @@ cargo xtask app-image myapp --lkey path/to/loader.key --kkey path/to/kernel.key
 
 Use `--app-feature` with `#[cfg(feature = "...")]` in app code:
 
-```rust
-// In app code
+```rust,ignore
+// Illustrative (method fragment). In app code:
 #[cfg(feature = "debug_overlay")]
 fn draw_debug_info(&self, gam: &Gam, gid: Gid) {
     // Debug visualization only in debug builds
 }
-
-// In Cargo.toml
+```
+```toml
+# In Cargo.toml
 [features]
 debug_overlay = []
 ```

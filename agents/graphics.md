@@ -23,12 +23,15 @@ You are the **Graphics Agent** for Precursor/Xous application development. You s
 ## Import Patterns
 
 ```rust
-// CRITICAL: Never import ux-api or blitstr2 directly
-// Use GAM re-exports instead:
-
-use gam::{Gam, GlyphStyle, UxRegistration, Gid};
-use gam::menu::*;  // Point, Rectangle, DrawStyle, TextView, etc.
+// Preferred: use the GAM re-exports, which insulate the app from ux-api/blitstr2 refactors.
+// (Depending on ux-api/blitstr2 directly also builds -- apps/hello does it -- but don't mix both.)
+use gam::menu::*; // Point, Rectangle, DrawStyle, TextView, TextBounds, Gid, ... (= ux_api::minigfx::*)
+use gam::{Gam, GamObjectList, GamObjectType, GlyphStyle, UxRegistration}; // gam root, NOT gam::menu
 ```
+
+Do not use (hallucinated or not available to apps): `graphics_server::*`, `gam::RawkeysEvent`,
+`gam.clear()`, `gam.draw_textview()`, a `Canvas` app type, `TextView.invert = true` (see below).
+For ready-made drawing helpers that respect these rules, prefer `precursor_appkit::screen`.
 
 ## Coordinate System
 
@@ -127,10 +130,11 @@ gam.draw_line(gid, line)?;
 ```rust
 use gam::menu::RoundedRectangle;
 
-let rrect = RoundedRectangle::new(
+let mut rrect = RoundedRectangle::new(
     Rectangle::new(Point::new(10, 10), Point::new(100, 50)),
-    8,  // corner radius
+    8,  // corner radius (isize)
 );
+rrect.border.style = outline_dark; // style lives on the inner Rectangle
 
 gam.draw_rounded_rectangle(gid, rrect)?;
 ```
@@ -151,10 +155,12 @@ let mut tv = TextView::new(
 // Style configuration
 tv.style = GlyphStyle::Regular;
 tv.draw_border = true;
-tv.border_width = 1;
-tv.rounded_border = Some(3);
+tv.border_width = 1;         // u16
+tv.rounded_border = Some(3); // Option<u16>
 tv.clear_area = true;
 tv.margin = Point::new(4, 4);
+// tv.invert is NOT available to apps: the GAM refuses to render inverted text
+// from canvases below the password-modal trust level (gam/src/main.rs:263-268).
 
 // Write text
 write!(tv.text, "Hello, Precursor!").unwrap();
@@ -181,11 +187,15 @@ gam.post_textview(&mut tv)?;
 // Fixed bounding box
 TextBounds::BoundingBox(Rectangle::new_coords(x0, y0, x1, y1))
 
-// Grows from corner (useful for dynamic content)
+// Grows from a corner (max_width: u16)
 TextBounds::GrowableFromTl(Point::new(x, y), max_width)  // top-left
 TextBounds::GrowableFromBr(Point::new(x, y), max_width)  // bottom-right
 TextBounds::GrowableFromBl(Point::new(x, y), max_width)  // bottom-left
 TextBounds::GrowableFromTr(Point::new(x, y), max_width)  // top-right
+
+// Centered in a rectangle
+TextBounds::CenteredTop(Rectangle::new_coords(x0, y0, x1, y1))
+TextBounds::CenteredBot(Rectangle::new_coords(x0, y0, x1, y1))
 ```
 
 ## Screen Layout Patterns
@@ -234,35 +244,40 @@ fn clear_screen(gam: &Gam, gid: Gid, screensize: Point) {
 ```
 
 ### Header Bar
+No inverted text (apps can't draw it): a light bar with a bold title and a rule underneath.
 ```rust
 fn draw_header(gam: &Gam, gid: Gid, title: &str) {
-    // Background
-    gam.draw_rectangle(gid, Rectangle::new_with_style(
-        Point::new(0, 0),
-        Point::new(336, 30),
-        DrawStyle::new(PixelColor::Dark, PixelColor::Dark, 1),
-    )).ok();
-
-    // Title (inverted)
-    let mut tv = TextView::new(gid,
-        TextBounds::BoundingBox(Rectangle::new_coords(8, 4, 328, 28))
-    );
+    let mut tv = TextView::new(gid, TextBounds::BoundingBox(Rectangle::new_coords(8, 4, 328, 28)));
     tv.style = GlyphStyle::Bold;
-    tv.invert = true;
+    tv.clear_area = true;
     write!(tv.text, "{}", title).unwrap();
     gam.post_textview(&mut tv).ok();
+
+    // 2px rule under the header
+    gam.draw_line(
+        gid,
+        Line::new_with_style(Point::new(0, 29), Point::new(336, 29), DrawStyle::new(PixelColor::Dark, PixelColor::Dark, 2)),
+    )
+    .ok();
 }
 ```
 
 ### Selection Highlight
+Outline the selected row (a filled dark bar would need inverted text on top, which apps can't draw).
 ```rust
 fn draw_selection(gam: &Gam, gid: Gid, y: isize, height: isize) {
-    // Invert a row for selection
-    gam.draw_rectangle(gid, Rectangle::new_with_style(
-        Point::new(0, y),
-        Point::new(336, y + height),
-        DrawStyle::new(PixelColor::Dark, PixelColor::Dark, 1),
-    )).ok();
+    gam.draw_rounded_rectangle(
+        gid,
+        RoundedRectangle::new(
+            Rectangle::new_with_style(
+                Point::new(2, y),
+                Point::new(334, y + height),
+                DrawStyle { fill_color: None, stroke_color: Some(PixelColor::Dark), stroke_width: 2 },
+            ),
+            4,
+        ),
+    )
+    .ok();
 }
 ```
 
@@ -298,22 +313,14 @@ fn draw_progress_bar(gam: &Gam, gid: Gid, x: isize, y: isize,
 fn draw_list_item(gam: &Gam, gid: Gid, y: isize, text: &str, selected: bool) {
     let height: isize = 24;
 
-    if selected {
-        // Inverted background
-        gam.draw_rectangle(gid, Rectangle::new_with_style(
-            Point::new(0, y),
-            Point::new(336, y + height),
-            DrawStyle::new(PixelColor::Dark, PixelColor::Dark, 1),
-        )).ok();
-    }
-
-    let mut tv = TextView::new(gid,
-        TextBounds::BoundingBox(Rectangle::new_coords(8, y + 4, 328, y + height - 4))
-    );
-    tv.style = GlyphStyle::Regular;
-    tv.invert = selected;
-    write!(tv.text, "{}", text).unwrap();
+    let mut tv = TextView::new(gid, TextBounds::BoundingBox(Rectangle::new_coords(8, y + 4, 328, y + height - 4)));
+    tv.style = if selected { GlyphStyle::Bold } else { GlyphStyle::Regular };
+    write!(tv.text, "{}{}", if selected { "> " } else { "  " }, text).unwrap();
     gam.post_textview(&mut tv).ok();
+
+    if selected {
+        draw_selection(gam, gid, y, height); // outline after text so clear_area doesn't erase it
+    }
 }
 ```
 
@@ -322,14 +329,14 @@ fn draw_list_item(gam: &Gam, gid: Gid, y: isize, text: &str, selected: bool) {
 For animations or complex updates, use batch drawing:
 
 ```rust
-use gam::menu::{GamObjectList, GamObjectType};
+use gam::{GamObjectList, GamObjectType}; // gam root, not gam::menu
 
 let mut draw_list = GamObjectList::new(gid);
 draw_list.push(GamObjectType::Circ(circle1)).unwrap();
 draw_list.push(GamObjectType::Rect(rect1)).unwrap();
 draw_list.push(GamObjectType::Line(line1)).unwrap();
 
-gam.draw_list(draw_list)?;
+gam.draw_list(draw_list)?; // push() returns Err(obj) when the list is full: flush and start a new list
 ```
 
 ## Redraw Pattern
@@ -354,8 +361,8 @@ fn redraw(&self, gam: &Gam, gid: Gid, screensize: Point) {
 ### Glyph Height Hint
 Get exact pixel height for a font without creating a TextView:
 ```rust
-let height = gam.glyph_height_hint(GlyphStyle::Regular);
-// Returns 15 for Regular, 12 for Small, etc.
+let height: usize = gam.glyph_height_hint(GlyphStyle::Regular)?; // Result<usize, xous::Error>
+// 15 for Regular, 12 for Small, etc.
 // Use for precise layout calculations
 ```
 
@@ -370,11 +377,11 @@ write!(tv.text, "{}", long_text).unwrap();
 // Compute bounds without drawing
 gam.bounds_compute_textview(&mut tv)?;
 
-// Check overflow
-if tv.overflow {
+// overflow is Option<bool>, set by the compute pass
+if tv.overflow == Some(true) {
     log::warn!("Text overflows bounds, need scrolling/truncation");
 }
-// tv.cursor contains the end position after text
+// tv.bounds_computed: Option<Rectangle>; tv.cursor: end position after text
 ```
 
 ### Screen Layout Calculator
@@ -390,7 +397,7 @@ Pixel budget by font (usable height = 536 - header(30) - status(20) = 486px):
 | ExtraLarge | 30px | 16 | 14 |
 
 Common layouts:
-```
+```text
 Header (30px, Bold/Large)
 + 15 list items (Regular, 19px each with 4px gap) = 285px
 + Footer hints (30px, Small)
@@ -453,11 +460,10 @@ let modals = modals::Modals::new(&xns).unwrap();
 modals.start_progress("Syncing data...", 0, 100, 0)?;
 
 // Update (non-blocking — may overflow queue, that's OK)
-for i in 0..100 {
+for i in 0..100u32 {
     do_work(i);
-    match modals.update_progress(i as u32) {
-        Ok(_) => {},
-        Err(_) => { xous::yield_slice(); }  // Queue full, yield
+    if modals.update_progress(i).is_err() {
+        xous::yield_slice(); // Queue full, yield
     }
 }
 
@@ -467,14 +473,14 @@ modals.finish_progress()?;
 
 ### Slider (Range Input)
 ```rust
-let value = modals.slider(
+let value: u32 = modals.slider(
     "Set brightness:",  // title
-    0,                  // min
-    100,                // max
+    0,                  // min   (u32)
+    100,                // max   (u32)
     50,                 // initial
     5,                  // step size
 )?;
-// Returns selected value. User adjusts with D-pad, confirms with Home/Enter.
+// Returns the selected value. User adjusts with left/right, confirms with Enter or the select key.
 ```
 
 ### Checkbox List (Multi-Select)
@@ -485,7 +491,7 @@ modals.add_stateful_list_item(true, "Option B")?;   // Pre-checked
 modals.add_stateful_list_item(false, "Option C")?;
 
 // Show and get selections
-let checked = modals.get_checkbox("Select features:")?;
+let checked: Vec<String> = modals.get_checkbox("Select features:")?;
 // Returns Vec<String> of checked item labels
 ```
 
@@ -495,7 +501,7 @@ modals.add_list_item("Mode A")?;
 modals.add_list_item("Mode B")?;
 modals.add_list_item("Mode C")?;
 
-let choice = modals.get_radiobutton("Select mode:")?;
+let choice: String = modals.get_radiobutton("Select mode:")?;
 // Returns String of selected item
 ```
 
@@ -530,12 +536,12 @@ let result = modals
     .set_growable()  // Last field can expand
     .build()?;
 
-// Validator function keeps modal open on error
-fn validate_username(input: &TextEntryPayload) -> Option<ValidatorErr> {
+// Validator: returning Some(msg) keeps the modal open and shows msg
+fn validate_username(input: &gam::TextEntryPayload) -> Option<gam::ValidatorErr> {
     if input.as_str().len() < 3 {
-        Some(ValidatorErr::new("Min 3 characters"))
+        Some(String::from("Min 3 characters")) // ValidatorErr is `type ValidatorErr = String`
     } else {
-        None  // Valid
+        None // Valid
     }
 }
 
@@ -553,17 +559,18 @@ modals = { path = "../../services/modals" }
 ## Haptic & Display Control
 
 ```rust
-// Haptic vibration (via GAM)
-gam.set_vibe(true);   // Enable
-gam.set_vibe(false);  // Disable
+// Haptic vibration (via GAM); returns Result<(), xous::Error>
+gam.set_vibe(true)?;  // Enable
+gam.set_vibe(false)?; // Disable
 
 // Backlight brightness (via COM service — see system agent)
-// com.set_backlight(main_brightness, secondary_brightness);
+// com.set_backlight(main_brightness, secondary_brightness)?;
 ```
 
 ## Quality Criteria
 
-- [ ] All drawing uses GAM re-exports (not direct ux-api/blitstr2)
+- [ ] All drawing uses GAM re-exports (preferred over direct ux-api/blitstr2)
+- [ ] No `tv.invert = true` (silently refused for apps); selection is an outline or marker
 - [ ] Screen cleared before redraw
 - [ ] `gam.redraw()` called after all drawing
 - [ ] Text fits within bounds (no overflow)

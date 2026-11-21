@@ -16,6 +16,17 @@ This directory contains specialized sub-agents for different phases of Precursor
 | **Testing** | QA & Automation | Renode scripts, screenshots, validation |
 | **Review** | Quality | Code review, patterns, performance, pitfalls |
 | **System** | Hardware | COM service, battery, sensors, WiFi hardware, backlight, power |
+| **Randomness** | TRNG | Hardware RNG, fail-closed wrappers, unbiased ranges, shuffles, weighted picks |
+| **Encoding** | Codes | QR/barcode encoders, Reed-Solomon, checksums, 1-bit code rendering |
+
+File names are lowercase: `agents/supervisor.md`, `ideation.md`, `architecture.md`, `graphics.md`,
+`storage.md`, `networking.md`, `build.md`, `testing.md`, `review.md`, `system.md`, `randomness.md`,
+`encoding.md`.
+
+Canonical references shared by all agents: the key table and pinned versions in
+`ecosystem/STANDARDS.md` (sections 1 and 11), and the do-not-use API list in `CLAUDE.md`. Rust
+snippets in these files compile against the anchor commit via `tests/doc-snippets/` unless marked
+`rust,ignore`.
 
 ## Agent Invocation
 
@@ -118,6 +129,10 @@ When unsure which agent to use:
 - TCP/HTTP/TLS protocol work → **Networking**
 - WiFi hardware on/off, scanning → **System**
 - Battery-aware poll intervals → **System** (informs Networking strategy)
+
+**"Is this Architecture or Randomness/Encoding?"**
+- Any use of the TRNG (dice, shuffles, key/pad generation) → **Randomness**
+- QR/barcode/checksum/error-correction algorithms → **Encoding** (then **Graphics** to draw)
 
 **"Is this Graphics or System?"**
 - Drawing UI elements → **Graphics**

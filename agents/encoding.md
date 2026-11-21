@@ -54,7 +54,7 @@
 ## Patterns
 
 ### Encoder Module Structure
-```
+```text
 src/
 ├── encode.rs       # Public API: encode(text, options) -> Matrix
 ├── gf.rs           # Galois field arithmetic (optional split)
@@ -83,40 +83,80 @@ For small encoders (QR, barcodes), a single file is acceptable.
 
 ## Rendering Patterns
 
-### Module-to-Pixel Mapping
-```rust
-let module_px = auto_fit_size(matrix_size, display_width, display_height, quiet_zone);
-let x_offset = (display_width - total_px) / 2;  // center
-let y_offset = (display_height - total_px) / 2;
-
-for row in 0..matrix.size {
-    for col in 0..matrix.size {
-        if matrix.modules[row][col] {
-            // Dark module → filled rectangle
-            draw_rectangle(x + col * module_px, y + row * module_px, module_px, module_px);
-        }
-    }
-}
-```
+Compiled in `tests/doc-snippets/src/encoding.rs`. Uses only GAM rectangles, batched with
+`GamObjectList` (flush when `push` returns `Err` because the list is full).
 
 ### Auto-Fit Calculation
+Return `None` instead of clamping up: a floor of 2 px with 336 px of width only fits 168 total
+modules (QR version 35 with a 4-module quiet zone); clamping larger codes up to 2 px makes
+`display_width - total_px` underflow (panic in debug, garbage offset in release).
 ```rust
-fn auto_fit_size(modules: usize, display_w: usize, display_h: usize, quiet: usize) -> usize {
+/// Largest module size (px) that fits, capped at 8. None if the code can't fit at >= 1 px.
+fn auto_fit_size(modules: usize, display_w: usize, display_h: usize, quiet: usize) -> Option<usize> {
     let total_modules = modules + quiet * 2;
-    let available = display_w.min(display_h);
-    (available / total_modules).max(2).min(8)
+    let px = (display_w.min(display_h) / total_modules).min(8);
+    if px == 0 { None } else { Some(px) }
+}
+```
+Modules below 2 px are hard for phone cameras to read on the memory LCD; prefer capping the QR version.
+
+### Module-to-Pixel Mapping
+```rust
+use gam::menu::*;
+use gam::{Gam, GamObjectList, GamObjectType};
+
+fn push_rect(gam: &Gam, gid: Gid, list: &mut GamObjectList, r: Rectangle) -> Result<(), xous::Error> {
+    if let Err(obj) = list.push(GamObjectType::Rect(r)) {
+        // list full: flush and start a new batch
+        let full = std::mem::replace(list, GamObjectList::new(gid));
+        gam.draw_list(full)?;
+        list.push(obj).ok();
+    }
+    Ok(())
+}
+
+/// `modules[row][col] == true` means a dark module. Square matrix.
+fn draw_matrix(gam: &Gam, gid: Gid, canvas: Point, modules: &[Vec<bool>], quiet: usize) -> Result<(), xous::Error> {
+    let size = modules.len();
+    let (w, h) = (canvas.x as usize, canvas.y as usize);
+    let Some(px) = auto_fit_size(size, w, h, quiet) else {
+        log::warn!("code too large for the display");
+        return Ok(());
+    };
+    let total_px = (size + quiet * 2) * px; // <= min(w, h), so the subtractions can't underflow
+    let x0 = ((w - total_px) / 2 + quiet * px) as isize;
+    let y0 = ((h - total_px) / 2 + quiet * px) as isize;
+    let px = px as isize;
+    let dark = DrawStyle::new(PixelColor::Dark, PixelColor::Dark, 0);
+
+    let mut list = GamObjectList::new(gid);
+    for (row, line) in modules.iter().enumerate() {
+        for (col, &is_dark) in line.iter().enumerate() {
+            if is_dark {
+                let (x, y) = (x0 + col as isize * px, y0 + row as isize * px);
+                push_rect(gam, gid, &mut list, Rectangle::new_coords_with_style(x, y, x + px - 1, y + px - 1, dark))?;
+            }
+        }
+    }
+    gam.draw_list(list)?;
+    gam.redraw()
 }
 ```
 
 ### 1-Bit Barcode Rendering
 For 1D barcodes, modules are vertical bars spanning a configurable height:
 ```rust
-fn draw_barcode(bars: &[bool], x_start: isize, y_start: isize, bar_width: isize, height: isize) {
-    for (i, &dark) in bars.iter().enumerate() {
-        if dark {
-            draw_rectangle(x_start + i * bar_width, y_start, bar_width, height);
+fn draw_barcode(gam: &Gam, gid: Gid, bars: &[bool], x_start: isize, y_start: isize, bar_width: isize, height: isize)
+    -> Result<(), xous::Error> {
+    let dark = DrawStyle::new(PixelColor::Dark, PixelColor::Dark, 0);
+    let mut list = GamObjectList::new(gid);
+    for (i, &is_dark) in bars.iter().enumerate() {
+        if is_dark {
+            let x = x_start + i as isize * bar_width;
+            push_rect(gam, gid, &mut list, Rectangle::new_coords_with_style(x, y_start, x + bar_width - 1, y_start + height, dark))?;
         }
     }
+    gam.draw_list(list)
 }
 ```
 
