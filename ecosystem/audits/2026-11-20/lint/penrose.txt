@@ -1,0 +1,31 @@
+apps/penrose/src/app.rs:9:5: warning: unused import: `alloc::format`
+apps/penrose/src/main.rs:34:44: error[E0599]: no function or associated item named `from_str` found for struct `xous::String` in the current scope: function or associated item not found in `String<128>`
+apps/penrose/src/main.rs:57:36: error[E0433]: failed to resolve: could not find `RawkeysEvent` in `gam`: could not find `RawkeysEvent` in `gam`
+apps/penrose/src/main.rs:61:43: error[E0308]: mismatched types: expected `WaitHandle<_>`, found `Duration`
+apps/penrose/src/ui.rs:110:17: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/penrose/src/ui.rs:111:17: error[E0308]: arguments to this function are incorrect
+apps/penrose/src/ui.rs:112:17: error[E0308]: arguments to this function are incorrect
+apps/penrose/src/ui.rs:16:42: error[E0308]: arguments to this function are incorrect
+apps/penrose/src/ui.rs:16:9: error[E0308]: arguments to this method are incorrect
+apps/penrose/src/ui.rs:17:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/penrose/src/ui.rs:18:51: error[E0308]: arguments to this function are incorrect
+apps/penrose/src/ui.rs:18:9: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/penrose/src/ui.rs:27:43: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/penrose/src/ui.rs:27:54: error[E0308]: arguments to this function are incorrect
+apps/penrose/src/ui.rs:27:9: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/penrose/src/ui.rs:28:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/penrose/src/ui.rs:29:47: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/penrose/src/ui.rs:29:62: error[E0308]: arguments to this function are incorrect
+apps/penrose/src/ui.rs:29:9: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/penrose/src/ui.rs:37:9: error[E0599]: no method named `clear` found for reference `&gam::Gam` in the current scope: method not found in `&gam::Gam`
+apps/penrose/src/ui.rs:64:17: error[E0308]: arguments to this method are incorrect
+apps/penrose/src/ui.rs:65:31: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/penrose/src/ui.rs:66:17: error[E0308]: arguments to this function are incorrect
+apps/penrose/src/ui.rs:70:22: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/penrose/src/ui.rs:71:13: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/penrose/src/ui.rs:72:32: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/penrose/src/ui.rs:73:17: error[E0308]: arguments to this function are incorrect
+apps/penrose/src/ui.rs:84:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/penrose/src/ui.rs:85:9: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/penrose/src/ui.rs:86:28: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/penrose/src/ui.rs:87:13: error[E0308]: arguments to this function are incorrect

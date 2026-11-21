@@ -1,0 +1,73 @@
+apps/mines/src/app.rs:4:5: warning: unused import: `alloc::string::String`
+apps/mines/src/minefield.rs:247:13: error[E0502]: cannot borrow `*self` as mutable because it is also borrowed as immutable: mutable borrow occurs here
+apps/mines/src/minefield.rs:248:13: error[E0506]: cannot assign to `self.cells_revealed` because it is borrowed: `self.cells_revealed` is assigned to here but it was already borrowed
+apps/mines/src/rng.rs:4:5: warning: unused import: `alloc::vec::Vec`
+apps/mines/src/storage.rs:45:20: error[E0599]: no method named `set_len` found for struct `pddb::PddbKey` in the current scope: method not found in `PddbKey<'_>`
+apps/mines/src/storage.rs:7:5: warning: unused import: `alloc::string::String`
+apps/mines/src/ui.rs:101:33: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:105:33: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:112:12: error[E0599]: cannot write into `gam::TextView`
+apps/mines/src/ui.rs:118:49: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:132:22: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:134:17: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:135:21: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:136:21: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:148:37: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:156:16: error[E0599]: cannot write into `gam::TextView`
+apps/mines/src/ui.rs:182:49: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:234:22: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:237:17: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:238:21: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:239:21: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:245:26: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:248:17: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:249:21: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:250:21: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:26:48: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:271:33: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:275:16: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:276:9: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:277:9: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:28:22: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:280:17: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:281:9: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:282:9: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:285:19: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:286:9: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:287:9: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:296:17: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:297:21: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:298:21: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:30:9: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:304:24: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:31:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:311:17: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:312:21: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:313:21: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:319:24: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:32:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:327:45: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:335:24: error[E0599]: cannot write into `gam::TextView`
+apps/mines/src/ui.rs:349:32: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:357:53: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:365:32: error[E0599]: cannot write into `gam::TextView`
+apps/mines/src/ui.rs:371:32: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:377:32: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:384:53: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:391:32: error[E0599]: cannot write into `gam::TextView`
+apps/mines/src/ui.rs:402:55: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:49:35: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:50:14: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:52:9: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:53:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:54:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:6:60: warning: unused import: `GameState`
+apps/mines/src/ui.rs:62:33: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:70:12: error[E0599]: cannot write into `gam::TextView`
+apps/mines/src/ui.rs:74:35: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:77:15: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:80:9: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:81:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:82:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:90:33: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mines/src/ui.rs:97:12: error[E0599]: cannot write into `gam::TextView`

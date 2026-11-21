@@ -1,0 +1,93 @@
+apps/barcode/src/storage.rs:117:17: error[E0599]: no method named `set_len` found for struct `pddb::PddbKey` in the current scope: method not found in `PddbKey<'_>`
+apps/barcode/src/storage.rs:138:21: error[E0599]: no method named `set_len` found for struct `pddb::PddbKey` in the current scope: method not found in `PddbKey<'_>`
+apps/barcode/src/storage.rs:65:17: error[E0599]: no method named `set_len` found for struct `pddb::PddbKey` in the current scope: method not found in `PddbKey<'_>`
+apps/barcode/src/ui.rs:108:22: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:110:17: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:111:21: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:112:21: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:121:37: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:129:16: error[E0599]: cannot write into `gam::TextView`
+apps/barcode/src/ui.rs:137:37: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:142:16: error[E0599]: cannot write into `gam::TextView`
+apps/barcode/src/ui.rs:149:52: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:155:33: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:162:12: error[E0599]: cannot write into `gam::TextView`
+apps/barcode/src/ui.rs:169:18: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:171:9: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:172:30: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:173:32: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:182:33: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:189:12: error[E0599]: cannot write into `gam::TextView`
+apps/barcode/src/ui.rs:19:50: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:203:33: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:21:17: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:212:13: error[E0599]: cannot write into `gam::TextView`
+apps/barcode/src/ui.rs:221:13: error[E0599]: cannot write into `gam::TextView`
+apps/barcode/src/ui.rs:23:9: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:234:54: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:24:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:25:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:254:28: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:256:21: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:257:25: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:258:25: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:271:41: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:278:20: error[E0599]: cannot write into `gam::TextView`
+apps/barcode/src/ui.rs:287:41: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:295:17: error[E0599]: cannot write into `gam::TextView`
+apps/barcode/src/ui.rs:306:58: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:311:14: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:313:9: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:314:30: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:315:32: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:323:33: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:330:12: error[E0599]: cannot write into `gam::TextView`
+apps/barcode/src/ui.rs:334:56: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:340:33: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:345:12: error[E0599]: cannot write into `gam::TextView`
+apps/barcode/src/ui.rs:349:18: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:351:9: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:352:30: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:353:32: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:362:33: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:369:12: error[E0599]: cannot write into `gam::TextView`
+apps/barcode/src/ui.rs:375:33: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:380:12: error[E0599]: cannot write into `gam::TextView`
+apps/barcode/src/ui.rs:386:56: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:392:37: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:399:16: error[E0599]: cannot write into `gam::TextView`
+apps/barcode/src/ui.rs:415:26: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:417:21: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:418:25: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:419:25: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:428:41: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:444:20: error[E0599]: cannot write into `gam::TextView`
+apps/barcode/src/ui.rs:45:35: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:452:55: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:46:14: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:474:22: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:476:17: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:477:21: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:478:21: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:48:9: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:487:37: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:49:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:493:16: error[E0599]: cannot write into `gam::TextView`
+apps/barcode/src/ui.rs:498:37: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:50:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:504:16: error[E0599]: cannot write into `gam::TextView`
+apps/barcode/src/ui.rs:511:33: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:516:12: error[E0599]: cannot write into `gam::TextView`
+apps/barcode/src/ui.rs:522:52: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:557:37: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:568:16: error[E0599]: cannot write into `gam::TextView`
+apps/barcode/src/ui.rs:58:33: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:64:12: error[E0599]: cannot write into `gam::TextView`
+apps/barcode/src/ui.rs:68:35: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:72:15: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:74:9: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:75:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:76:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:87:37: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/barcode/src/ui.rs:94:16: error[E0599]: cannot write into `gam::TextView`
+apps/barcode/src/ui.rs:99:56: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`

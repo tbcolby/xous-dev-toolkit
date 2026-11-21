@@ -1,0 +1,1 @@
+apps/calc/src/main.rs:145:5: error[E0133]: call to unsafe function `xous::destroy_server` is unsafe and requires unsafe function or block: call to unsafe function

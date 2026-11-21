@@ -1,0 +1,2 @@
+apps/flashcards/src/main.rs:601:54: error[E0616]: field `0` of struct `xous::SID` is private: private field
+apps/flashcards/src/main.rs:686:5: error[E0133]: call to unsafe function `xous::destroy_server` is unsafe and requires unsafe function or block: call to unsafe function

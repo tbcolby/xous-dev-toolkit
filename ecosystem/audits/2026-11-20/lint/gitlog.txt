@@ -1,0 +1,88 @@
+apps/gitlog/src/main.rs:17:40: error[E0599]: no function or associated item named `from_str` found for struct `xous::String` in the current scope: function or associated item not found in `String<128>`
+apps/gitlog/src/main.rs:29:36: error[E0433]: failed to resolve: could not find `RawkeysEvent` in `gam`: could not find `RawkeysEvent` in `gam`
+apps/gitlog/src/main.rs:31:96: error[E0308]: mismatched types: expected `WaitHandle<_>`, found `Duration`
+apps/gitlog/src/ui.rs:107:22: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/gitlog/src/ui.rs:107:36: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/gitlog/src/ui.rs:107:74: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/gitlog/src/ui.rs:107:78: error[E0308]: arguments to this function are incorrect
+apps/gitlog/src/ui.rs:112:22: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/gitlog/src/ui.rs:112:36: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/gitlog/src/ui.rs:112:75: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/gitlog/src/ui.rs:112:79: error[E0308]: arguments to this function are incorrect
+apps/gitlog/src/ui.rs:118:13: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/gitlog/src/ui.rs:118:47: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/gitlog/src/ui.rs:118:51: error[E0308]: arguments to this function are incorrect
+apps/gitlog/src/ui.rs:122:22: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/gitlog/src/ui.rs:122:36: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/gitlog/src/ui.rs:122:74: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/gitlog/src/ui.rs:122:78: error[E0308]: arguments to this function are incorrect
+apps/gitlog/src/ui.rs:127:22: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/gitlog/src/ui.rs:127:36: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/gitlog/src/ui.rs:127:75: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/gitlog/src/ui.rs:127:79: error[E0308]: arguments to this function are incorrect
+apps/gitlog/src/ui.rs:133:22: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/gitlog/src/ui.rs:133:36: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/gitlog/src/ui.rs:133:74: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/gitlog/src/ui.rs:133:78: error[E0308]: arguments to this function are incorrect
+apps/gitlog/src/ui.rs:138:22: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/gitlog/src/ui.rs:138:36: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/gitlog/src/ui.rs:138:75: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/gitlog/src/ui.rs:138:79: error[E0308]: arguments to this function are incorrect
+apps/gitlog/src/ui.rs:144:13: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/gitlog/src/ui.rs:144:47: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/gitlog/src/ui.rs:144:51: error[E0308]: arguments to this function are incorrect
+apps/gitlog/src/ui.rs:148:22: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/gitlog/src/ui.rs:148:36: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/gitlog/src/ui.rs:148:74: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/gitlog/src/ui.rs:148:78: error[E0308]: arguments to this function are incorrect
+apps/gitlog/src/ui.rs:15:42: error[E0308]: arguments to this function are incorrect
+apps/gitlog/src/ui.rs:15:9: error[E0308]: arguments to this method are incorrect
+apps/gitlog/src/ui.rs:153:22: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/gitlog/src/ui.rs:153:36: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/gitlog/src/ui.rs:153:75: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/gitlog/src/ui.rs:153:79: error[E0308]: arguments to this function are incorrect
+apps/gitlog/src/ui.rs:16:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/gitlog/src/ui.rs:16:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/gitlog/src/ui.rs:16:74: error[E0308]: arguments to this function are incorrect
+apps/gitlog/src/ui.rs:165:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/gitlog/src/ui.rs:165:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/gitlog/src/ui.rs:165:70: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/gitlog/src/ui.rs:165:74: error[E0308]: arguments to this function are incorrect
+apps/gitlog/src/ui.rs:171:43: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/gitlog/src/ui.rs:171:52: error[E0308]: arguments to this function are incorrect
+apps/gitlog/src/ui.rs:171:9: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/gitlog/src/ui.rs:173:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/gitlog/src/ui.rs:173:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/gitlog/src/ui.rs:173:71: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/gitlog/src/ui.rs:173:75: error[E0308]: arguments to this function are incorrect
+apps/gitlog/src/ui.rs:178:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/gitlog/src/ui.rs:178:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/gitlog/src/ui.rs:178:70: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/gitlog/src/ui.rs:178:74: error[E0308]: arguments to this function are incorrect
+apps/gitlog/src/ui.rs:23:43: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/gitlog/src/ui.rs:23:54: error[E0308]: arguments to this function are incorrect
+apps/gitlog/src/ui.rs:23:9: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/gitlog/src/ui.rs:24:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/gitlog/src/ui.rs:24:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/gitlog/src/ui.rs:24:70: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/gitlog/src/ui.rs:24:85: error[E0308]: arguments to this function are incorrect
+apps/gitlog/src/ui.rs:31:9: error[E0599]: no method named `clear` found for reference `&gam::Gam` in the current scope: method not found in `&gam::Gam`
+apps/gitlog/src/ui.rs:53:22: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/gitlog/src/ui.rs:53:36: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/gitlog/src/ui.rs:53:75: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/gitlog/src/ui.rs:53:90: error[E0308]: arguments to this function are incorrect
+apps/gitlog/src/ui.rs:67:21: error[E0308]: arguments to this method are incorrect
+apps/gitlog/src/ui.rs:67:50: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/gitlog/src/ui.rs:67:58: error[E0308]: arguments to this function are incorrect
+apps/gitlog/src/ui.rs:71:26: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/gitlog/src/ui.rs:71:40: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/gitlog/src/ui.rs:71:79: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/gitlog/src/ui.rs:71:83: error[E0308]: arguments to this function are incorrect
+apps/gitlog/src/ui.rs:79:27: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/gitlog/src/ui.rs:79:41: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/gitlog/src/ui.rs:79:80: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/gitlog/src/ui.rs:79:89: error[E0308]: arguments to this function are incorrect
+apps/gitlog/src/ui.rs:89:107: error[E0308]: arguments to this function are incorrect
+apps/gitlog/src/ui.rs:89:26: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/gitlog/src/ui.rs:89:40: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/gitlog/src/ui.rs:89:64: error[E0308]: arguments to this function are incorrect

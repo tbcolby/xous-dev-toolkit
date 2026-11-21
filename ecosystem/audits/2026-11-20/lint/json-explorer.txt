@@ -1,0 +1,53 @@
+apps/json-explorer/src/main.rs:34:44: error[E0599]: no function or associated item named `from_str` found for struct `xous::String` in the current scope: function or associated item not found in `String<128>`
+apps/json-explorer/src/main.rs:57:36: error[E0433]: failed to resolve: could not find `RawkeysEvent` in `gam`: could not find `RawkeysEvent` in `gam`
+apps/json-explorer/src/main.rs:61:43: error[E0308]: mismatched types: expected `WaitHandle<_>`, found `Duration`
+apps/json-explorer/src/ui.rs:105:17: error[E0308]: arguments to this method are incorrect
+apps/json-explorer/src/ui.rs:106:31: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/json-explorer/src/ui.rs:107:17: error[E0308]: arguments to this function are incorrect
+apps/json-explorer/src/ui.rs:123:22: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/json-explorer/src/ui.rs:124:13: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/json-explorer/src/ui.rs:125:17: error[E0308]: arguments to this function are incorrect
+apps/json-explorer/src/ui.rs:126:17: error[E0308]: arguments to this function are incorrect
+apps/json-explorer/src/ui.rs:141:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/json-explorer/src/ui.rs:142:53: error[E0308]: arguments to this function are incorrect
+apps/json-explorer/src/ui.rs:142:9: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/json-explorer/src/ui.rs:154:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/json-explorer/src/ui.rs:155:64: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/json-explorer/src/ui.rs:155:9: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/json-explorer/src/ui.rs:16:42: error[E0308]: arguments to this function are incorrect
+apps/json-explorer/src/ui.rs:16:9: error[E0308]: arguments to this method are incorrect
+apps/json-explorer/src/ui.rs:17:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/json-explorer/src/ui.rs:175:17: error[E0308]: arguments to this method are incorrect
+apps/json-explorer/src/ui.rs:176:31: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/json-explorer/src/ui.rs:177:17: error[E0308]: arguments to this function are incorrect
+apps/json-explorer/src/ui.rs:18:51: error[E0308]: arguments to this function are incorrect
+apps/json-explorer/src/ui.rs:18:9: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/json-explorer/src/ui.rs:181:22: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/json-explorer/src/ui.rs:182:13: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/json-explorer/src/ui.rs:183:32: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/json-explorer/src/ui.rs:184:17: error[E0308]: arguments to this function are incorrect
+apps/json-explorer/src/ui.rs:194:22: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/json-explorer/src/ui.rs:195:13: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/json-explorer/src/ui.rs:196:32: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/json-explorer/src/ui.rs:197:17: error[E0308]: arguments to this function are incorrect
+apps/json-explorer/src/ui.rs:27:43: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/json-explorer/src/ui.rs:27:54: error[E0308]: arguments to this function are incorrect
+apps/json-explorer/src/ui.rs:27:9: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/json-explorer/src/ui.rs:28:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/json-explorer/src/ui.rs:29:47: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/json-explorer/src/ui.rs:29:62: error[E0308]: arguments to this function are incorrect
+apps/json-explorer/src/ui.rs:29:9: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/json-explorer/src/ui.rs:37:9: error[E0599]: no method named `clear` found for reference `&gam::Gam` in the current scope: method not found in `&gam::Gam`
+apps/json-explorer/src/ui.rs:53:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/json-explorer/src/ui.rs:54:63: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/json-explorer/src/ui.rs:54:9: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/json-explorer/src/ui.rs:61:59: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/json-explorer/src/ui.rs:61:9: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/json-explorer/src/ui.rs:62:60: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/json-explorer/src/ui.rs:62:9: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/json-explorer/src/ui.rs:72:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/json-explorer/src/ui.rs:73:63: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/json-explorer/src/ui.rs:73:9: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/json-explorer/src/ui.rs:79:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/json-explorer/src/ui.rs:80:64: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/json-explorer/src/ui.rs:80:9: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied

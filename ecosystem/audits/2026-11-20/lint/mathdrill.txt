@@ -1,0 +1,53 @@
+apps/mathdrill/src/app.rs:13:5: warning: unused import: `alloc::format`
+apps/mathdrill/src/storage.rs:55:20: error[E0599]: no method named `set_len` found for struct `pddb::PddbKey` in the current scope: method not found in `PddbKey<'_>`
+apps/mathdrill/src/ui.rs:10:5: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mathdrill/src/ui.rs:100:9: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `tv`: use of unresolved module or unlinked crate `tv`
+apps/mathdrill/src/ui.rs:106:52: error[E0412]: cannot find type `Canvas` in this scope: not found in this scope
+apps/mathdrill/src/ui.rs:109:53: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/mathdrill/src/ui.rs:11:5: error[E0432]: unresolved import `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/mathdrill/src/ui.rs:110:14: error[E0599]: no method named `style` found for struct `gam::Rectangle` in the current scope: field, not a method
+apps/mathdrill/src/ui.rs:124:53: error[E0412]: cannot find type `Canvas` in this scope: not found in this scope
+apps/mathdrill/src/ui.rs:171:56: error[E0412]: cannot find type `Canvas` in this scope: not found in this scope
+apps/mathdrill/src/ui.rs:186:24: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/mathdrill/src/ui.rs:187:9: error[E0308]: arguments to this function are incorrect
+apps/mathdrill/src/ui.rs:189:39: error[E0599]: no method named `style` found for struct `gam::Rectangle` in the current scope: field, not a method
+apps/mathdrill/src/ui.rs:194:28: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/mathdrill/src/ui.rs:195:13: error[E0308]: arguments to this function are incorrect
+apps/mathdrill/src/ui.rs:197:45: error[E0599]: no method named `style` found for struct `gam::Rectangle` in the current scope: field, not a method
+apps/mathdrill/src/ui.rs:21:35: error[E0412]: cannot find type `Canvas` in this scope: not found in this scope
+apps/mathdrill/src/ui.rs:225:57: error[E0412]: cannot find type `Canvas` in this scope: not found in this scope
+apps/mathdrill/src/ui.rs:24:9: error[E0308]: arguments to this function are incorrect
+apps/mathdrill/src/ui.rs:252:56: error[E0412]: cannot find type `Canvas` in this scope: not found in this scope
+apps/mathdrill/src/ui.rs:26:44: error[E0599]: no method named `style` found for struct `gam::Rectangle` in the current scope: field, not a method
+apps/mathdrill/src/ui.rs:297:60: error[E0412]: cannot find type `Canvas` in this scope: not found in this scope
+apps/mathdrill/src/ui.rs:32:9: error[E0308]: arguments to this function are incorrect
+apps/mathdrill/src/ui.rs:323:13: error[E0412]: cannot find type `Canvas` in this scope: not found in this scope
+apps/mathdrill/src/ui.rs:330:53: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/mathdrill/src/ui.rs:331:14: error[E0599]: no method named `style` found for struct `gam::Rectangle` in the current scope: field, not a method
+apps/mathdrill/src/ui.rs:34:9: error[E0599]: no method named `draw_textview` found for reference `&gam::Gam` in the current scope
+apps/mathdrill/src/ui.rs:36:9: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `tv`: use of unresolved module or unlinked crate `tv`
+apps/mathdrill/src/ui.rs:43:35: error[E0412]: cannot find type `Canvas` in this scope: not found in this scope
+apps/mathdrill/src/ui.rs:45:41: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/mathdrill/src/ui.rs:45:45: error[E0308]: arguments to this function are incorrect
+apps/mathdrill/src/ui.rs:45:9: error[E0061]: this method takes 2 arguments but 4 arguments were supplied
+apps/mathdrill/src/ui.rs:50:23: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/mathdrill/src/ui.rs:51:20: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/mathdrill/src/ui.rs:53:9: error[E0599]: no method named `draw_textview` found for reference `&gam::Gam` in the current scope
+apps/mathdrill/src/ui.rs:55:9: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `tv`: use of unresolved module or unlinked crate `tv`
+apps/mathdrill/src/ui.rs:61:33: error[E0412]: cannot find type `Canvas` in this scope: not found in this scope
+apps/mathdrill/src/ui.rs:63:9: error[E0308]: arguments to this function are incorrect
+apps/mathdrill/src/ui.rs:64:9: error[E0308]: arguments to this function are incorrect
+apps/mathdrill/src/ui.rs:66:9: error[E0599]: no method named `draw_textview` found for reference `&gam::Gam` in the current scope
+apps/mathdrill/src/ui.rs:68:9: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `tv`: use of unresolved module or unlinked crate `tv`
+apps/mathdrill/src/ui.rs:74:42: error[E0412]: cannot find type `Canvas` in this scope: not found in this scope
+apps/mathdrill/src/ui.rs:75:29: error[E0308]: arguments to this function are incorrect
+apps/mathdrill/src/ui.rs:75:47: error[E0308]: arguments to this function are incorrect
+apps/mathdrill/src/ui.rs:76:35: error[E0599]: no method named `style` found for struct `gam::Rectangle` in the current scope: field, not a method
+apps/mathdrill/src/ui.rs:81:9: error[E0308]: arguments to this function are incorrect
+apps/mathdrill/src/ui.rs:82:9: error[E0308]: arguments to this function are incorrect
+apps/mathdrill/src/ui.rs:84:9: error[E0599]: no method named `draw_textview` found for reference `&gam::Gam` in the current scope
+apps/mathdrill/src/ui.rs:86:9: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `tv`: use of unresolved module or unlinked crate `tv`
+apps/mathdrill/src/ui.rs:93:39: error[E0412]: cannot find type `Canvas` in this scope: not found in this scope
+apps/mathdrill/src/ui.rs:95:9: error[E0308]: arguments to this function are incorrect
+apps/mathdrill/src/ui.rs:96:9: error[E0308]: arguments to this function are incorrect
+apps/mathdrill/src/ui.rs:98:9: error[E0599]: no method named `draw_textview` found for reference `&gam::Gam` in the current scope

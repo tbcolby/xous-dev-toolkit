@@ -1,0 +1,38 @@
+apps/kaleidoscope/src/app.rs:10:5: warning: unused import: `alloc::format`
+apps/kaleidoscope/src/main.rs:36:44: error[E0599]: no function or associated item named `from_str` found for struct `xous::String` in the current scope: function or associated item not found in `String<128>`
+apps/kaleidoscope/src/main.rs:61:36: error[E0433]: failed to resolve: could not find `RawkeysEvent` in `gam`: could not find `RawkeysEvent` in `gam`
+apps/kaleidoscope/src/main.rs:69:43: error[E0308]: mismatched types: expected `WaitHandle<_>`, found `Duration`
+apps/kaleidoscope/src/ui.rs:111:17: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/kaleidoscope/src/ui.rs:112:17: error[E0308]: arguments to this function are incorrect
+apps/kaleidoscope/src/ui.rs:113:17: error[E0308]: arguments to this function are incorrect
+apps/kaleidoscope/src/ui.rs:143:17: error[E0308]: arguments to this method are incorrect
+apps/kaleidoscope/src/ui.rs:144:31: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/kaleidoscope/src/ui.rs:145:17: error[E0308]: arguments to this function are incorrect
+apps/kaleidoscope/src/ui.rs:152:22: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/kaleidoscope/src/ui.rs:153:13: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/kaleidoscope/src/ui.rs:154:32: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/kaleidoscope/src/ui.rs:155:17: error[E0308]: arguments to this function are incorrect
+apps/kaleidoscope/src/ui.rs:16:42: error[E0308]: arguments to this function are incorrect
+apps/kaleidoscope/src/ui.rs:16:9: error[E0308]: arguments to this method are incorrect
+apps/kaleidoscope/src/ui.rs:17:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/kaleidoscope/src/ui.rs:18:51: error[E0308]: arguments to this function are incorrect
+apps/kaleidoscope/src/ui.rs:18:9: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/kaleidoscope/src/ui.rs:27:43: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/kaleidoscope/src/ui.rs:27:54: error[E0308]: arguments to this function are incorrect
+apps/kaleidoscope/src/ui.rs:27:9: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/kaleidoscope/src/ui.rs:28:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/kaleidoscope/src/ui.rs:29:47: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/kaleidoscope/src/ui.rs:29:62: error[E0308]: arguments to this function are incorrect
+apps/kaleidoscope/src/ui.rs:29:9: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/kaleidoscope/src/ui.rs:37:9: error[E0599]: no method named `clear` found for reference `&gam::Gam` in the current scope: method not found in `&gam::Gam`
+apps/kaleidoscope/src/ui.rs:68:17: error[E0308]: arguments to this method are incorrect
+apps/kaleidoscope/src/ui.rs:69:31: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/kaleidoscope/src/ui.rs:70:17: error[E0308]: arguments to this function are incorrect
+apps/kaleidoscope/src/ui.rs:74:22: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/kaleidoscope/src/ui.rs:75:13: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/kaleidoscope/src/ui.rs:76:32: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/kaleidoscope/src/ui.rs:77:17: error[E0308]: arguments to this function are incorrect
+apps/kaleidoscope/src/ui.rs:87:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/kaleidoscope/src/ui.rs:88:9: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/kaleidoscope/src/ui.rs:89:28: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/kaleidoscope/src/ui.rs:90:13: error[E0308]: arguments to this function are incorrect

@@ -1,0 +1,78 @@
+apps/budget/src/app.rs:202:13: warning: variable does not need to be mutable
+apps/budget/src/app.rs:7:27: warning: unused import: `Category`
+apps/budget/src/ledger.rs:5:5: warning: unused import: `alloc::vec::Vec`
+apps/budget/src/storage.rs:41:20: error[E0599]: no method named `set_len` found for struct `pddb::PddbKey` in the current scope: method not found in `PddbKey<'_>`
+apps/budget/src/ui.rs:104:33: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:110:12: error[E0599]: cannot write into `gam::TextView`
+apps/budget/src/ui.rs:115:15: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:117:9: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:118:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:119:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:138:21: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`
+apps/budget/src/ui.rs:160:50: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:161:17: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`
+apps/budget/src/ui.rs:17:49: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:178:26: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:18:22: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:180:21: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:181:25: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:182:25: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:189:41: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:196:20: error[E0599]: cannot write into `gam::TextView`
+apps/budget/src/ui.rs:20:9: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:208:49: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:21:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:214:17: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`
+apps/budget/src/ui.rs:22:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:229:30: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:231:25: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:232:29: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:233:29: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:239:45: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:246:24: error[E0599]: cannot write into `gam::TextView`
+apps/budget/src/ui.rs:250:29: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`
+apps/budget/src/ui.rs:257:29: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`
+apps/budget/src/ui.rs:264:29: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`
+apps/budget/src/ui.rs:270:21: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:271:25: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:272:25: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:275:21: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:276:25: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:277:25: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:280:28: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:285:21: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`
+apps/budget/src/ui.rs:293:29: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`
+apps/budget/src/ui.rs:299:21: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:300:25: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:301:25: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:304:21: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:305:25: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:306:25: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:309:28: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:314:21: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`
+apps/budget/src/ui.rs:334:50: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:351:18: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`
+apps/budget/src/ui.rs:353:33: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:359:12: error[E0599]: cannot write into `gam::TextView`
+apps/budget/src/ui.rs:363:20: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`
+apps/budget/src/ui.rs:378:53: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:38:35: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:383:28: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`
+apps/budget/src/ui.rs:39:14: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:4:27: warning: unused import: `TxnType`
+apps/budget/src/ui.rs:41:9: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:42:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:43:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:48:33: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:55:12: error[E0599]: cannot write into `gam::TextView`
+apps/budget/src/ui.rs:59:35: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:61:15: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:63:9: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:64:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:65:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:70:33: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:76:12: error[E0599]: cannot write into `gam::TextView`
+apps/budget/src/ui.rs:80:33: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:83:33: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/budget/src/ui.rs:89:12: error[E0599]: cannot write into `gam::TextView`
+apps/budget/src/ui.rs:95:53: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`

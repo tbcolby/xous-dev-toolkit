@@ -1,0 +1,38 @@
+apps/death/src/main.rs:18:40: error[E0599]: no function or associated item named `from_str` found for struct `xous::String` in the current scope: function or associated item not found in `String<128>`
+apps/death/src/main.rs:25:8: error[E0599]: no method named `set_alarm` found for struct `xous_api_ticktimer::Ticktimer` in the current scope: method not found in `Ticktimer`
+apps/death/src/main.rs:32:36: error[E0433]: failed to resolve: could not find `RawkeysEvent` in `gam`: could not find `RawkeysEvent` in `gam`
+apps/death/src/main.rs:34:96: error[E0308]: mismatched types: expected `WaitHandle<_>`, found `Duration`
+apps/death/src/main.rs:40:20: error[E0599]: no method named `set_alarm` found for struct `xous_api_ticktimer::Ticktimer` in the current scope: method not found in `Ticktimer`
+apps/death/src/ui.rs:100:29: error[E0308]: arguments to this function are incorrect
+apps/death/src/ui.rs:100:53: error[E0308]: arguments to this function are incorrect
+apps/death/src/ui.rs:100:9: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/death/src/ui.rs:101:29: error[E0308]: arguments to this function are incorrect
+apps/death/src/ui.rs:101:53: error[E0308]: arguments to this function are incorrect
+apps/death/src/ui.rs:101:9: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/death/src/ui.rs:117:21: error[E0308]: arguments to this method are incorrect
+apps/death/src/ui.rs:117:36: error[E0308]: arguments to this function are incorrect
+apps/death/src/ui.rs:117:58: error[E0308]: arguments to this function are incorrect
+apps/death/src/ui.rs:16:42: error[E0308]: arguments to this function are incorrect
+apps/death/src/ui.rs:16:9: error[E0308]: arguments to this method are incorrect
+apps/death/src/ui.rs:17:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/death/src/ui.rs:17:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/death/src/ui.rs:17:74: error[E0308]: arguments to this function are incorrect
+apps/death/src/ui.rs:24:43: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/death/src/ui.rs:24:54: error[E0308]: arguments to this function are incorrect
+apps/death/src/ui.rs:24:9: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/death/src/ui.rs:25:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/death/src/ui.rs:25:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/death/src/ui.rs:25:70: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/death/src/ui.rs:25:85: error[E0308]: arguments to this function are incorrect
+apps/death/src/ui.rs:32:9: error[E0599]: no method named `clear` found for reference `&gam::Gam` in the current scope: method not found in `&gam::Gam`
+apps/death/src/ui.rs:56:17: error[E0308]: arguments to this method are incorrect
+apps/death/src/ui.rs:56:46: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/death/src/ui.rs:56:54: error[E0308]: arguments to this function are incorrect
+apps/death/src/ui.rs:59:22: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/death/src/ui.rs:59:36: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/death/src/ui.rs:59:75: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/death/src/ui.rs:59:79: error[E0308]: arguments to this function are incorrect
+apps/death/src/ui.rs:65:23: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/death/src/ui.rs:65:37: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/death/src/ui.rs:65:76: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/death/src/ui.rs:65:85: error[E0308]: arguments to this function are incorrect

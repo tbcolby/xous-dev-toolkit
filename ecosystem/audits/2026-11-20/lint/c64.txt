@@ -1,0 +1,7 @@
+apps/c64/src/cia.rs:3:1: warning: empty line after doc comment
+apps/c64/src/cpu.rs:3:1: warning: empty line after doc comment
+apps/c64/src/keyboard.rs:4:1: warning: empty line after doc comment
+apps/c64/src/loader.rs:1:1: warning: empty line after doc comment
+apps/c64/src/main.rs:715:5: error[E0133]: call to unsafe function `xous::destroy_server` is unsafe and requires unsafe function or block: call to unsafe function
+apps/c64/src/memory.rs:3:1: warning: empty line after doc comment
+apps/c64/src/vic.rs:2:1: warning: empty line after doc comment

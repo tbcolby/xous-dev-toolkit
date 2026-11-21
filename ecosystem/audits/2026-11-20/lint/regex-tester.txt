@@ -1,0 +1,45 @@
+apps/regex-tester/src/app.rs:12:5: warning: unused import: `alloc::format`
+apps/regex-tester/src/engine.rs:180:9: warning: unused variable: `quantifier`: help: if this is intentional, prefix it with an underscore: `_quantifier`
+apps/regex-tester/src/main.rs:34:44: error[E0599]: no function or associated item named `from_str` found for struct `xous::String` in the current scope: function or associated item not found in `String<128>`
+apps/regex-tester/src/main.rs:57:36: error[E0433]: failed to resolve: could not find `RawkeysEvent` in `gam`: could not find `RawkeysEvent` in `gam`
+apps/regex-tester/src/main.rs:61:43: error[E0308]: mismatched types: expected `WaitHandle<_>`, found `Duration`
+apps/regex-tester/src/ui.rs:103:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/regex-tester/src/ui.rs:104:48: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/regex-tester/src/ui.rs:104:58: error[E0308]: arguments to this function are incorrect
+apps/regex-tester/src/ui.rs:104:9: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/regex-tester/src/ui.rs:130:43: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/regex-tester/src/ui.rs:130:52: error[E0308]: arguments to this function are incorrect
+apps/regex-tester/src/ui.rs:130:9: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/regex-tester/src/ui.rs:16:42: error[E0308]: arguments to this function are incorrect
+apps/regex-tester/src/ui.rs:16:9: error[E0308]: arguments to this method are incorrect
+apps/regex-tester/src/ui.rs:17:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/regex-tester/src/ui.rs:18:51: error[E0308]: arguments to this function are incorrect
+apps/regex-tester/src/ui.rs:18:9: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/regex-tester/src/ui.rs:27:43: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/regex-tester/src/ui.rs:27:54: error[E0308]: arguments to this function are incorrect
+apps/regex-tester/src/ui.rs:27:9: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/regex-tester/src/ui.rs:28:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/regex-tester/src/ui.rs:29:47: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/regex-tester/src/ui.rs:29:62: error[E0308]: arguments to this function are incorrect
+apps/regex-tester/src/ui.rs:29:9: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/regex-tester/src/ui.rs:37:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/regex-tester/src/ui.rs:38:33: error[E0308]: arguments to this function are incorrect
+apps/regex-tester/src/ui.rs:38:51: error[E0308]: arguments to this function are incorrect
+apps/regex-tester/src/ui.rs:38:9: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/regex-tester/src/ui.rs:46:9: error[E0599]: no method named `clear` found for reference `&gam::Gam` in the current scope: method not found in `&gam::Gam`
+apps/regex-tester/src/ui.rs:68:13: error[E0308]: arguments to this method are incorrect
+apps/regex-tester/src/ui.rs:68:42: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/regex-tester/src/ui.rs:68:51: error[E0308]: arguments to this function are incorrect
+apps/regex-tester/src/ui.rs:70:13: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/regex-tester/src/ui.rs:70:47: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/regex-tester/src/ui.rs:70:56: error[E0308]: arguments to this function are incorrect
+apps/regex-tester/src/ui.rs:79:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/regex-tester/src/ui.rs:80:48: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/regex-tester/src/ui.rs:80:57: error[E0308]: arguments to this function are incorrect
+apps/regex-tester/src/ui.rs:80:9: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/regex-tester/src/ui.rs:92:13: error[E0308]: arguments to this method are incorrect
+apps/regex-tester/src/ui.rs:92:42: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/regex-tester/src/ui.rs:92:52: error[E0308]: arguments to this function are incorrect
+apps/regex-tester/src/ui.rs:94:13: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/regex-tester/src/ui.rs:94:47: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/regex-tester/src/ui.rs:94:57: error[E0308]: arguments to this function are incorrect

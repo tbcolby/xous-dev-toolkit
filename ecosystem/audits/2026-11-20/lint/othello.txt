@@ -1,0 +1,23 @@
+apps/othello/src/app.rs:11:5: warning: unused import: `crate::AppOp`
+apps/othello/src/app.rs:253:19: warning: unreachable pattern: no value can reach this
+apps/othello/src/app.rs:257:19: warning: unreachable pattern: no value can reach this
+apps/othello/src/app.rs:273:54: warning: unused variable: `self_cid`: help: if this is intentional, prefix it with an underscore: `_self_cid`
+apps/othello/src/app.rs:379:19: warning: unreachable pattern: no value can reach this
+apps/othello/src/app.rs:379:38: warning: unreachable pattern: no value can reach this
+apps/othello/src/app.rs:472:26: warning: unused variable: `player_color`: help: if this is intentional, prefix it with an underscore: `_player_color`
+apps/othello/src/app.rs:498:19: warning: unreachable pattern: no value can reach this
+apps/othello/src/app.rs:5:31: warning: unused import: `GameResult`
+apps/othello/src/app.rs:504:19: warning: unreachable pattern: no value can reach this
+apps/othello/src/app.rs:510:19: warning: unreachable pattern: no value can reach this
+apps/othello/src/app.rs:516:19: warning: unreachable pattern: no value can reach this
+apps/othello/src/app.rs:706:19: warning: unreachable pattern: no value can reach this
+apps/othello/src/app.rs:714:19: warning: unreachable pattern: no value can reach this
+apps/othello/src/app.rs:722:19: warning: unreachable pattern: no value can reach this
+apps/othello/src/app.rs:728:19: warning: unreachable pattern: no value can reach this
+apps/othello/src/app.rs:755:19: warning: unreachable pattern: no value can reach this
+apps/othello/src/app.rs:761:19: warning: unreachable pattern: no value can reach this
+apps/othello/src/main.rs:161:5: error[E0133]: call to unsafe function `xous::destroy_server` is unsafe and requires unsafe function or block: call to unsafe function
+apps/othello/src/main.rs:165:5: warning: unused import: `num_traits::ToPrimitive`
+apps/othello/src/storage.rs:5:5: warning: unused import: `othello_core::Difficulty`
+apps/othello/src/ui.rs:347:9: warning: unused variable: `center_x`: help: if this is intentional, prefix it with an underscore: `_center_x`
+apps/othello/src/ui.rs:8:5: warning: unused import: `crate::menu::MenuItem`

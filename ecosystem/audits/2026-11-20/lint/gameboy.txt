@@ -1,0 +1,46 @@
+apps/gameboy/src/app.rs:135:13: warning: unreachable pattern: no value can reach this
+apps/gameboy/src/app.rs:7:5: warning: unused import: `alloc::format`
+apps/gameboy/src/main.rs:17:40: error[E0599]: no function or associated item named `from_str` found for struct `xous::String` in the current scope: function or associated item not found in `String<128>`
+apps/gameboy/src/main.rs:29:36: error[E0433]: failed to resolve: could not find `RawkeysEvent` in `gam`: could not find `RawkeysEvent` in `gam`
+apps/gameboy/src/main.rs:31:96: error[E0308]: mismatched types: expected `WaitHandle<_>`, found `Duration`
+apps/gameboy/src/ui.rs:105:43: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/gameboy/src/ui.rs:105:47: error[E0308]: arguments to this function are incorrect
+apps/gameboy/src/ui.rs:105:9: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/gameboy/src/ui.rs:119:17: error[E0308]: arguments to this method are incorrect
+apps/gameboy/src/ui.rs:119:46: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/gameboy/src/ui.rs:119:54: error[E0308]: arguments to this function are incorrect
+apps/gameboy/src/ui.rs:120:26: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/gameboy/src/ui.rs:120:40: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/gameboy/src/ui.rs:120:78: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/gameboy/src/ui.rs:120:82: error[E0308]: arguments to this function are incorrect
+apps/gameboy/src/ui.rs:140:43: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/gameboy/src/ui.rs:140:47: error[E0308]: arguments to this function are incorrect
+apps/gameboy/src/ui.rs:140:9: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/gameboy/src/ui.rs:16:42: error[E0308]: arguments to this function are incorrect
+apps/gameboy/src/ui.rs:16:9: error[E0308]: arguments to this method are incorrect
+apps/gameboy/src/ui.rs:17:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/gameboy/src/ui.rs:17:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/gameboy/src/ui.rs:17:74: error[E0308]: arguments to this function are incorrect
+apps/gameboy/src/ui.rs:24:43: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/gameboy/src/ui.rs:24:54: error[E0308]: arguments to this function are incorrect
+apps/gameboy/src/ui.rs:24:9: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/gameboy/src/ui.rs:25:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/gameboy/src/ui.rs:25:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/gameboy/src/ui.rs:25:70: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/gameboy/src/ui.rs:25:85: error[E0308]: arguments to this function are incorrect
+apps/gameboy/src/ui.rs:32:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/gameboy/src/ui.rs:32:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/gameboy/src/ui.rs:32:56: error[E0308]: arguments to this function are incorrect
+apps/gameboy/src/ui.rs:32:74: error[E0308]: arguments to this function are incorrect
+apps/gameboy/src/ui.rs:38:9: error[E0599]: no method named `clear` found for reference `&gam::Gam` in the current scope: method not found in `&gam::Gam`
+apps/gameboy/src/ui.rs:59:17: error[E0308]: arguments to this method are incorrect
+apps/gameboy/src/ui.rs:59:46: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/gameboy/src/ui.rs:59:54: error[E0308]: arguments to this function are incorrect
+apps/gameboy/src/ui.rs:62:22: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/gameboy/src/ui.rs:62:36: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/gameboy/src/ui.rs:62:75: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/gameboy/src/ui.rs:62:79: error[E0308]: arguments to this function are incorrect
+apps/gameboy/src/ui.rs:68:23: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/gameboy/src/ui.rs:68:37: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/gameboy/src/ui.rs:68:76: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/gameboy/src/ui.rs:68:85: error[E0308]: arguments to this function are incorrect

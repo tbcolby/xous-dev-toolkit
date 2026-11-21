@@ -1,0 +1,54 @@
+apps/pet/src/main.rs:18:40: error[E0599]: no function or associated item named `from_str` found for struct `xous::String` in the current scope: function or associated item not found in `String<128>`
+apps/pet/src/main.rs:24:8: error[E0599]: no method named `set_alarm` found for struct `xous_api_ticktimer::Ticktimer` in the current scope: method not found in `Ticktimer`
+apps/pet/src/main.rs:31:36: error[E0433]: failed to resolve: could not find `RawkeysEvent` in `gam`: could not find `RawkeysEvent` in `gam`
+apps/pet/src/main.rs:33:96: error[E0308]: mismatched types: expected `WaitHandle<_>`, found `Duration`
+apps/pet/src/main.rs:39:20: error[E0599]: no method named `set_alarm` found for struct `xous_api_ticktimer::Ticktimer` in the current scope: method not found in `Ticktimer`
+apps/pet/src/ui.rs:128:17: error[E0308]: arguments to this method are incorrect
+apps/pet/src/ui.rs:128:47: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/pet/src/ui.rs:128:59: error[E0308]: arguments to this function are incorrect
+apps/pet/src/ui.rs:129:26: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/pet/src/ui.rs:129:40: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/pet/src/ui.rs:129:79: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/pet/src/ui.rs:129:87: error[E0308]: arguments to this function are incorrect
+apps/pet/src/ui.rs:15:42: error[E0308]: arguments to this function are incorrect
+apps/pet/src/ui.rs:15:9: error[E0308]: arguments to this method are incorrect
+apps/pet/src/ui.rs:150:17: error[E0308]: arguments to this method are incorrect
+apps/pet/src/ui.rs:150:46: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/pet/src/ui.rs:150:54: error[E0308]: arguments to this function are incorrect
+apps/pet/src/ui.rs:153:22: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/pet/src/ui.rs:153:36: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/pet/src/ui.rs:153:75: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/pet/src/ui.rs:153:79: error[E0308]: arguments to this function are incorrect
+apps/pet/src/ui.rs:16:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/pet/src/ui.rs:16:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/pet/src/ui.rs:16:74: error[E0308]: arguments to this function are incorrect
+apps/pet/src/ui.rs:23:43: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/pet/src/ui.rs:23:54: error[E0308]: arguments to this function are incorrect
+apps/pet/src/ui.rs:23:9: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/pet/src/ui.rs:24:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/pet/src/ui.rs:24:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/pet/src/ui.rs:24:70: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/pet/src/ui.rs:24:85: error[E0308]: arguments to this function are incorrect
+apps/pet/src/ui.rs:31:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/pet/src/ui.rs:31:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/pet/src/ui.rs:31:56: error[E0308]: arguments to this function are incorrect
+apps/pet/src/ui.rs:31:74: error[E0308]: arguments to this function are incorrect
+apps/pet/src/ui.rs:40:29: error[E0308]: arguments to this function are incorrect
+apps/pet/src/ui.rs:40:55: error[E0308]: arguments to this function are incorrect
+apps/pet/src/ui.rs:40:9: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/pet/src/ui.rs:41:29: error[E0308]: arguments to this function are incorrect
+apps/pet/src/ui.rs:41:56: error[E0308]: arguments to this function are incorrect
+apps/pet/src/ui.rs:41:9: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/pet/src/ui.rs:42:29: error[E0308]: arguments to this function are incorrect
+apps/pet/src/ui.rs:42:55: error[E0308]: arguments to this function are incorrect
+apps/pet/src/ui.rs:42:9: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/pet/src/ui.rs:43:29: error[E0308]: arguments to this function are incorrect
+apps/pet/src/ui.rs:43:63: error[E0308]: arguments to this function are incorrect
+apps/pet/src/ui.rs:43:9: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/pet/src/ui.rs:47:13: error[E0308]: arguments to this method are incorrect
+apps/pet/src/ui.rs:47:28: error[E0308]: arguments to this function are incorrect
+apps/pet/src/ui.rs:47:58: error[E0308]: arguments to this function are incorrect
+apps/pet/src/ui.rs:54:9: error[E0599]: no method named `clear` found for reference `&gam::Gam` in the current scope: method not found in `&gam::Gam`
+apps/pet/src/ui.rs:70:43: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/pet/src/ui.rs:70:52: error[E0308]: arguments to this function are incorrect
+apps/pet/src/ui.rs:70:9: error[E0061]: this method takes 2 arguments but 1 argument was supplied

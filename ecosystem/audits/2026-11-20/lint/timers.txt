@@ -1,0 +1,5 @@
+    Checking timer-core v0.1.0 (/private/tmp/claude-501/-/222625fb-1cb9-475b-aba1-974303a9b50f/scratchpad/xous-core/apps/timers/timer-core)
+apps/timers/src/main.rs:1209:5: error[E0133]: call to unsafe function `xous::destroy_server` is unsafe and requires unsafe function or block: call to unsafe function
+apps/timers/timer-core/src/lib.rs:104:5: warning: variables can be used directly in the `format!` string
+apps/timers/timer-core/src/lib.rs:114:5: warning: variables can be used directly in the `format!` string
+apps/timers/timer-core/src/lib.rs:122:5: warning: variables can be used directly in the `format!` string

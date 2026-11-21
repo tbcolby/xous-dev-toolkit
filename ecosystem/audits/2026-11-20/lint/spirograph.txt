@@ -1,0 +1,41 @@
+apps/spirograph/src/app.rs:11:5: warning: unused import: `alloc::format`
+apps/spirograph/src/app.rs:9:5: warning: unused import: `alloc::string::String`
+apps/spirograph/src/main.rs:34:44: error[E0599]: no function or associated item named `from_str` found for struct `xous::String` in the current scope: function or associated item not found in `String<128>`
+apps/spirograph/src/main.rs:57:36: error[E0433]: failed to resolve: could not find `RawkeysEvent` in `gam`: could not find `RawkeysEvent` in `gam`
+apps/spirograph/src/main.rs:62:43: error[E0308]: mismatched types: expected `WaitHandle<_>`, found `Duration`
+apps/spirograph/src/math.rs:23:5: error[E0308]: mismatched types: expected `i32`, found `i64`
+apps/spirograph/src/math.rs:32:9: warning: variable does not need to be mutable
+apps/spirograph/src/ui.rs:125:21: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/spirograph/src/ui.rs:126:21: error[E0308]: arguments to this function are incorrect
+apps/spirograph/src/ui.rs:127:21: error[E0308]: arguments to this function are incorrect
+apps/spirograph/src/ui.rs:159:17: error[E0308]: arguments to this method are incorrect
+apps/spirograph/src/ui.rs:160:31: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/spirograph/src/ui.rs:161:17: error[E0308]: arguments to this function are incorrect
+apps/spirograph/src/ui.rs:168:22: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/spirograph/src/ui.rs:169:13: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/spirograph/src/ui.rs:17:42: error[E0308]: arguments to this function are incorrect
+apps/spirograph/src/ui.rs:17:9: error[E0308]: arguments to this method are incorrect
+apps/spirograph/src/ui.rs:170:32: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/spirograph/src/ui.rs:171:17: error[E0308]: arguments to this function are incorrect
+apps/spirograph/src/ui.rs:19:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/spirograph/src/ui.rs:20:51: error[E0308]: arguments to this function are incorrect
+apps/spirograph/src/ui.rs:20:9: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/spirograph/src/ui.rs:30:43: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/spirograph/src/ui.rs:30:54: error[E0308]: arguments to this function are incorrect
+apps/spirograph/src/ui.rs:30:9: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/spirograph/src/ui.rs:32:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/spirograph/src/ui.rs:33:47: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/spirograph/src/ui.rs:33:62: error[E0308]: arguments to this function are incorrect
+apps/spirograph/src/ui.rs:33:9: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/spirograph/src/ui.rs:41:9: error[E0599]: no method named `clear` found for reference `&gam::Gam` in the current scope: method not found in `&gam::Gam`
+apps/spirograph/src/ui.rs:73:17: error[E0308]: arguments to this method are incorrect
+apps/spirograph/src/ui.rs:74:31: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/spirograph/src/ui.rs:75:17: error[E0308]: arguments to this function are incorrect
+apps/spirograph/src/ui.rs:79:22: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/spirograph/src/ui.rs:80:13: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/spirograph/src/ui.rs:81:32: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/spirograph/src/ui.rs:82:17: error[E0308]: arguments to this function are incorrect
+apps/spirograph/src/ui.rs:95:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/spirograph/src/ui.rs:96:9: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/spirograph/src/ui.rs:97:28: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/spirograph/src/ui.rs:98:13: error[E0308]: arguments to this function are incorrect

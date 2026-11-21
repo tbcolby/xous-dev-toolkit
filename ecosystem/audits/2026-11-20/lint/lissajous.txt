@@ -1,0 +1,66 @@
+apps/lissajous/src/app.rs:10:5: warning: unused import: `alloc::string::String`
+apps/lissajous/src/app.rs:12:5: warning: unused import: `alloc::format`
+apps/lissajous/src/main.rs:34:44: error[E0599]: no function or associated item named `from_str` found for struct `xous::String` in the current scope: function or associated item not found in `String<128>`
+apps/lissajous/src/main.rs:57:36: error[E0433]: failed to resolve: could not find `RawkeysEvent` in `gam`: could not find `RawkeysEvent` in `gam`
+apps/lissajous/src/main.rs:61:43: error[E0308]: mismatched types: expected `WaitHandle<_>`, found `Duration`
+apps/lissajous/src/ui.rs:122:21: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/lissajous/src/ui.rs:123:21: error[E0308]: arguments to this function are incorrect
+apps/lissajous/src/ui.rs:124:21: error[E0308]: arguments to this function are incorrect
+apps/lissajous/src/ui.rs:155:17: error[E0308]: arguments to this method are incorrect
+apps/lissajous/src/ui.rs:156:31: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/lissajous/src/ui.rs:157:17: error[E0308]: arguments to this function are incorrect
+apps/lissajous/src/ui.rs:16:42: error[E0308]: arguments to this function are incorrect
+apps/lissajous/src/ui.rs:16:9: error[E0308]: arguments to this method are incorrect
+apps/lissajous/src/ui.rs:165:22: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/lissajous/src/ui.rs:166:13: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/lissajous/src/ui.rs:167:32: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/lissajous/src/ui.rs:168:17: error[E0308]: arguments to this function are incorrect
+apps/lissajous/src/ui.rs:18:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/lissajous/src/ui.rs:19:51: error[E0308]: arguments to this function are incorrect
+apps/lissajous/src/ui.rs:19:9: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/lissajous/src/ui.rs:194:22: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/lissajous/src/ui.rs:195:13: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/lissajous/src/ui.rs:196:17: error[E0308]: arguments to this function are incorrect
+apps/lissajous/src/ui.rs:197:17: error[E0308]: arguments to this function are incorrect
+apps/lissajous/src/ui.rs:210:22: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/lissajous/src/ui.rs:211:13: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/lissajous/src/ui.rs:212:31: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/lissajous/src/ui.rs:213:17: error[E0308]: arguments to this function are incorrect
+apps/lissajous/src/ui.rs:225:17: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/lissajous/src/ui.rs:225:37: error[E0308]: arguments to this function are incorrect
+apps/lissajous/src/ui.rs:225:55: error[E0308]: arguments to this function are incorrect
+apps/lissajous/src/ui.rs:226:17: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/lissajous/src/ui.rs:226:37: error[E0308]: arguments to this function are incorrect
+apps/lissajous/src/ui.rs:226:55: error[E0308]: arguments to this function are incorrect
+apps/lissajous/src/ui.rs:229:21: error[E0308]: arguments to this method are incorrect
+apps/lissajous/src/ui.rs:230:21: error[E0308]: arguments to this function are incorrect
+apps/lissajous/src/ui.rs:231:21: error[E0308]: arguments to this function are incorrect
+apps/lissajous/src/ui.rs:236:26: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/lissajous/src/ui.rs:237:17: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/lissajous/src/ui.rs:238:21: error[E0308]: arguments to this function are incorrect
+apps/lissajous/src/ui.rs:239:21: error[E0308]: arguments to this function are incorrect
+apps/lissajous/src/ui.rs:253:9: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/lissajous/src/ui.rs:254:9: error[E0308]: arguments to this function are incorrect
+apps/lissajous/src/ui.rs:255:9: error[E0308]: arguments to this function are incorrect
+apps/lissajous/src/ui.rs:258:9: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/lissajous/src/ui.rs:259:9: error[E0308]: arguments to this function are incorrect
+apps/lissajous/src/ui.rs:260:9: error[E0308]: arguments to this function are incorrect
+apps/lissajous/src/ui.rs:28:43: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/lissajous/src/ui.rs:28:54: error[E0308]: arguments to this function are incorrect
+apps/lissajous/src/ui.rs:28:9: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/lissajous/src/ui.rs:30:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/lissajous/src/ui.rs:31:47: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/lissajous/src/ui.rs:31:62: error[E0308]: arguments to this function are incorrect
+apps/lissajous/src/ui.rs:31:9: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/lissajous/src/ui.rs:39:9: error[E0599]: no method named `clear` found for reference `&gam::Gam` in the current scope: method not found in `&gam::Gam`
+apps/lissajous/src/ui.rs:71:17: error[E0308]: arguments to this method are incorrect
+apps/lissajous/src/ui.rs:72:31: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/lissajous/src/ui.rs:73:17: error[E0308]: arguments to this function are incorrect
+apps/lissajous/src/ui.rs:77:22: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/lissajous/src/ui.rs:78:13: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/lissajous/src/ui.rs:79:32: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/lissajous/src/ui.rs:80:17: error[E0308]: arguments to this function are incorrect
+apps/lissajous/src/ui.rs:93:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/lissajous/src/ui.rs:94:9: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/lissajous/src/ui.rs:95:28: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/lissajous/src/ui.rs:96:13: error[E0308]: arguments to this function are incorrect

@@ -1,0 +1,7 @@
+apps/c64/Cargo.toml:16:gam = { path = "../../xous-core/services/gam" }
+apps/c64/Cargo.toml:17:pddb = { path = "../../xous-core/services/pddb" }
+apps/writer/Cargo.toml:22:writer-core = { path = "writer-core" }
+apps/timers/Cargo.toml:21:timer-core = { path = "timer-core" }
+othello: Cargo.toml references ../../libs/othello-core but repo ships it at ./libs/othello-core (must be manually copied into xous-core/libs)
+cipher: package name "cipher" collides with RustCrypto `cipher` crate in xous-core workspace (cargo -p cipher ambiguous); code references gam::APP_NAME_CIPHER_WORKSHOP which implies manifest key "cipher-workshop" != package name
+qrcode: code references gam::APP_NAME_QRCODE_APP which implies manifest key "qrcode-app" != package name "qrcode"

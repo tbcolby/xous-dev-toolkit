@@ -1,0 +1,61 @@
+apps/decide/src/app.rs:15:25: warning: unused import: `self`
+apps/decide/src/app.rs:7:20: warning: unused import: `self`
+apps/decide/src/storage.rs:11:5: warning: unused import: `crate::spinner::SpinnerConfig`
+apps/decide/src/storage.rs:54:20: error[E0599]: no method named `set_len` found for struct `pddb::PddbKey` in the current scope: method not found in `PddbKey<'_>`
+apps/decide/src/ui.rs:101:33: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/decide/src/ui.rs:108:12: error[E0599]: cannot write into `gam::TextView`
+apps/decide/src/ui.rs:112:33: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/decide/src/ui.rs:116:33: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/decide/src/ui.rs:123:12: error[E0599]: cannot write into `gam::TextView`
+apps/decide/src/ui.rs:127:39: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/decide/src/ui.rs:131:33: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/decide/src/ui.rs:138:12: error[E0599]: cannot write into `gam::TextView`
+apps/decide/src/ui.rs:144:55: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/decide/src/ui.rs:153:22: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/decide/src/ui.rs:155:17: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/decide/src/ui.rs:156:21: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/decide/src/ui.rs:157:21: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/decide/src/ui.rs:166:37: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/decide/src/ui.rs:174:16: error[E0599]: cannot write into `gam::TextView`
+apps/decide/src/ui.rs:183:50: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/decide/src/ui.rs:230:50: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/decide/src/ui.rs:237:19: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`
+apps/decide/src/ui.rs:243:22: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`
+apps/decide/src/ui.rs:264:30: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`
+apps/decide/src/ui.rs:282:51: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/decide/src/ui.rs:290:18: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`
+apps/decide/src/ui.rs:296:14: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`
+apps/decide/src/ui.rs:30:49: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/decide/src/ui.rs:305:23: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`
+apps/decide/src/ui.rs:305:40: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`
+apps/decide/src/ui.rs:309:32: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`
+apps/decide/src/ui.rs:32:22: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/decide/src/ui.rs:332:55: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/decide/src/ui.rs:34:9: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/decide/src/ui.rs:35:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/decide/src/ui.rs:353:53: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/decide/src/ui.rs:36:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/decide/src/ui.rs:374:56: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/decide/src/ui.rs:384:15: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`
+apps/decide/src/ui.rs:392:51: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/decide/src/ui.rs:404:56: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/decide/src/ui.rs:430:24: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/decide/src/ui.rs:448:20: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/decide/src/ui.rs:450:9: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/decide/src/ui.rs:451:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/decide/src/ui.rs:452:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/decide/src/ui.rs:459:19: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`
+apps/decide/src/ui.rs:466:25: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`
+apps/decide/src/ui.rs:470:29: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`
+apps/decide/src/ui.rs:60:35: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/decide/src/ui.rs:61:14: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/decide/src/ui.rs:63:9: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/decide/src/ui.rs:64:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/decide/src/ui.rs:65:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/decide/src/ui.rs:73:33: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/decide/src/ui.rs:81:12: error[E0599]: cannot write into `gam::TextView`
+apps/decide/src/ui.rs:85:35: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/decide/src/ui.rs:88:15: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/decide/src/ui.rs:91:9: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/decide/src/ui.rs:92:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/decide/src/ui.rs:93:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`

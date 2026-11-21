@@ -1,0 +1,13 @@
+    Checking writer-core v0.1.0 (/private/tmp/claude-501/-/222625fb-1cb9-475b-aba1-974303a9b50f/scratchpad/xous-core/apps/writer/writer-core)
+apps/writer/src/main.rs:1285:5: error[E0133]: call to unsafe function `xous::destroy_server` is unsafe and requires unsafe function or block: call to unsafe function
+apps/writer/writer-core/src/buffer.rs:153:5: warning: implementation of inherent method `to_string(&self) -> String` for type `buffer::TextBuffer`
+apps/writer/writer-core/src/buffer.rs:23:5: warning: you should consider adding a `Default` implementation for `TextBuffer`
+apps/writer/writer-core/src/buffer.rs:8:5: warning: you should consider adding a `Default` implementation for `Cursor`
+apps/writer/writer-core/src/markdown.rs:109:21: warning: stripping a prefix manually
+apps/writer/writer-core/src/markdown.rs:111:21: warning: stripping a prefix manually
+apps/writer/writer-core/src/serialize.rs:141:5: warning: variables can be used directly in the `format!` string
+apps/writer/writer-core/src/serialize.rs:146:16: warning: casting to the same type is unnecessary (`u64` -> `u64`): help: try: `(epoch_ms / 1000 / 86400)`
+apps/writer/writer-core/src/serialize.rs:171:35: warning: manual `!RangeInclusive::contains` implementation: help: use: `!(1..=31).contains(&day)`
+apps/writer/writer-core/src/serialize.rs:171:8: warning: manual `!RangeInclusive::contains` implementation: help: use: `!(1..=12).contains(&month)`
+apps/writer/writer-core/src/serialize.rs:187:14: warning: the loop variable `i` is only used to index `days_in_months`
+apps/writer/writer-core/src/serialize.rs:9:5: warning: method `default` can be confused for the standard trait method `std::default::Default::default`

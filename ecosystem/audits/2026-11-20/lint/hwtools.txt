@@ -1,0 +1,5 @@
+apps/hwtools/src/main.rs:144:5: error[E0133]: call to unsafe function `xous::destroy_server` is unsafe and requires unsafe function or block: call to unsafe function
+apps/hwtools/src/main.rs:196:9: error[E0133]: call to unsafe function `xous::destroy_server` is unsafe and requires unsafe function or block: call to unsafe function
+apps/hwtools/src/storage.rs:33:15: error[E0597]: `pddb` does not live long enough: borrowed value does not live long enough
+apps/hwtools/src/storage.rs:68:15: error[E0597]: `pddb` does not live long enough: borrowed value does not live long enough
+apps/hwtools/src/system_tab.rs:4:16: warning: unused import: `GlyphStyle`

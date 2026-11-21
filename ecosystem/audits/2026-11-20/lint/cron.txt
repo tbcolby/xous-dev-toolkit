@@ -1,0 +1,45 @@
+apps/cron/src/app.rs:6:5: warning: unused import: `alloc::vec::Vec`
+apps/cron/src/main.rs:17:40: error[E0599]: no function or associated item named `from_str` found for struct `xous::String` in the current scope: function or associated item not found in `String<128>`
+apps/cron/src/main.rs:29:36: error[E0433]: failed to resolve: could not find `RawkeysEvent` in `gam`: could not find `RawkeysEvent` in `gam`
+apps/cron/src/main.rs:31:96: error[E0308]: mismatched types: expected `WaitHandle<_>`, found `Duration`
+apps/cron/src/ui.rs:105:13: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/cron/src/ui.rs:105:47: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/cron/src/ui.rs:105:51: error[E0308]: arguments to this function are incorrect
+apps/cron/src/ui.rs:112:22: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/cron/src/ui.rs:112:36: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/cron/src/ui.rs:112:75: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/cron/src/ui.rs:112:79: error[E0308]: arguments to this function are incorrect
+apps/cron/src/ui.rs:133:17: error[E0308]: arguments to this method are incorrect
+apps/cron/src/ui.rs:133:46: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/cron/src/ui.rs:133:54: error[E0308]: arguments to this function are incorrect
+apps/cron/src/ui.rs:136:22: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/cron/src/ui.rs:136:36: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/cron/src/ui.rs:136:75: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/cron/src/ui.rs:136:79: error[E0308]: arguments to this function are incorrect
+apps/cron/src/ui.rs:142:23: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/cron/src/ui.rs:142:37: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/cron/src/ui.rs:142:76: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/cron/src/ui.rs:142:85: error[E0308]: arguments to this function are incorrect
+apps/cron/src/ui.rs:16:42: error[E0308]: arguments to this function are incorrect
+apps/cron/src/ui.rs:16:9: error[E0308]: arguments to this method are incorrect
+apps/cron/src/ui.rs:17:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/cron/src/ui.rs:17:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/cron/src/ui.rs:17:74: error[E0308]: arguments to this function are incorrect
+apps/cron/src/ui.rs:24:43: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/cron/src/ui.rs:24:54: error[E0308]: arguments to this function are incorrect
+apps/cron/src/ui.rs:24:9: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/cron/src/ui.rs:25:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/cron/src/ui.rs:25:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/cron/src/ui.rs:25:70: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/cron/src/ui.rs:25:85: error[E0308]: arguments to this function are incorrect
+apps/cron/src/ui.rs:32:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/cron/src/ui.rs:32:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/cron/src/ui.rs:32:56: error[E0308]: arguments to this function are incorrect
+apps/cron/src/ui.rs:32:74: error[E0308]: arguments to this function are incorrect
+apps/cron/src/ui.rs:38:9: error[E0599]: no method named `clear` found for reference `&gam::Gam` in the current scope: method not found in `&gam::Gam`
+apps/cron/src/ui.rs:58:43: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/cron/src/ui.rs:58:52: error[E0308]: arguments to this function are incorrect
+apps/cron/src/ui.rs:58:9: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/cron/src/ui.rs:92:13: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/cron/src/ui.rs:92:47: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/cron/src/ui.rs:92:51: error[E0308]: arguments to this function are incorrect

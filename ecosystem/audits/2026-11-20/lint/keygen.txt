@@ -1,0 +1,49 @@
+apps/keygen/src/app.rs:12:5: warning: unused import: `alloc::format`
+apps/keygen/src/generators.rs:265:29: error[E0277]: the size for values of type `str` cannot be known at compilation time: doesn't have a size known at compile-time
+apps/keygen/src/generators.rs:265:29: error[E0308]: mismatched types: expected `&[str]`, found `&[&str]`
+apps/keygen/src/generators.rs:298:34: warning: unnecessary parentheses around index expression
+apps/keygen/src/generators.rs:8:5: warning: unused import: `alloc::format`
+apps/keygen/src/storage.rs:52:20: error[E0599]: no method named `set_len` found for struct `pddb::PddbKey` in the current scope: method not found in `PddbKey<'_>`
+apps/keygen/src/ui.rs:137:52: error[E0412]: cannot find type `Canvas` in this scope: not found in this scope
+apps/keygen/src/ui.rs:148:41: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/keygen/src/ui.rs:148:45: error[E0308]: arguments to this function are incorrect
+apps/keygen/src/ui.rs:148:9: error[E0061]: this method takes 2 arguments but 4 arguments were supplied
+apps/keygen/src/ui.rs:156:41: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/keygen/src/ui.rs:156:45: error[E0308]: arguments to this function are incorrect
+apps/keygen/src/ui.rs:156:9: error[E0061]: this method takes 2 arguments but 4 arguments were supplied
+apps/keygen/src/ui.rs:166:51: error[E0412]: cannot find type `Canvas` in this scope: not found in this scope
+apps/keygen/src/ui.rs:19:35: error[E0412]: cannot find type `Canvas` in this scope: not found in this scope
+apps/keygen/src/ui.rs:20:46: error[E0308]: arguments to this function are incorrect
+apps/keygen/src/ui.rs:21:34: error[E0599]: no method named `style` found for struct `gam::Rectangle` in the current scope: field, not a method
+apps/keygen/src/ui.rs:22:71: error[E0308]: arguments to this function are incorrect
+apps/keygen/src/ui.rs:23:31: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `tv`: use of unresolved module or unlinked crate `tv`
+apps/keygen/src/ui.rs:23:9: error[E0599]: no method named `draw_textview` found for reference `&gam::Gam` in the current scope
+apps/keygen/src/ui.rs:26:35: error[E0412]: cannot find type `Canvas` in this scope: not found in this scope
+apps/keygen/src/ui.rs:28:41: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/keygen/src/ui.rs:28:45: error[E0308]: arguments to this function are incorrect
+apps/keygen/src/ui.rs:28:9: error[E0061]: this method takes 2 arguments but 4 arguments were supplied
+apps/keygen/src/ui.rs:29:67: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/keygen/src/ui.rs:29:86: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/keygen/src/ui.rs:30:31: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `tv`: use of unresolved module or unlinked crate `tv`
+apps/keygen/src/ui.rs:30:9: error[E0599]: no method named `draw_textview` found for reference `&gam::Gam` in the current scope
+apps/keygen/src/ui.rs:33:33: error[E0412]: cannot find type `Canvas` in this scope: not found in this scope
+apps/keygen/src/ui.rs:34:53: error[E0308]: arguments to this function are incorrect
+apps/keygen/src/ui.rs:34:71: error[E0308]: arguments to this function are incorrect
+apps/keygen/src/ui.rs:35:31: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `tv`: use of unresolved module or unlinked crate `tv`
+apps/keygen/src/ui.rs:35:9: error[E0599]: no method named `draw_textview` found for reference `&gam::Gam` in the current scope
+apps/keygen/src/ui.rs:38:42: error[E0412]: cannot find type `Canvas` in this scope: not found in this scope
+apps/keygen/src/ui.rs:39:29: error[E0308]: arguments to this function are incorrect
+apps/keygen/src/ui.rs:39:47: error[E0308]: arguments to this function are incorrect
+apps/keygen/src/ui.rs:40:35: error[E0599]: no method named `style` found for struct `gam::Rectangle` in the current scope: field, not a method
+apps/keygen/src/ui.rs:41:53: error[E0308]: arguments to this function are incorrect
+apps/keygen/src/ui.rs:41:75: error[E0308]: arguments to this function are incorrect
+apps/keygen/src/ui.rs:42:31: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `tv`: use of unresolved module or unlinked crate `tv`
+apps/keygen/src/ui.rs:42:9: error[E0599]: no method named `draw_textview` found for reference `&gam::Gam` in the current scope
+apps/keygen/src/ui.rs:45:36: error[E0412]: cannot find type `Canvas` in this scope: not found in this scope
+apps/keygen/src/ui.rs:60:49: error[E0412]: cannot find type `Canvas` in this scope: not found in this scope
+apps/keygen/src/ui.rs:61:76: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/keygen/src/ui.rs:61:96: error[E0599]: no method named `style` found for struct `gam::Rectangle` in the current scope: field, not a method
+apps/keygen/src/ui.rs:73:57: error[E0412]: cannot find type `Canvas` in this scope: not found in this scope
+apps/keygen/src/ui.rs:8:5: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/keygen/src/ui.rs:9:5: error[E0432]: unresolved import `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/keygen/src/ui.rs:96:55: error[E0412]: cannot find type `Canvas` in this scope: not found in this scope

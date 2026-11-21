@@ -1,0 +1,76 @@
+apps/contacts/src/app.rs:210:21: warning: variable does not need to be mutable
+apps/contacts/src/app.rs:7:28: warning: unused import: `Category`
+apps/contacts/src/storage.rs:46:20: error[E0599]: no method named `set_len` found for struct `pddb::PddbKey` in the current scope: method not found in `PddbKey<'_>`
+apps/contacts/src/storage.rs:7:5: warning: unused import: `alloc::string::String`
+apps/contacts/src/ui.rs:101:12: error[E0599]: cannot write into `gam::TextView`
+apps/contacts/src/ui.rs:107:52: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:112:17: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`
+apps/contacts/src/ui.rs:118:22: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`
+apps/contacts/src/ui.rs:142:26: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:144:21: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:145:25: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:146:25: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:155:17: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`
+apps/contacts/src/ui.rs:157:17: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`
+apps/contacts/src/ui.rs:162:41: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:170:20: error[E0599]: cannot write into `gam::TextView`
+apps/contacts/src/ui.rs:18:51: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:182:52: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:19:22: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:201:33: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:208:12: error[E0599]: cannot write into `gam::TextView`
+apps/contacts/src/ui.rs:21:9: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:213:20: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`
+apps/contacts/src/ui.rs:218:15: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:22:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:220:9: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:221:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:222:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:23:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:247:37: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:254:16: error[E0599]: cannot write into `gam::TextView`
+apps/contacts/src/ui.rs:263:52: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:285:30: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:287:25: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:288:29: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:289:29: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:296:45: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:304:24: error[E0599]: cannot write into `gam::TextView`
+apps/contacts/src/ui.rs:309:29: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`
+apps/contacts/src/ui.rs:324:29: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`
+apps/contacts/src/ui.rs:331:21: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:332:25: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:333:25: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:336:21: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:337:25: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:338:25: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:341:28: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:346:21: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`
+apps/contacts/src/ui.rs:366:54: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:374:16: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:376:9: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:377:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:378:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:383:19: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`
+apps/contacts/src/ui.rs:388:19: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`
+apps/contacts/src/ui.rs:398:62: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:4:5: warning: unused import: `crate::contact::Contact`
+apps/contacts/src/ui.rs:401:20: error[E0624]: method `selected_contact_index` is private: private method
+apps/contacts/src/ui.rs:41:35: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:412:33: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:419:12: error[E0599]: cannot write into `gam::TextView`
+apps/contacts/src/ui.rs:42:14: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:44:9: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:45:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:46:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:54:33: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:62:12: error[E0599]: cannot write into `gam::TextView`
+apps/contacts/src/ui.rs:66:35: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:68:15: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:70:9: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:71:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:72:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:79:33: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:86:12: error[E0599]: cannot write into `gam::TextView`
+apps/contacts/src/ui.rs:90:33: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`
+apps/contacts/src/ui.rs:94:33: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`

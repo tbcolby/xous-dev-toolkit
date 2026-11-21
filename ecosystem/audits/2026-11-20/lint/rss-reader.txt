@@ -1,0 +1,53 @@
+apps/rss-reader/src/app.rs:5:5: warning: unused import: `alloc::vec::Vec`
+apps/rss-reader/src/app.rs:6:5: warning: unused import: `alloc::format`
+apps/rss-reader/src/main.rs:17:40: error[E0599]: no function or associated item named `from_str` found for struct `xous::String` in the current scope: function or associated item not found in `String<128>`
+apps/rss-reader/src/main.rs:29:36: error[E0433]: failed to resolve: could not find `RawkeysEvent` in `gam`: could not find `RawkeysEvent` in `gam`
+apps/rss-reader/src/main.rs:31:96: error[E0308]: mismatched types: expected `WaitHandle<_>`, found `Duration`
+apps/rss-reader/src/ui.rs:103:30: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/rss-reader/src/ui.rs:103:44: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/rss-reader/src/ui.rs:103:83: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/rss-reader/src/ui.rs:103:92: error[E0308]: arguments to this function are incorrect
+apps/rss-reader/src/ui.rs:118:26: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/rss-reader/src/ui.rs:118:40: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/rss-reader/src/ui.rs:118:94: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/rss-reader/src/ui.rs:122:17: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/rss-reader/src/ui.rs:122:67: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/rss-reader/src/ui.rs:124:22: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/rss-reader/src/ui.rs:124:36: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/rss-reader/src/ui.rs:124:79: error[E0308]: arguments to this function are incorrect
+apps/rss-reader/src/ui.rs:16:42: error[E0308]: arguments to this function are incorrect
+apps/rss-reader/src/ui.rs:16:9: error[E0308]: arguments to this method are incorrect
+apps/rss-reader/src/ui.rs:17:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/rss-reader/src/ui.rs:17:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/rss-reader/src/ui.rs:17:74: error[E0308]: arguments to this function are incorrect
+apps/rss-reader/src/ui.rs:24:43: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/rss-reader/src/ui.rs:24:54: error[E0308]: arguments to this function are incorrect
+apps/rss-reader/src/ui.rs:24:9: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/rss-reader/src/ui.rs:25:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/rss-reader/src/ui.rs:25:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/rss-reader/src/ui.rs:25:70: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/rss-reader/src/ui.rs:25:85: error[E0308]: arguments to this function are incorrect
+apps/rss-reader/src/ui.rs:32:9: error[E0599]: no method named `clear` found for reference `&gam::Gam` in the current scope: method not found in `&gam::Gam`
+apps/rss-reader/src/ui.rs:52:17: error[E0308]: arguments to this method are incorrect
+apps/rss-reader/src/ui.rs:52:46: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/rss-reader/src/ui.rs:52:54: error[E0308]: arguments to this function are incorrect
+apps/rss-reader/src/ui.rs:54:22: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/rss-reader/src/ui.rs:54:36: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/rss-reader/src/ui.rs:54:75: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/rss-reader/src/ui.rs:54:79: error[E0308]: arguments to this function are incorrect
+apps/rss-reader/src/ui.rs:63:22: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/rss-reader/src/ui.rs:63:36: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/rss-reader/src/ui.rs:63:75: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/rss-reader/src/ui.rs:63:80: error[E0308]: arguments to this function are incorrect
+apps/rss-reader/src/ui.rs:74:59: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/rss-reader/src/ui.rs:74:9: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/rss-reader/src/ui.rs:76:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/rss-reader/src/ui.rs:76:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/rss-reader/src/ui.rs:76:86: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/rss-reader/src/ui.rs:94:21: error[E0308]: arguments to this method are incorrect
+apps/rss-reader/src/ui.rs:94:50: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/rss-reader/src/ui.rs:94:58: error[E0308]: arguments to this function are incorrect
+apps/rss-reader/src/ui.rs:96:26: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/rss-reader/src/ui.rs:96:40: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/rss-reader/src/ui.rs:96:79: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/rss-reader/src/ui.rs:96:83: error[E0308]: arguments to this function are incorrect

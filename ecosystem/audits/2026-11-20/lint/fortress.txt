@@ -1,0 +1,52 @@
+apps/fortress/src/app.rs:5:5: warning: unused import: `alloc::vec::Vec`
+apps/fortress/src/main.rs:17:40: error[E0599]: no function or associated item named `from_str` found for struct `xous::String` in the current scope: function or associated item not found in `String<128>`
+apps/fortress/src/main.rs:23:8: error[E0599]: no method named `set_alarm` found for struct `xous_api_ticktimer::Ticktimer` in the current scope: method not found in `Ticktimer`
+apps/fortress/src/main.rs:31:36: error[E0433]: failed to resolve: could not find `RawkeysEvent` in `gam`: could not find `RawkeysEvent` in `gam`
+apps/fortress/src/main.rs:33:96: error[E0308]: mismatched types: expected `WaitHandle<_>`, found `Duration`
+apps/fortress/src/main.rs:42:20: error[E0599]: no method named `set_alarm` found for struct `xous_api_ticktimer::Ticktimer` in the current scope: method not found in `Ticktimer`
+apps/fortress/src/ui.rs:107:17: error[E0308]: arguments to this method are incorrect
+apps/fortress/src/ui.rs:107:46: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/fortress/src/ui.rs:107:54: error[E0308]: arguments to this function are incorrect
+apps/fortress/src/ui.rs:110:22: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/fortress/src/ui.rs:110:36: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/fortress/src/ui.rs:111:28: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/fortress/src/ui.rs:111:32: error[E0308]: arguments to this function are incorrect
+apps/fortress/src/ui.rs:118:23: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/fortress/src/ui.rs:118:37: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/fortress/src/ui.rs:119:28: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/fortress/src/ui.rs:119:37: error[E0308]: arguments to this function are incorrect
+apps/fortress/src/ui.rs:16:42: error[E0308]: arguments to this function are incorrect
+apps/fortress/src/ui.rs:16:9: error[E0308]: arguments to this method are incorrect
+apps/fortress/src/ui.rs:17:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/fortress/src/ui.rs:17:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/fortress/src/ui.rs:17:74: error[E0308]: arguments to this function are incorrect
+apps/fortress/src/ui.rs:189:21: error[E0308]: arguments to this method are incorrect
+apps/fortress/src/ui.rs:189:50: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/fortress/src/ui.rs:189:58: error[E0308]: arguments to this function are incorrect
+apps/fortress/src/ui.rs:192:26: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/fortress/src/ui.rs:192:40: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/fortress/src/ui.rs:193:32: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/fortress/src/ui.rs:193:36: error[E0308]: arguments to this function are incorrect
+apps/fortress/src/ui.rs:220:22: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/fortress/src/ui.rs:220:36: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/fortress/src/ui.rs:221:28: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/fortress/src/ui.rs:221:32: error[E0308]: arguments to this function are incorrect
+apps/fortress/src/ui.rs:24:43: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/fortress/src/ui.rs:24:54: error[E0308]: arguments to this function are incorrect
+apps/fortress/src/ui.rs:24:9: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/fortress/src/ui.rs:25:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/fortress/src/ui.rs:25:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/fortress/src/ui.rs:25:70: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/fortress/src/ui.rs:25:85: error[E0308]: arguments to this function are incorrect
+apps/fortress/src/ui.rs:32:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/fortress/src/ui.rs:32:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/fortress/src/ui.rs:32:56: error[E0308]: arguments to this function are incorrect
+apps/fortress/src/ui.rs:32:74: error[E0308]: arguments to this function are incorrect
+apps/fortress/src/ui.rs:38:9: error[E0599]: no method named `clear` found for reference `&gam::Gam` in the current scope: method not found in `&gam::Gam`
+apps/fortress/src/ui.rs:65:43: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/fortress/src/ui.rs:65:47: error[E0308]: arguments to this function are incorrect
+apps/fortress/src/ui.rs:65:9: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/fortress/src/world.rs:374:34: error[E0499]: cannot borrow `*self` as mutable more than once at a time: second mutable borrow occurs here
+apps/fortress/src/world.rs:375:31: error[E0499]: cannot borrow `*self` as mutable more than once at a time: second mutable borrow occurs here
+apps/fortress/src/world.rs:376:31: error[E0499]: cannot borrow `*self` as mutable more than once at a time: second mutable borrow occurs here
+apps/fortress/src/world.rs:558:17: error[E0499]: cannot borrow `*self` as mutable more than once at a time: second mutable borrow occurs here

@@ -1,0 +1,48 @@
+apps/sqlite/src/main.rs:17:40: error[E0599]: no function or associated item named `from_str` found for struct `xous::String` in the current scope: function or associated item not found in `String<128>`
+apps/sqlite/src/main.rs:29:36: error[E0433]: failed to resolve: could not find `RawkeysEvent` in `gam`: could not find `RawkeysEvent` in `gam`
+apps/sqlite/src/main.rs:31:96: error[E0308]: mismatched types: expected `WaitHandle<_>`, found `Duration`
+apps/sqlite/src/ui.rs:105:17: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/sqlite/src/ui.rs:105:51: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/sqlite/src/ui.rs:105:55: error[E0308]: arguments to this function are incorrect
+apps/sqlite/src/ui.rs:147:17: error[E0308]: arguments to this method are incorrect
+apps/sqlite/src/ui.rs:147:46: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/sqlite/src/ui.rs:147:54: error[E0308]: arguments to this function are incorrect
+apps/sqlite/src/ui.rs:150:22: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/sqlite/src/ui.rs:150:36: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/sqlite/src/ui.rs:150:75: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/sqlite/src/ui.rs:150:79: error[E0308]: arguments to this function are incorrect
+apps/sqlite/src/ui.rs:16:42: error[E0308]: arguments to this function are incorrect
+apps/sqlite/src/ui.rs:16:9: error[E0308]: arguments to this method are incorrect
+apps/sqlite/src/ui.rs:17:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/sqlite/src/ui.rs:17:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/sqlite/src/ui.rs:17:74: error[E0308]: arguments to this function are incorrect
+apps/sqlite/src/ui.rs:177:21: error[E0308]: arguments to this method are incorrect
+apps/sqlite/src/ui.rs:177:50: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/sqlite/src/ui.rs:177:58: error[E0308]: arguments to this function are incorrect
+apps/sqlite/src/ui.rs:180:26: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/sqlite/src/ui.rs:180:40: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/sqlite/src/ui.rs:180:79: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/sqlite/src/ui.rs:180:83: error[E0308]: arguments to this function are incorrect
+apps/sqlite/src/ui.rs:24:43: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/sqlite/src/ui.rs:24:54: error[E0308]: arguments to this function are incorrect
+apps/sqlite/src/ui.rs:24:9: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/sqlite/src/ui.rs:25:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/sqlite/src/ui.rs:25:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/sqlite/src/ui.rs:25:70: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/sqlite/src/ui.rs:25:85: error[E0308]: arguments to this function are incorrect
+apps/sqlite/src/ui.rs:32:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/sqlite/src/ui.rs:32:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/sqlite/src/ui.rs:32:56: error[E0308]: arguments to this function are incorrect
+apps/sqlite/src/ui.rs:32:74: error[E0308]: arguments to this function are incorrect
+apps/sqlite/src/ui.rs:38:9: error[E0599]: no method named `clear` found for reference `&gam::Gam` in the current scope: method not found in `&gam::Gam`
+apps/sqlite/src/ui.rs:56:43: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/sqlite/src/ui.rs:56:51: error[E0308]: arguments to this function are incorrect
+apps/sqlite/src/ui.rs:56:9: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/sqlite/src/ui.rs:58:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/sqlite/src/ui.rs:58:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/sqlite/src/ui.rs:58:70: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/sqlite/src/ui.rs:58:74: error[E0308]: arguments to this function are incorrect
+apps/sqlite/src/ui.rs:99:26: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/sqlite/src/ui.rs:99:40: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/sqlite/src/ui.rs:99:78: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/sqlite/src/ui.rs:99:82: error[E0308]: arguments to this function are incorrect

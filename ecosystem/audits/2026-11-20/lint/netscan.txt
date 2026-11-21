@@ -1,0 +1,51 @@
+apps/netscan/src/app.rs:7:28: warning: unused import: `Ipv4`
+apps/netscan/src/main.rs:17:40: error[E0599]: no function or associated item named `from_str` found for struct `xous::String` in the current scope: function or associated item not found in `String<128>`
+apps/netscan/src/main.rs:29:36: error[E0433]: failed to resolve: could not find `RawkeysEvent` in `gam`: could not find `RawkeysEvent` in `gam`
+apps/netscan/src/main.rs:31:96: error[E0308]: mismatched types: expected `WaitHandle<_>`, found `Duration`
+apps/netscan/src/ui.rs:102:13: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/netscan/src/ui.rs:102:47: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/netscan/src/ui.rs:102:51: error[E0308]: arguments to this function are incorrect
+apps/netscan/src/ui.rs:126:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/netscan/src/ui.rs:126:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/netscan/src/ui.rs:126:70: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/netscan/src/ui.rs:126:80: error[E0308]: arguments to this function are incorrect
+apps/netscan/src/ui.rs:131:43: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/netscan/src/ui.rs:131:58: error[E0308]: arguments to this function are incorrect
+apps/netscan/src/ui.rs:131:9: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/netscan/src/ui.rs:16:42: error[E0308]: arguments to this function are incorrect
+apps/netscan/src/ui.rs:16:9: error[E0308]: arguments to this method are incorrect
+apps/netscan/src/ui.rs:167:21: error[E0308]: arguments to this method are incorrect
+apps/netscan/src/ui.rs:167:50: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/netscan/src/ui.rs:167:58: error[E0308]: arguments to this function are incorrect
+apps/netscan/src/ui.rs:17:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/netscan/src/ui.rs:17:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/netscan/src/ui.rs:17:74: error[E0308]: arguments to this function are incorrect
+apps/netscan/src/ui.rs:170:26: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/netscan/src/ui.rs:170:40: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/netscan/src/ui.rs:170:79: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/netscan/src/ui.rs:170:83: error[E0308]: arguments to this function are incorrect
+apps/netscan/src/ui.rs:177:27: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/netscan/src/ui.rs:177:41: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/netscan/src/ui.rs:177:80: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/netscan/src/ui.rs:177:89: error[E0308]: arguments to this function are incorrect
+apps/netscan/src/ui.rs:200:43: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/netscan/src/ui.rs:200:47: error[E0308]: arguments to this function are incorrect
+apps/netscan/src/ui.rs:200:9: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/netscan/src/ui.rs:24:43: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/netscan/src/ui.rs:24:54: error[E0308]: arguments to this function are incorrect
+apps/netscan/src/ui.rs:24:9: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/netscan/src/ui.rs:25:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/netscan/src/ui.rs:25:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/netscan/src/ui.rs:25:70: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/netscan/src/ui.rs:25:85: error[E0308]: arguments to this function are incorrect
+apps/netscan/src/ui.rs:32:18: error[E0061]: this function takes 2 arguments but 1 argument was supplied
+apps/netscan/src/ui.rs:32:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied
+apps/netscan/src/ui.rs:32:56: error[E0308]: arguments to this function are incorrect
+apps/netscan/src/ui.rs:32:74: error[E0308]: arguments to this function are incorrect
+apps/netscan/src/ui.rs:38:9: error[E0599]: no method named `clear` found for reference `&gam::Gam` in the current scope: method not found in `&gam::Gam`
+apps/netscan/src/ui.rs:57:43: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/netscan/src/ui.rs:57:52: error[E0308]: arguments to this function are incorrect
+apps/netscan/src/ui.rs:57:9: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/netscan/src/ui.rs:90:13: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+apps/netscan/src/ui.rs:90:47: error[E0308]: mismatched types: expected `isize`, found `i16`
+apps/netscan/src/ui.rs:90:51: error[E0308]: arguments to this function are incorrect
