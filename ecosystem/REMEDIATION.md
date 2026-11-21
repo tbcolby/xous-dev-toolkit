@@ -59,6 +59,24 @@ Package renames needed for G4: `cipher` → `cipher-workshop` (crate collision; 
 - Workers don't edit the toolkit. They list reusable helpers in their report; between rounds those are upstreamed into appkit, docs, lint and the template, then the next round uses them.
 - After each round: `bin/integrate --grade --json ecosystem/status.json <all repos>` and `bin/status ecosystem/status.json --update ecosystem/TRACKER.md`, then commit.
 
+## Status and TODO (paused 2026-11-21, usage limit)
+
+**At 10/10 gate, pushed to `main` (11):** barcode, qrcode-app, keygen, otp, cipher-workshop, contacts, budget, planner (gate re-run by orchestrator) · calc, writer, timers (worker-reported gate pass + README review; orchestrator re-grade was interrupted).
+
+**Resume checklist**
+1. [ ] Re-grade calc, writer, timers independently: `bin/integrate --xous-root <tree> --grade ~/Dev/precursor/precursor-{calc,writer,timers}`.
+2. [ ] Round 2b — resume from branch `remediation-wip` (pushed, NOT gated):
+   - [ ] othello (F): WIP on `remediation-wip`; perft 1–6 = 4/12/56/244/1396/8200, AI off the UI thread, F-keys.
+   - [ ] c64 (F): WIP on `remediation-wip` (was mid-way through vic.rs); path deps, frame pump, heap memory, 6502 tests.
+   - [ ] gameboy (R): not started.
+3. [ ] Round 3a: carse WIP on `remediation-wip` (core/ codec + draw started); decide, mines, flashcards not started.
+4. [ ] Rounds 3b, 4a, 4b, 5a, 5b (table above) — 22 apps not started.
+5. [ ] After each round: fold worker Retro into `LESSONS.md` + toolkit; `bin/integrate --grade --json ecosystem/status.json <all>`; `bin/status ecosystem/status.json --update ecosystem/TRACKER.md`; commit.
+6. [ ] Renode capture runs for every app (needs Renode installed); until then READMEs say "Renode capture not yet run".
+7. [ ] Remaining appkit candidates (LESSONS "Open"): modal confirm/menu overlay, right-aligned text, non-blocking alert thread, device-clock → `Date` helper.
+
+**How to run workers** (see `LESSONS.md`): model Sonnet; brief = REMEDIATION + LESSONS + CLAUDE.md + reference apps; one private xous-core tree and `CARGO_HOME` per worker; max two concurrent builds; orchestrator re-runs `--grade` and reviews against the audit before counting an app done; toolkit edits only in a `git worktree`.
+
 ## Log
 
-Updated as rounds complete.
+- 2026-11-20/21: toolkit gate + appkit-core + helpers; 11 apps to 10/10; see `LESSONS.md` log for per-round notes.
