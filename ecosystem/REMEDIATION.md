@@ -59,22 +59,18 @@ Package renames needed for G4: `cipher` → `cipher-workshop` (crate collision; 
 - Workers don't edit the toolkit. They list reusable helpers in their report; between rounds those are upstreamed into appkit, docs, lint and the template, then the next round uses them.
 - After each round: `bin/integrate --grade --json ecosystem/status.json <all repos>` and `bin/status ecosystem/status.json --update ecosystem/TRACKER.md`, then commit.
 
-## Status and TODO (paused 2026-11-21, usage limit)
+## Status and TODO (updated 2026-11-21)
 
-**At 10/10 gate, pushed to `main` (11):** barcode, qrcode-app, keygen, otp, cipher-workshop, contacts, budget, planner (gate re-run by orchestrator) · calc, writer, timers (worker-reported gate pass + README review; orchestrator re-grade was interrupted).
+**All 40/40 apps pass the 10/10 gate on `main`.** Each was graded by its Sonnet worker and then re-graded independently by the orchestrator in a separate xous-core tree at 31fbe23 (rounds 1–5b; see `LESSONS.md` log). No `remediation-wip` branches remain.
 
 **Resume checklist**
-1. [ ] Re-grade calc, writer, timers independently: `bin/integrate --xous-root <tree> --grade ~/Dev/precursor/precursor-{calc,writer,timers}`.
-2. [ ] Round 2b — resume from branch `remediation-wip` (pushed, NOT gated):
-   - [ ] othello (F): WIP on `remediation-wip`; perft 1–6 = 4/12/56/244/1396/8200, AI off the UI thread, F-keys.
-   - [ ] c64 (F): WIP on `remediation-wip` (was mid-way through vic.rs); path deps, frame pump, heap memory, 6502 tests.
-   - [ ] gameboy (R): not started.
-3. [ ] Round 3a: carse WIP on `remediation-wip` (core/ codec + draw started); decide, mines, flashcards not started.
-4. [ ] Rounds 3b, 4a, 4b, 5a, 5b (table above) — 22 apps not started.
-5. [ ] After each round: fold worker Retro into `LESSONS.md` + toolkit; `bin/integrate --grade --json ecosystem/status.json <all>`; `bin/status ecosystem/status.json --update ecosystem/TRACKER.md`; commit.
-6. [ ] Renode capture runs for every app (needs Renode installed); until then READMEs say "Renode capture not yet run".
-7. [ ] Final pass, every repo: README rebuilt around real Renode screenshots from `capture.py` (hero shot + one per screen, key table, honest limitations). Screenshots must come from a passing capture run (exit 0, app visible, not Shellchat); remove the "not yet run" notes only then.
-8. [ ] Remaining appkit candidates (LESSONS "Open"): modal confirm/menu overlay, right-aligned text, non-blocking alert thread, device-clock → `Date` helper.
+1. [x] Rounds 1–5b remediated, re-graded, retros folded into `LESSONS.md` + toolkit.
+2. [ ] Combined sweep: `bin/integrate --grade --json ecosystem/status.json <all 40>` then `bin/status ecosystem/status.json --update ecosystem/TRACKER.md` (started 2026-11-21, stopped at a wrap-up point under load ~330; apps built against older toolkit commits should be re-confirmed, as appkit-core tracks `main`).
+3. [ ] Renode capture runs for every app (needs Renode installed); until then READMEs say "Renode capture not yet run".
+4. [ ] Final pass, every repo: README rebuilt around real Renode screenshots from `capture.py` (hero shot + one per screen, key table, honest limitations). Screenshots must come from a passing capture run (exit 0, app visible, not Shellchat); remove the "not yet run" notes only then.
+5. [ ] Appkit candidates (LESSONS "Open"): animated-shell template variant / `run_loop`, shared LAN one-time-code transfer crate (flashcards, gitlog, writer), confirm dialog, scrollable text view, Life-like grid, bitmap→rects merge, `Reveal` counter, right-aligned text.
+6. [ ] DOCS_AUDIT leftovers: T2 HOSTED_PKGS drift check, T4 nightly Renode-image CI job, R1 chat template variant.
+7. [ ] Tyler decisions: renames (rss-viewer, sql-explorer, "IFS Fractals", "Cron Explainer", "Net Check", zork); plaintext LAN transfers (flashcards, writer, gitlog :7880, c64 :6464 on 0.0.0.0); pet away rule; othello AI times; fortress removed features; reaction "Waves" now bands; penrose star seed capped at level 6; hwtools restores GPIO/UART on background; hardware checks (GPIO ADC scale, `connect_timeout` on Xous); mines 9df8aa1 and writer's first commit don't build alone.
 
 **How to run workers** (see `LESSONS.md`): model Sonnet; brief = REMEDIATION + LESSONS + CLAUDE.md + reference apps; one private xous-core tree and `CARGO_HOME` per worker; max two concurrent builds; orchestrator re-runs `--grade` and reviews against the audit before counting an app done; toolkit edits only in a `git worktree`.
 
