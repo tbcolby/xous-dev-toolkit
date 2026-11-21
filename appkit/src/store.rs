@@ -124,6 +124,52 @@ impl Store {
         }
     }
 
+    /// Load every record whose key matches `prefix` (see
+    /// `precursor_appkit_core::records`). Records that fail to read or parse
+    /// are counted in `unreadable`, logged by key name only, and left alone.
+    /// Call again when [`watch_bases`] fires.
+    pub fn load_records<T, E: core::fmt::Debug>(
+        &self,
+        prefix: &str,
+        parse: impl Fn(&[u8]) -> core::result::Result<T, E>,
+    ) -> Result<precursor_appkit_core::records::Loaded<T>> {
+        let mut out = precursor_appkit_core::records::Loaded::default();
+        for name in self.keys()?.into_iter().filter(|n| precursor_appkit_core::records::is_key(prefix, n)) {
+            match self.read_bytes(&name) {
+                Ok(Some(bytes)) => match parse(&bytes) {
+                    Ok(v) => {
+                        let basis = self.basis_of(&name).ok().flatten();
+                        out.items.push((name, v, basis));
+                    }
+                    Err(e) => {
+                        log::warn!("record {} unreadable: {:?}", name, e);
+                        out.unreadable += 1;
+                    }
+                },
+                Ok(None) => {}
+                Err(e) => {
+                    log::warn!("couldn't read {}: {:?}", name, e.kind());
+                    out.unreadable += 1;
+                }
+            }
+        }
+        Ok(out)
+    }
+
+    /// Write `bytes` as a new record under a fresh random key and return the
+    /// key. Fails (writing nothing) if the entropy source fails.
+    pub fn create_record<E: precursor_appkit_core::entropy::Entropy + ?Sized>(
+        &self,
+        prefix: &str,
+        entropy: &mut E,
+        bytes: &[u8],
+    ) -> Result<String> {
+        let key = precursor_appkit_core::records::new_key(prefix, entropy)
+            .map_err(|_| std::io::Error::other("entropy source failed; record not created"))?;
+        self.write_bytes(&key, bytes)?;
+        Ok(key)
+    }
+
     /// The basis new records will be written to. Show this to the user before
     /// saving anything sensitive.
     pub fn target_basis(&self) -> Option<String> { self.pddb.latest_basis() }

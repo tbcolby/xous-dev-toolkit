@@ -17,6 +17,10 @@
 
 #![forbid(unsafe_code)]
 
+
+
 pub mod entropy;
 pub mod keys;
 pub mod layout;
+pub mod records;
+pub mod text;

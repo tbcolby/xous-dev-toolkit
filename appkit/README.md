@@ -40,3 +40,9 @@ The Xous-dependent modules are compiled by CI through the scaffolded app (`bin/n
 ## Not yet covered
 
 Modals wrappers, text entry, networking, and a status-bar-aware vibration/notification helper. Use the raw `modals`/`net` APIs per `agents/graphics.md` and `agents/networking.md`.
+
+## Added after round 2a
+
+- `precursor_appkit_core::text`: `TextField` (UTF-8-safe cursor, max length, redacted `Debug`), `wrap`, `Pager`.
+- `precursor_appkit_core::records` + `Store::create_record` / `Store::load_records`: one PDDB key per record with random names; unreadable records are counted, never overwritten.
+- `Screen::fill_rects` (batched rectangles) and `Screen::para` (wrapped paragraph, returns next y).

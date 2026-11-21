@@ -160,5 +160,31 @@ impl Screen {
     }
 
     /// Push buffered drawing to the display. Call once per frame.
+    /// Fill many rectangles with one GAM message per batch instead of one
+    /// blocking call each (QR modules, game boards, cellular automata).
+    /// Each item is `(top_left, bottom_right)`, inclusive.
+    pub fn fill_rects(&self, rects: impl IntoIterator<Item = (Point, Point)>, color: PixelColor) {
+        let style = DrawStyle::new(color, color, 0);
+        let mut list = gam::GamObjectList::new(self.gid);
+        for (tl, br) in rects {
+            let obj = gam::GamObjectType::Rect(Rectangle::new_with_style(tl, br, style));
+            if let Err(obj) = list.push(obj) {
+                self.gam.draw_list(list).ok();
+                list = gam::GamObjectList::new(self.gid);
+                list.push(obj).ok();
+            }
+        }
+        self.gam.draw_list(list).ok();
+    }
+
+    /// Wrapped text between `y` and `bottom` with the standard margins.
+    /// Returns the next free y (with a small gap), or `y` if there's no room.
+    pub fn para(&self, y: isize, bottom: isize, style: GlyphStyle, text: &str) -> isize {
+        if y >= bottom {
+            return y;
+        }
+        y + self.text_in(Point::new(MARGIN, y), Point::new(self.size.x - MARGIN, bottom), style, text) + 4
+    }
+
     pub fn flush(&self) { self.gam.redraw().ok(); }
 }
