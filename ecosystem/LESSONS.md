@@ -25,6 +25,9 @@ Format: **Lesson** · what happened · what changed in the toolkit.
 19. **Inner loop for the hosted build: `bin/integrate --check --strict --quick <repo>`** skips regenerating the GAM app table when it already lists the app (saves the xtask run). Use the full `--grade` before pushing. The gate takes 3–5 min: run it in the background and wait, don't fight a 120 s tool timeout.
 20. **Rebuild without destroying.** Never `rm -rf src` during a rebuild: `git mv` old files to `old/` and delete them once the new shell builds (a worker lost freshly written work this way).
 21. **The template core already has serde/serde_json.** Adding them again is a duplicate-key error.
+22. **Write core tests from the audit's measured numbers.** Round 5a turned each finding's measurement (vertex positions, side ratios, coverage) into an assertion; nearly every test passed first run after the fix and none needed debugging.
+23. **Don't give models a default canvas size.** Use `Option` or take the area from `Screen::content_area()`; `(336, 400)` literals trip `hardcoded-screen` and break on other displays.
+24. **The appkit-core git dependency tracks the toolkit's `main`.** Lockfiles are not committed, so builds pick up new toolkit commits. The toolkit only makes additive changes to appkit-core; breaking changes need a version bump and a pinned `rev`.
 9. **Run the gate early, not just at the end.** Gate failures found at the end cost a full rebuild cycle each. Run `bin/lint` and `core` tests continuously; run `--grade` after the shell compiles.
 
 ## Patterns (use these, don't reinvent)
@@ -68,6 +71,8 @@ Format: **Lesson** · what happened · what changed in the toolkit.
 - Modal confirm/menu overlay, right-aligned text, non-blocking alert thread (round 2a).
 
 ## Log
+
+- 2026-11-21 round 5a (flames → "IFS Fractals", penrose, kaleidoscope, sacred, moire), Sonnet: 5/5 pass, 25 min / 73 tool calls; tests 16/13/13/18/24. All local sine tables replaced by `fixed::`. Worker found a real appkit bug: `Screen::circles(fill=false)` filled Light and erased overlaps (fixed). Toolkit: `Screen::content_area`, lessons 22–24. Open: `run_loop` shell helper, bitmap→rects merge (moire, qrcode, life).
 
 - 2026-11-21 round 4b (cron, gitlog, netscan, hwtools), Sonnet: 4/4 pass first submission, 28 min / 76 tool calls; tests 54/38/34/30. netscan's fake scan replaced by a real confirmed TCP check; hwtools writes need confirmation and are restored on background. Toolkit: Effect pattern, lessons 20–21, date/pump docs. Open: shared LAN-transfer crate, confirm dialog, scrollable text view.
 

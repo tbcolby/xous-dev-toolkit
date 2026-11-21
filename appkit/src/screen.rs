@@ -107,6 +107,15 @@ impl Screen {
         self.gam.post_textview(&mut tv).ok();
     }
 
+    /// The content area between [`Screen::header`] and [`Screen::footer`] as
+    /// inclusive `((x0, y0), (x1, y1))`, known before drawing — pass it as the
+    /// `clip` of [`Screen::lines`].
+    pub fn content_area(&self) -> ((i32, i32), (i32, i32)) {
+        let top = 2 + self.line_height(GlyphStyle::Bold) + 2 + 4;
+        let bottom = self.size.y - self.line_height(GlyphStyle::Small) - 2 - 4;
+        ((0, top as i32), (self.size.x as i32 - 1, bottom as i32))
+    }
+
     /// Title row with a rule under it. Returns the y where content can start.
     pub fn header(&self, title: &str) -> isize {
         let h = self.line_height(GlyphStyle::Bold);
@@ -205,12 +214,16 @@ impl Screen {
         self.gam.draw_list(list).ok();
     }
 
-    /// Draw many circle outlines (`width` px; `fill` fills them dark) in
-    /// batched GAM messages. Items are `(center, radius)`. Use this instead of
-    /// approximating circles with polygons.
+    /// Draw many circles (`width` px outline; `fill` fills them dark) in
+    /// batched GAM messages. Items are `(center, radius)`. Unfilled circles
+    /// have no fill at all (`fill_color: None`), so overlapping outlines don't
+    /// erase each other (a Light fill wiped Seed of Life). Circles are not
+    /// clipped: repaint the header/footer afterwards if they can overlap.
     pub fn circles(&self, items: impl IntoIterator<Item = ((i32, i32), i32)>, width: isize, fill: bool) {
-        let fillc = if fill { PixelColor::Dark } else { PixelColor::Light };
-        let style = DrawStyle::new(fillc, PixelColor::Dark, width);
+        let mut style = DrawStyle::new(PixelColor::Dark, PixelColor::Dark, width);
+        if !fill {
+            style.fill_color = None;
+        }
         let mut list = gam::GamObjectList::new(self.gid);
         for (c, r) in items {
             let circ = Circle::new_with_style(Point::new(c.0 as isize, c.1 as isize), r as isize, style);
