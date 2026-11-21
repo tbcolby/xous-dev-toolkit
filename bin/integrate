@@ -212,8 +212,8 @@ def check(root: Path, pkgs, verbose, broken, strict=False):
         results[pkg] = {"ok": ok, "errors": len(errors), "warnings": len(warns),
                         "seconds": round(time.monotonic() - t0, 1), "first_errors": errors[:5]}
         print(f"  {'PASS' if ok else 'FAIL'}  {pkg:<20} {len(errors):>3} err {len(warns):>3} warn", flush=True)
-        if verbose and errors:
-            for e in errors[:10]:
+        if verbose and (errors or (strict and warns)):
+            for e in (errors + (warns if strict else []))[:10]:
                 print("        " + e)
     return results
 
@@ -290,6 +290,12 @@ def main() -> int:
         return 100
     if a.grade:
         a.check = a.strict = a.test = True
+    pin = re.search(r"^rust=(\S+)", (TOOLKIT / "XOUS_CORE_ANCHOR").read_text(), re.M)
+    if pin and a.check:
+        rv = sh(["rustc", "--version"], cwd=root, capture=True).stdout.split()
+        if len(rv) > 1 and rv[1] != pin.group(1):
+            print(f"warning: rustc {rv[1]} here, anchor pins {pin.group(1)}; clippy results may differ from CI "
+                  f"(rustup toolchain install {pin.group(1)})", file=sys.stderr)
     if not a.check:
         return 0
 

@@ -32,7 +32,11 @@ jobs:
       - uses: actions/checkout@v4
       - name: Ubuntu deps (hosted mode)
         run: sudo apt-get update && sudo apt-get install -y libxkbcommon-dev
-      - run: rustup update stable
+      - name: Rust toolchain (anchor pins it; upstream job tracks stable)
+        run: |
+          . <(grep -E '^rust=' XOUS_CORE_ANCHOR)
+          if [ "${{ matrix.xous }}" = anchor ]; then tc="$rust"; else tc=stable; fi
+          rustup toolchain install "$tc" --profile minimal -c clippy && rustup default "$tc"
       - name: Checkout xous-core
         run: |
           . <(grep -E '^(repo|commit)=' XOUS_CORE_ANCHOR)

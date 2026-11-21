@@ -1,4 +1,7 @@
-# xous-core commit this toolkit (appkit, templates, docs) is verified against.
-# Update only after scripts/../bin/integrate passes on the new commit.
+# xous-core commit and Rust toolchain this toolkit (appkit, templates, docs)
+# is verified against. Update only after bin/integrate --grade passes on the
+# new pair. CI pins `rust`; clippy lints differ between Rust releases, so a
+# local run on another version can pass while CI fails (or vice versa).
 repo=https://github.com/betrusted-io/xous-core.git
 commit=31fbe23
+rust=1.88.0
