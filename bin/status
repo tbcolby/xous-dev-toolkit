@@ -36,8 +36,12 @@ def render(data: dict) -> str:
         first = first.replace("|", "\\|")[:110]
         state = "✅ pass" if r["ok"] else "❌ fail"
         t = r.get("tests")
-        tests = "—" if t is None else (f"{t['passed']} ✓" if t["ok"] else f"{t['passed']}✓ {t['failed']}✗" if t["crates"]
-                                       else "none")
+        if t is None:
+            tests = "—"
+        elif t["ok"]:
+            tests = f"{t['passed']} ✓"
+        else:
+            tests = f"{t['passed']}✓ {t['failed']}✗" if t["crates"] else "none"
         lint = r.get("lint", "—")
         lines.append(f"| {pkg} | {state} | {r['errors']} | {r['warnings']} | {tests} | {lint} | {first} |")
     if data.get("warnings"):

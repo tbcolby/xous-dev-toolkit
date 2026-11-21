@@ -31,11 +31,8 @@ jobs:
           git clone -q "$repo" xous-core && git -C xous-core checkout -q "$commit"
       - uses: Swatinem/rust-cache@v2
         with: { workspaces: xous-core }
-      - name: Hosted check
-        run: toolkit/bin/integrate --xous-root xous-core --check -v app
-      - name: Host tests for pure crates
-        run: |
-          shopt -s nullglob
-          for d in app/core app/*-core app/libs/*; do
-            [ -f "$d/Cargo.toml" ] && (cd "$d" && cargo test)
-          done
+      - name: Xous toolchain (xtask needs it to generate the GAM app table)
+        working-directory: xous-core
+        run: cargo xtask install-toolkit
+      - name: 10/10 gate (build, clippy, host tests, lint)
+        run: toolkit/bin/integrate --xous-root xous-core --grade -v app

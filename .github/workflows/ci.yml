@@ -43,6 +43,9 @@ jobs:
         with:
           workspaces: ../xous-core
           key: ${{ matrix.xous }}
+      - name: Xous toolchain (xtask needs it to generate the GAM app table)
+        working-directory: ../xous-core
+        run: cargo xtask install-toolkit
       - name: Scaffold a throwaway app
         run: bin/new-app ci-smoke "CI Smoke" --dir ../apps
       - name: Integrate + hosted check (scaffold + appkit)
