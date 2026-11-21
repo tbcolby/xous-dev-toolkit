@@ -1,0 +1,41 @@
+# Reusable workflow for app repos. In an app repo, add .github/workflows/ci.yml:
+#
+#   name: ci
+#   on: [push, pull_request]
+#   jobs:
+#     check:
+#       uses: tbcolby/xous-dev-toolkit/.github/workflows/app-check.yml@main
+#
+# It builds the calling repo in hosted mode against xous-core at the toolkit's
+# anchor commit, and runs `cargo test` for any host-testable *-core crates.
+name: app-check
+on:
+  workflow_call:
+    inputs:
+      toolkit-ref:
+        type: string
+        default: main
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { path: app }
+      - uses: actions/checkout@v4
+        with: { repository: tbcolby/xous-dev-toolkit, ref: "${{ inputs.toolkit-ref }}", path: toolkit }
+      - run: sudo apt-get update && sudo apt-get install -y libxkbcommon-dev
+      - run: rustup update stable
+      - name: Checkout xous-core at anchor
+        run: |
+          . <(grep -E '^(repo|commit)=' toolkit/XOUS_CORE_ANCHOR)
+          git clone -q "$repo" xous-core && git -C xous-core checkout -q "$commit"
+      - uses: Swatinem/rust-cache@v2
+        with: { workspaces: xous-core }
+      - name: Hosted check
+        run: toolkit/bin/integrate --xous-root xous-core --check -v app
+      - name: Host tests for pure crates
+        run: |
+          shopt -s nullglob
+          for d in app/*-core app/libs/*; do
+            [ -f "$d/Cargo.toml" ] && (cd "$d" && cargo test)
+          done

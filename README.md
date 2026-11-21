@@ -1,232 +1,91 @@
 # Xous Development Toolkit
 
-Tools and methodology for developing [Xous](https://github.com/betrusted-io/xous-core) apps on the [Precursor](https://www.crowdsupply.com/sutajio-kosagi/precursor) platform — particularly on macOS ARM64 where the Renode GUI is unavailable.
+Tools for building [Xous](https://github.com/betrusted-io/xous-core) apps for the [Precursor](https://www.crowdsupply.com/sutajio-kosagi/precursor) handheld, especially from macOS ARM64 where Renode has no GUI.
 
-This toolkit was developed entirely through LLM-assisted development (Claude Code), bootstrapping from zero Xous knowledge to a working app running on the emulated hardware.
+Everything here is verified against xous-core at the commit in [`XOUS_CORE_ANCHOR`](XOUS_CORE_ANCHOR). CI rebuilds a scaffolded app against that commit on every push, and against upstream `main` nightly.
 
-## What's Included
+## What's in the box
 
-| File | Purpose |
-|------|---------|
-| `CLAUDE.md` | LLM agent instructions for Precursor/Xous app development |
-| `discoveries.md` | API notes and hard-won discoveries from development |
-| `scripts/renode_interact.py` | Low-level Renode automation (screenshots, keyboard, PDDB init) |
-| `scripts/renode_capture.py` | Full app screenshot capture (boot, unlock, launch, capture all screens) |
+| Path | What it is |
+|---|---|
+| [`bin/new-app`](bin/new-app) | Scaffold a new app repo that builds, registers with GAM correctly, and uses `precursor-appkit` |
+| [`bin/integrate`](bin/integrate) | Copy app repos into a xous-core tree (manifest, workspace, libs) and hosted-check each one; pass/fail table + JSON |
+| [`appkit/`](appkit/) | `precursor-appkit`: shared crate with correct key codes, GAM drawing helpers, PDDB JSON store, fail-closed TRNG, focus-aware pump |
+| [`templates/app/`](templates/app/) | The app template `new-app` instantiates |
+| [`scripts/`](scripts/README.md) | Renode automation (`renode_lib.py`, `renode_capture.py`) and the USB log monitor |
+| [`agents/`](agents/README.md) | Specialist knowledge files for Claude Code (graphics, storage, networking, …) |
+| [`ecosystem/`](ecosystem/) | App standards, pipeline, and portfolio tracker |
+| [`tests/`](tests/) | Python tests; `tests/doc-snippets/` compiles the Rust snippets from the docs |
+| [`.github/workflows/`](.github/workflows/) | Toolkit CI and a reusable `app-check.yml` for app repos |
 
-## The Problem
-
-Developing for Precursor on macOS ARM64 has several challenges:
-
-1. **No GUI emulator** — Renode's XWT/GTK UI doesn't work on macOS ARM64
-2. **Complex boot sequence** — PDDB initialization requires interactive PIN entry
-3. **Keyboard timing quirks** — 500ms hold threshold silently drops key presses
-4. **Limited documentation** — Must infer APIs from source code
-
-## The Solution
-
-### Headless Renode with Telnet Monitor
+## Quick start
 
 ```bash
-# Start Renode headless with telnet access
-renode --disable-xwt -P 4567 \
-  -e 'path add @/path/to/xous-core; i @emulation/xous-release.resc; start'
+# 0. One-time: a xous-core checkout at the anchor commit
+git clone https://github.com/betrusted-io/xous-core ~/xous-core
+git -C ~/xous-core checkout $(sed -n 's/^commit=//p' XOUS_CORE_ANCHOR)
+export XOUS_ROOT=~/xous-core
+
+# 1. New app
+bin/new-app tally "Tally" --dir ~/Dev/precursor
+
+# 2. Build it (hosted mode, no hardware needed)
+bin/integrate --check ~/Dev/precursor/precursor-tally
+cd $XOUS_ROOT && cargo xtask run tally          # opens the hosted-mode window
+
+# 3. Whole portfolio
+bin/integrate --check --json status.json ~/Dev/precursor/precursor-*
 ```
 
-### Automated Interaction via Python
+`bin/integrate` exits with the number of failing apps, so it works as a CI gate.
 
-```bash
-# Take a screenshot of the emulated display
-python3 scripts/renode_interact.py screenshot output.png
+## precursor-appkit
 
-# Initialize PDDB on a blank image (handles full dialog sequence)
-python3 scripts/renode_interact.py init-pddb a
+The crate exists because the same mistakes kept recurring across apps. Each module is the fix for one of them:
 
-# Launch an app via the menu system
-python3 scripts/renode_interact.py launch-app Flashcards 1
+| Module | Use it instead of… |
+|---|---|
+| `keys` | hand-written key constants. Arrows are U+2190–2193, Enter `\r`, Backspace 0x08, F1–F4 0x11–0x14. `∴` never reaches an app. |
+| `rng` | `trng.get_u32().unwrap_or(0)` and `x % n`. Panics on TRNG failure; unbiased ranges and shuffles. |
+| `layout` | ad-hoc list scrolling and hard-coded 336×536. |
+| `store` | `PddbKey::set_len` (doesn't exist). Delete-then-rewrite in the key's own basis, `Result` everywhere, basis-change watcher. |
+| `pump` | a ticker thread that runs while backgrounded or doubles its rate on refocus. |
+| `screen` | `invert` (refused for apps), `gam.clear()`, `graphics_server::*`. |
+| `app` | registering with the xous-names server name. Uses `gam::APP_NAME_*`, leaves via `relinquish_focus`. |
 
-# Full sequence: boot wait + PDDB init + app launch
-python3 scripts/renode_interact.py full-init 90
-```
+Host unit tests: `cargo test -p precursor-appkit --no-default-features` inside a xous-core tree that `bin/integrate` has populated.
 
-### Full App Screenshot Capture
+## Hosted, Renode, hardware
 
-The `renode_capture.py` script automates the complete process of booting Renode, initializing PDDB, launching an app, and capturing screenshots:
-
-```bash
-cd scripts
-
-# First time (or when PDDB PIN unknown): full initialization
-python3 renode_capture.py --init --app flashcards --screenshots ../output
-
-# Subsequent runs (PDDB already formatted with PIN 'a'):
-python3 renode_capture.py --app flashcards --screenshots ../output
-
-# Specify app menu index (default: 1 = first app after Shellchat)
-python3 renode_capture.py --app othello --app-index 1 --screenshots ../output
-```
-
-**Currently supported apps:**
-- `flashcards` - Deck list, cards, study mode
-- `writer` - Mode selection, editing, preview
-- `othello` - Main menu, difficulty selection, gameplay
-
-Adding new apps: Implement a `capture_<appname>()` function in `renode_capture.py`.
-
-## Screenshots
-
-| PDDB Format Dialog | Formatting Progress | App Running |
+| Target | Command | Use for |
 |---|---|---|
-| ![Format Dialog](screenshots/pddb_format_dialog.png) | ![Formatting](screenshots/pddb_formatting.png) | ![App](screenshots/app_launched.png) |
+| Hosted | `cargo xtask run <app>` | Fast iteration; window on your desktop |
+| Renode | `cargo xtask renode-image <app>` then `scripts/renode_capture.py` | Screenshots, PDDB flows, CI-style capture |
+| Device | `cargo xtask app-image <app>` + update via USB | The real thing |
 
-## Setup Guide (macOS ARM64)
+## Setup (macOS ARM64)
 
-### 1. Install Renode
+1. **Renode**: download the ARM64 portable package from [Renode releases](https://github.com/renode/renode/releases) into `/Applications/`.
+2. **Rust**: `rustup install stable`. For device and Renode images, install the Xous sysroot matching your rustc from [betrusted-io/rust releases](https://github.com/betrusted-io/rust/releases) into `~/.rustup/toolchains/stable-aarch64-apple-darwin/lib/rustlib/riscv32imac-unknown-xous-elf/`. Hosted builds need no sysroot.
+3. **Flash backing file for Renode** (128 MiB of 0xFF):
+   ```bash
+   cd $XOUS_ROOT && python3 -c "open('tools/pddb-images/renode.bin','wb').write(b'\xff'*(128<<20))"
+   ```
+4. **Python**: 3.9+. `pip install pyserial` only for the USB log monitor. Dev: `pip install pytest ruff`.
 
-Download the ARM64 portable package from [Renode releases](https://github.com/renode/renode/releases). Mount the DMG and copy to `/Applications/`.
-
-```bash
-# Create a convenience symlink
-ln -s /Applications/Renode.app/Contents/MacOS/renode ~/bin/renode
-```
-
-### 2. Install Rust Toolchain
-
-```bash
-# Install stable Rust (tested with 1.88.0)
-rustup install stable
-
-# Download the Xous sysroot matching your Rust version
-# From: https://github.com/betrusted-io/rust/releases
-# Extract to:
-~/.rustup/toolchains/stable-aarch64-apple-darwin/lib/rustlib/riscv32imac-unknown-xous-elf/
-```
-
-### 3. Create Flash Backing File
+## Renode capture
 
 ```bash
-cd xous-core
-python3 -c "
-with open('tools/pddb-images/renode.bin', 'wb') as f:
-    for _ in range(128):
-        f.write(b'\xff' * (1024*1024))
-"
+python3 scripts/renode_capture.py --init --app tally            # blank flash: format PDDB with PIN 'a'
+python3 scripts/renode_capture.py --app tally --script ../precursor-tally/capture.py
 ```
 
-### 4. Build and Run
+Exit code is non-zero if any screenshot fails. See [`scripts/README.md`](scripts/README.md) for the plugin contract, exit codes and known limits.
 
-```bash
-# Build a Renode image with your app
-cargo xtask renode-image your_app_name
+## Using this with Claude Code
 
-# Start Renode headless
-renode --disable-xwt -P 4567 \
-  -e 'path add @/path/to/xous-core; i @emulation/xous-release.resc; start'
-
-# In another terminal: initialize PDDB and launch app
-python3 scripts/renode_interact.py full-init 90
-```
-
-## Screenshot Capture Troubleshooting
-
-### Screenshots show "Incorrect PIN" dialog
-**Cause:** PDDB has different PIN than expected, or was never formatted.
-
-**Solution:** Use `--init` flag to reset and format PDDB:
-```bash
-python3 renode_capture.py --init --app myapp --screenshots ./output
-```
-
-### Screenshots show Shellchat instead of app
-**Cause:** App not appearing in "Switch to App" menu. Usually an app registration issue.
-
-**Solution:** Ensure app uses correct naming pattern:
-```rust
-const SERVER_NAME: &str = "_MyApp_";  // Underscored for xous names server
-const APP_NAME: &str = "MyApp";       // Plain for GAM, must match manifest
-```
-The `APP_NAME` must exactly match `context_name` in `apps/manifest.json`.
-
-### System reboots during capture (uptime jumps backwards)
-**Cause:** App crash during key handling.
-
-**Solution:** Use direct keyboard shortcuts instead of Enter for navigation. Check app's key handling code for panics.
-
-### Keys don't work / wrong characters produced
-**Cause:** Keyboard hold timing issue (>500ms emulated time between press/release).
-
-**Solution:** Always use `timed_key()` method which pauses emulation during key press:
-```python
-def timed_key(key, after=1.0):
-    send('pause')
-    send(f'sysbus.keyboard Press {key}')
-    send('emulation RunFor "0:0:0.001"')  # 1ms hold time
-    send(f'sysbus.keyboard Release {key}')
-    send('start')
-    time.sleep(after)
-```
-
-## Critical: Keyboard Hold Timing
-
-The single most important discovery for Renode interaction:
-
-> The Xous keyboard service has a **500ms hold threshold**. If the emulated time between key press and release exceeds 500ms, the "hold" character variant is produced. **Many navigation keys (arrows, Home, Space) have `hold: None` — they produce NOTHING when held too long.**
-
-**Solution:** Send Press and Release in a single socket write:
-
-```python
-# WRONG - may exceed 500ms emulated time between commands
-sock.sendall(b'sysbus.keyboard Press Home\n')
-time.sleep(0.05)  # Even 50ms can be too long when CPU is idle!
-sock.sendall(b'sysbus.keyboard Release Home\n')
-
-# CORRECT - single write minimizes emulated time gap
-sock.sendall(b'sysbus.keyboard Press Home\nsysbus.keyboard Release Home\n')
-```
-
-## Key Scan Codes
-
-| Key | Scan Code | Notes |
-|-----|-----------|-------|
-| Letters | `A` - `Z` | Lowercase unless shift active |
-| Numbers | `Number0` - `Number9` | |
-| Arrows | `Up`, `Down`, `Left`, `Right` | `hold: None` - timing critical! |
-| Menu | `Home` | Produces '∴' (U+2234) - opens AND selects in menus |
-| Enter | `Return` | Same char for all timing variants |
-| Space | `Space` | `hold: None` - timing critical! |
-| Backspace | `BackSpace` | |
-| Shift | `ShiftL`, `ShiftR` | NOT `ShiftLeft`/`ShiftRight`! |
-
-## CLAUDE.md — LLM Development Agent
-
-The `CLAUDE.md` file contains comprehensive instructions for using an LLM (Claude Code) as a development agent for Precursor apps. It covers:
-
-- Repository layout and architecture
-- Hardware constraints (336x536 1-bit display, 100MHz CPU)
-- GAM (Graphics Abstraction Manager) API patterns
-- Text rendering with `blitstr2`
-- PDDB (Plausibly Deniable DataBase) storage
-- Network and TLS APIs
-- Renode emulation setup and interaction
-- Complete app template with all boilerplate
-
-This file can be placed at the root of your development directory and used as context for LLM-assisted development sessions.
-
-## Xous Character Codes for Apps
-
-Apps receiving `rawkeys` get these Unicode characters:
-
-| Key | Character | Unicode |
-|-----|-----------|---------|
-| Right arrow | `→` | U+2192 |
-| Left arrow | `←` | U+2190 |
-| Up arrow | `↑` | U+2191 |
-| Down arrow | `↓` | U+2193 |
-| Menu/Select | `∴` | U+2234 |
-| Enter | `\r` | U+000D |
-| Backspace | `\u{08}` | U+0008 |
-
-**Do NOT use Apple PUA codes** (`\u{F700}`-`\u{F7FF}`) for arrow keys in Xous apps.
+[`CLAUDE.md`](CLAUDE.md) is the canonical guide for agents. It is short on purpose: it lists the hard rules and points to `agents/<domain>.md` for detail. If guidance anywhere else disagrees with CLAUDE.md or with xous-core source, the source wins and the doc is a bug.
 
 ## License
 
-MIT
+Apache-2.0

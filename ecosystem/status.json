@@ -1,0 +1,496 @@
+{
+  "xous_core": "31fbe23",
+  "anchor": "31fbe23",
+  "warnings": [
+    "c64: unresolved path dependencies ['../../xous-core/services/gam', '../../xous-core/services/pddb']; not added to the workspace",
+    "cipher: code uses gam::APP_NAME_CIPHER_WORKSHOP, but package implies APP_NAME_CIPHER",
+    "qrcode: code uses gam::APP_NAME_QRCODE_APP, but package implies APP_NAME_QRCODE"
+  ],
+  "results": {
+    "carse": {
+      "ok": false,
+      "errors": 2,
+      "warnings": 0,
+      "seconds": 17.4,
+      "first_errors": [
+        "apps/carse/src/main.rs:123:5: error[E0133]: call to unsafe function `destroy_server` is unsafe and requires unsafe function or block: call to unsafe function",
+        "apps/carse/src/main.rs:168:13: error[E0133]: call to unsafe function `destroy_server` is unsafe and requires unsafe function or block: call to unsafe function"
+      ]
+    },
+    "barcode": {
+      "ok": false,
+      "errors": 93,
+      "warnings": 0,
+      "seconds": 1.8,
+      "first_errors": [
+        "apps/barcode/src/ui.rs:21:17: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`",
+        "apps/barcode/src/ui.rs:23:9: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`",
+        "apps/barcode/src/ui.rs:24:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`",
+        "apps/barcode/src/ui.rs:25:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`",
+        "apps/barcode/src/ui.rs:46:14: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`"
+      ]
+    },
+    "budget": {
+      "ok": false,
+      "errors": 74,
+      "warnings": 4,
+      "seconds": 0.9,
+      "first_errors": [
+        "apps/budget/src/ui.rs:363:20: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`",
+        "apps/budget/src/ui.rs:351:18: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`",
+        "apps/budget/src/ui.rs:314:21: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`",
+        "apps/budget/src/ui.rs:293:29: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`",
+        "apps/budget/src/ui.rs:285:21: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`"
+      ]
+    },
+    "c64": {
+      "ok": false,
+      "errors": 1,
+      "warnings": 0,
+      "seconds": 0,
+      "first_errors": [
+        "packaging: unresolved path dependencies ['../../xous-core/services/gam', '../../xous-core/services/pddb']"
+      ]
+    },
+    "calc": {
+      "ok": false,
+      "errors": 1,
+      "warnings": 0,
+      "seconds": 0.8,
+      "first_errors": [
+        "apps/calc/src/main.rs:145:5: error[E0133]: call to unsafe function `destroy_server` is unsafe and requires unsafe function or block: call to unsafe function"
+      ]
+    },
+    "cipher": {
+      "ok": false,
+      "errors": 1,
+      "warnings": 0,
+      "seconds": 0.4,
+      "first_errors": [
+        "error: There are multiple `cipher` packages in your project, and the specification `cipher` is ambiguous."
+      ]
+    },
+    "contacts": {
+      "ok": false,
+      "errors": 72,
+      "warnings": 4,
+      "seconds": 1.8,
+      "first_errors": [
+        "apps/contacts/src/ui.rs:388:19: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`",
+        "apps/contacts/src/ui.rs:383:19: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`",
+        "apps/contacts/src/ui.rs:346:21: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`",
+        "apps/contacts/src/ui.rs:324:29: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`",
+        "apps/contacts/src/ui.rs:309:29: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`"
+      ]
+    },
+    "cron": {
+      "ok": false,
+      "errors": 44,
+      "warnings": 1,
+      "seconds": 1.9,
+      "first_errors": [
+        "apps/cron/src/main.rs:29:36: error[E0433]: failed to resolve: could not find `RawkeysEvent` in `gam`: could not find `RawkeysEvent` in `gam`",
+        "apps/cron/src/ui.rs:16:42: error[E0308]: arguments to this function are incorrect",
+        "apps/cron/src/ui.rs:16:9: error[E0308]: arguments to this method are incorrect",
+        "apps/cron/src/ui.rs:17:74: error[E0308]: arguments to this function are incorrect",
+        "apps/cron/src/ui.rs:17:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied"
+      ]
+    },
+    "death": {
+      "ok": false,
+      "errors": 38,
+      "warnings": 0,
+      "seconds": 1.5,
+      "first_errors": [
+        "apps/death/src/main.rs:32:36: error[E0433]: failed to resolve: could not find `RawkeysEvent` in `gam`: could not find `RawkeysEvent` in `gam`",
+        "apps/death/src/ui.rs:16:42: error[E0308]: arguments to this function are incorrect",
+        "apps/death/src/ui.rs:16:9: error[E0308]: arguments to this method are incorrect",
+        "apps/death/src/ui.rs:17:74: error[E0308]: arguments to this function are incorrect",
+        "apps/death/src/ui.rs:17:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied"
+      ]
+    },
+    "decide": {
+      "ok": false,
+      "errors": 58,
+      "warnings": 3,
+      "seconds": 1.3,
+      "first_errors": [
+        "apps/decide/src/ui.rs:470:29: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`",
+        "apps/decide/src/ui.rs:466:25: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`",
+        "apps/decide/src/ui.rs:459:19: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`",
+        "apps/decide/src/ui.rs:384:15: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`",
+        "apps/decide/src/ui.rs:296:14: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `alloc`: use of unresolved module or unlinked crate `alloc`"
+      ]
+    },
+    "flames": {
+      "ok": false,
+      "errors": 30,
+      "warnings": 1,
+      "seconds": 0.9,
+      "first_errors": [
+        "apps/flames/src/main.rs:60:36: error[E0433]: failed to resolve: could not find `RawkeysEvent` in `gam`: could not find `RawkeysEvent` in `gam`",
+        "apps/flames/src/ui.rs:17:42: error[E0308]: arguments to this function are incorrect",
+        "apps/flames/src/ui.rs:17:9: error[E0308]: arguments to this method are incorrect",
+        "apps/flames/src/ui.rs:19:51: error[E0308]: arguments to this function are incorrect",
+        "apps/flames/src/ui.rs:19:9: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied"
+      ]
+    },
+    "flashcards": {
+      "ok": false,
+      "errors": 2,
+      "warnings": 0,
+      "seconds": 0.9,
+      "first_errors": [
+        "apps/flashcards/src/main.rs:601:54: error[E0616]: field `0` of struct `xous::SID` is private: private field",
+        "apps/flashcards/src/main.rs:686:5: error[E0133]: call to unsafe function `destroy_server` is unsafe and requires unsafe function or block: call to unsafe function"
+      ]
+    },
+    "fortress": {
+      "ok": false,
+      "errors": 51,
+      "warnings": 1,
+      "seconds": 1.0,
+      "first_errors": [
+        "apps/fortress/src/main.rs:31:36: error[E0433]: failed to resolve: could not find `RawkeysEvent` in `gam`: could not find `RawkeysEvent` in `gam`",
+        "apps/fortress/src/ui.rs:16:42: error[E0308]: arguments to this function are incorrect",
+        "apps/fortress/src/ui.rs:16:9: error[E0308]: arguments to this method are incorrect",
+        "apps/fortress/src/ui.rs:17:74: error[E0308]: arguments to this function are incorrect",
+        "apps/fortress/src/ui.rs:17:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied"
+      ]
+    },
+    "gameboy": {
+      "ok": false,
+      "errors": 44,
+      "warnings": 2,
+      "seconds": 3.0,
+      "first_errors": [
+        "apps/gameboy/src/main.rs:29:36: error[E0433]: failed to resolve: could not find `RawkeysEvent` in `gam`: could not find `RawkeysEvent` in `gam`",
+        "apps/gameboy/src/ui.rs:16:42: error[E0308]: arguments to this function are incorrect",
+        "apps/gameboy/src/ui.rs:16:9: error[E0308]: arguments to this method are incorrect",
+        "apps/gameboy/src/ui.rs:17:74: error[E0308]: arguments to this function are incorrect",
+        "apps/gameboy/src/ui.rs:17:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied"
+      ]
+    },
+    "gitlog": {
+      "ok": false,
+      "errors": 88,
+      "warnings": 0,
+      "seconds": 1.4,
+      "first_errors": [
+        "apps/gitlog/src/main.rs:29:36: error[E0433]: failed to resolve: could not find `RawkeysEvent` in `gam`: could not find `RawkeysEvent` in `gam`",
+        "apps/gitlog/src/ui.rs:15:42: error[E0308]: arguments to this function are incorrect",
+        "apps/gitlog/src/ui.rs:15:9: error[E0308]: arguments to this method are incorrect",
+        "apps/gitlog/src/ui.rs:16:74: error[E0308]: arguments to this function are incorrect",
+        "apps/gitlog/src/ui.rs:16:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied"
+      ]
+    },
+    "hwtools": {
+      "ok": false,
+      "errors": 4,
+      "warnings": 1,
+      "seconds": 2.7,
+      "first_errors": [
+        "apps/hwtools/src/storage.rs:33:15: error[E0597]: `pddb` does not live long enough: borrowed value does not live long enough",
+        "apps/hwtools/src/storage.rs:68:15: error[E0597]: `pddb` does not live long enough: borrowed value does not live long enough",
+        "apps/hwtools/src/main.rs:144:5: error[E0133]: call to unsafe function `destroy_server` is unsafe and requires unsafe function or block: call to unsafe function",
+        "apps/hwtools/src/main.rs:196:9: error[E0133]: call to unsafe function `destroy_server` is unsafe and requires unsafe function or block: call to unsafe function"
+      ]
+    },
+    "json-explorer": {
+      "ok": false,
+      "errors": 53,
+      "warnings": 0,
+      "seconds": 4.2,
+      "first_errors": [
+        "apps/json-explorer/src/main.rs:57:36: error[E0433]: failed to resolve: could not find `RawkeysEvent` in `gam`: could not find `RawkeysEvent` in `gam`",
+        "apps/json-explorer/src/ui.rs:16:42: error[E0308]: arguments to this function are incorrect",
+        "apps/json-explorer/src/ui.rs:16:9: error[E0308]: arguments to this method are incorrect",
+        "apps/json-explorer/src/ui.rs:18:51: error[E0308]: arguments to this function are incorrect",
+        "apps/json-explorer/src/ui.rs:18:9: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied"
+      ]
+    },
+    "kaleidoscope": {
+      "ok": false,
+      "errors": 37,
+      "warnings": 1,
+      "seconds": 1.0,
+      "first_errors": [
+        "apps/kaleidoscope/src/main.rs:61:36: error[E0433]: failed to resolve: could not find `RawkeysEvent` in `gam`: could not find `RawkeysEvent` in `gam`",
+        "apps/kaleidoscope/src/ui.rs:16:42: error[E0308]: arguments to this function are incorrect",
+        "apps/kaleidoscope/src/ui.rs:16:9: error[E0308]: arguments to this method are incorrect",
+        "apps/kaleidoscope/src/ui.rs:18:51: error[E0308]: arguments to this function are incorrect",
+        "apps/kaleidoscope/src/ui.rs:18:9: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied"
+      ]
+    },
+    "keygen": {
+      "ok": false,
+      "errors": 46,
+      "warnings": 3,
+      "seconds": 0.8,
+      "first_errors": [
+        "apps/keygen/src/ui.rs:8:5: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`",
+        "apps/keygen/src/ui.rs:9:5: error[E0432]: unresolved import `graphics_server`: use of unresolved module or unlinked crate `graphics_server`",
+        "apps/keygen/src/ui.rs:19:35: error[E0412]: cannot find type `Canvas` in this scope: not found in this scope",
+        "apps/keygen/src/ui.rs:23:31: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `tv`: use of unresolved module or unlinked crate `tv`",
+        "apps/keygen/src/ui.rs:26:35: error[E0412]: cannot find type `Canvas` in this scope: not found in this scope"
+      ]
+    },
+    "life": {
+      "ok": false,
+      "errors": 37,
+      "warnings": 0,
+      "seconds": 0.8,
+      "first_errors": [
+        "apps/life/src/main.rs:32:36: error[E0433]: failed to resolve: could not find `RawkeysEvent` in `gam`: could not find `RawkeysEvent` in `gam`",
+        "apps/life/src/ui.rs:16:42: error[E0308]: arguments to this function are incorrect",
+        "apps/life/src/ui.rs:16:9: error[E0308]: arguments to this method are incorrect",
+        "apps/life/src/ui.rs:17:74: error[E0308]: arguments to this function are incorrect",
+        "apps/life/src/ui.rs:17:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied"
+      ]
+    },
+    "lissajous": {
+      "ok": false,
+      "errors": 64,
+      "warnings": 2,
+      "seconds": 0.8,
+      "first_errors": [
+        "apps/lissajous/src/main.rs:57:36: error[E0433]: failed to resolve: could not find `RawkeysEvent` in `gam`: could not find `RawkeysEvent` in `gam`",
+        "apps/lissajous/src/ui.rs:16:42: error[E0308]: arguments to this function are incorrect",
+        "apps/lissajous/src/ui.rs:16:9: error[E0308]: arguments to this method are incorrect",
+        "apps/lissajous/src/ui.rs:19:51: error[E0308]: arguments to this function are incorrect",
+        "apps/lissajous/src/ui.rs:19:9: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied"
+      ]
+    },
+    "mathdrill": {
+      "ok": false,
+      "errors": 52,
+      "warnings": 1,
+      "seconds": 0.9,
+      "first_errors": [
+        "apps/mathdrill/src/ui.rs:10:5: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`",
+        "apps/mathdrill/src/ui.rs:11:5: error[E0432]: unresolved import `graphics_server`: use of unresolved module or unlinked crate `graphics_server`",
+        "apps/mathdrill/src/ui.rs:21:35: error[E0412]: cannot find type `Canvas` in this scope: not found in this scope",
+        "apps/mathdrill/src/ui.rs:36:9: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `tv`: use of unresolved module or unlinked crate `tv`",
+        "apps/mathdrill/src/ui.rs:43:35: error[E0412]: cannot find type `Canvas` in this scope: not found in this scope"
+      ]
+    },
+    "mines": {
+      "ok": false,
+      "errors": 69,
+      "warnings": 4,
+      "seconds": 1.1,
+      "first_errors": [
+        "apps/mines/src/ui.rs:28:22: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`",
+        "apps/mines/src/ui.rs:30:9: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`",
+        "apps/mines/src/ui.rs:31:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`",
+        "apps/mines/src/ui.rs:32:13: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`",
+        "apps/mines/src/ui.rs:50:14: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`"
+      ]
+    },
+    "moire": {
+      "ok": false,
+      "errors": 39,
+      "warnings": 2,
+      "seconds": 0.7,
+      "first_errors": [
+        "apps/moire/src/main.rs:57:36: error[E0433]: failed to resolve: could not find `RawkeysEvent` in `gam`: could not find `RawkeysEvent` in `gam`",
+        "apps/moire/src/ui.rs:16:42: error[E0308]: arguments to this function are incorrect",
+        "apps/moire/src/ui.rs:16:9: error[E0308]: arguments to this method are incorrect",
+        "apps/moire/src/ui.rs:18:51: error[E0308]: arguments to this function are incorrect",
+        "apps/moire/src/ui.rs:18:9: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied"
+      ]
+    },
+    "netscan": {
+      "ok": false,
+      "errors": 50,
+      "warnings": 1,
+      "seconds": 0.6,
+      "first_errors": [
+        "apps/netscan/src/main.rs:29:36: error[E0433]: failed to resolve: could not find `RawkeysEvent` in `gam`: could not find `RawkeysEvent` in `gam`",
+        "apps/netscan/src/ui.rs:16:42: error[E0308]: arguments to this function are incorrect",
+        "apps/netscan/src/ui.rs:16:9: error[E0308]: arguments to this method are incorrect",
+        "apps/netscan/src/ui.rs:17:74: error[E0308]: arguments to this function are incorrect",
+        "apps/netscan/src/ui.rs:17:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied"
+      ]
+    },
+    "othello": {
+      "ok": false,
+      "errors": 1,
+      "warnings": 22,
+      "seconds": 0.6,
+      "first_errors": [
+        "apps/othello/src/main.rs:161:5: error[E0133]: call to unsafe function `destroy_server` is unsafe and requires unsafe function or block: call to unsafe function"
+      ]
+    },
+    "otp": {
+      "ok": false,
+      "errors": 41,
+      "warnings": 2,
+      "seconds": 0.6,
+      "first_errors": [
+        "apps/otp/src/ui.rs:8:5: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`",
+        "apps/otp/src/ui.rs:9:5: error[E0432]: unresolved import `graphics_server`: use of unresolved module or unlinked crate `graphics_server`",
+        "apps/otp/src/ui.rs:19:35: error[E0412]: cannot find type `Canvas` in this scope: not found in this scope",
+        "apps/otp/src/ui.rs:33:9: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `tv`: use of unresolved module or unlinked crate `tv`",
+        "apps/otp/src/ui.rs:40:35: error[E0412]: cannot find type `Canvas` in this scope: not found in this scope"
+      ]
+    },
+    "penrose": {
+      "ok": false,
+      "errors": 30,
+      "warnings": 1,
+      "seconds": 0.5,
+      "first_errors": [
+        "apps/penrose/src/main.rs:57:36: error[E0433]: failed to resolve: could not find `RawkeysEvent` in `gam`: could not find `RawkeysEvent` in `gam`",
+        "apps/penrose/src/ui.rs:16:42: error[E0308]: arguments to this function are incorrect",
+        "apps/penrose/src/ui.rs:16:9: error[E0308]: arguments to this method are incorrect",
+        "apps/penrose/src/ui.rs:18:51: error[E0308]: arguments to this function are incorrect",
+        "apps/penrose/src/ui.rs:18:9: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied"
+      ]
+    },
+    "pet": {
+      "ok": false,
+      "errors": 54,
+      "warnings": 0,
+      "seconds": 0.6,
+      "first_errors": [
+        "apps/pet/src/main.rs:31:36: error[E0433]: failed to resolve: could not find `RawkeysEvent` in `gam`: could not find `RawkeysEvent` in `gam`",
+        "apps/pet/src/ui.rs:15:42: error[E0308]: arguments to this function are incorrect",
+        "apps/pet/src/ui.rs:15:9: error[E0308]: arguments to this method are incorrect",
+        "apps/pet/src/ui.rs:16:74: error[E0308]: arguments to this function are incorrect",
+        "apps/pet/src/ui.rs:16:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied"
+      ]
+    },
+    "planner": {
+      "ok": false,
+      "errors": 46,
+      "warnings": 1,
+      "seconds": 0.7,
+      "first_errors": [
+        "apps/planner/src/ui.rs:11:5: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `graphics_server`: use of unresolved module or unlinked crate `graphics_server`",
+        "apps/planner/src/ui.rs:12:5: error[E0432]: unresolved import `graphics_server`: use of unresolved module or unlinked crate `graphics_server`",
+        "apps/planner/src/ui.rs:22:35: error[E0412]: cannot find type `Canvas` in this scope: not found in this scope",
+        "apps/planner/src/ui.rs:37:9: error[E0433]: failed to resolve: use of unresolved module or unlinked crate `tv`: use of unresolved module or unlinked crate `tv`",
+        "apps/planner/src/ui.rs:44:35: error[E0412]: cannot find type `Canvas` in this scope: not found in this scope"
+      ]
+    },
+    "qrcode": {
+      "ok": false,
+      "errors": 1,
+      "warnings": 0,
+      "seconds": 0.3,
+      "first_errors": [
+        "error: There are multiple `qrcode` packages in your project, and the specification `qrcode` is ambiguous."
+      ]
+    },
+    "reaction": {
+      "ok": false,
+      "errors": 32,
+      "warnings": 2,
+      "seconds": 0.7,
+      "first_errors": [
+        "apps/reaction/src/main.rs:63:36: error[E0433]: failed to resolve: could not find `RawkeysEvent` in `gam`: could not find `RawkeysEvent` in `gam`",
+        "apps/reaction/src/ui.rs:18:42: error[E0308]: arguments to this function are incorrect",
+        "apps/reaction/src/ui.rs:18:9: error[E0308]: arguments to this method are incorrect",
+        "apps/reaction/src/ui.rs:20:51: error[E0308]: arguments to this function are incorrect",
+        "apps/reaction/src/ui.rs:20:9: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied"
+      ]
+    },
+    "regex-tester": {
+      "ok": false,
+      "errors": 43,
+      "warnings": 2,
+      "seconds": 0.7,
+      "first_errors": [
+        "apps/regex-tester/src/main.rs:57:36: error[E0433]: failed to resolve: could not find `RawkeysEvent` in `gam`: could not find `RawkeysEvent` in `gam`",
+        "apps/regex-tester/src/ui.rs:16:42: error[E0308]: arguments to this function are incorrect",
+        "apps/regex-tester/src/ui.rs:16:9: error[E0308]: arguments to this method are incorrect",
+        "apps/regex-tester/src/ui.rs:18:51: error[E0308]: arguments to this function are incorrect",
+        "apps/regex-tester/src/ui.rs:18:9: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied"
+      ]
+    },
+    "rss-reader": {
+      "ok": false,
+      "errors": 51,
+      "warnings": 2,
+      "seconds": 0.8,
+      "first_errors": [
+        "apps/rss-reader/src/main.rs:29:36: error[E0433]: failed to resolve: could not find `RawkeysEvent` in `gam`: could not find `RawkeysEvent` in `gam`",
+        "apps/rss-reader/src/ui.rs:16:42: error[E0308]: arguments to this function are incorrect",
+        "apps/rss-reader/src/ui.rs:16:9: error[E0308]: arguments to this method are incorrect",
+        "apps/rss-reader/src/ui.rs:17:74: error[E0308]: arguments to this function are incorrect",
+        "apps/rss-reader/src/ui.rs:17:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied"
+      ]
+    },
+    "sacred": {
+      "ok": false,
+      "errors": 29,
+      "warnings": 0,
+      "seconds": 0.7,
+      "first_errors": [
+        "apps/sacred/src/main.rs:57:36: error[E0433]: failed to resolve: could not find `RawkeysEvent` in `gam`: could not find `RawkeysEvent` in `gam`",
+        "apps/sacred/src/ui.rs:17:42: error[E0308]: arguments to this function are incorrect",
+        "apps/sacred/src/ui.rs:17:9: error[E0308]: arguments to this method are incorrect",
+        "apps/sacred/src/ui.rs:19:51: error[E0308]: arguments to this function are incorrect",
+        "apps/sacred/src/ui.rs:19:9: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied"
+      ]
+    },
+    "spirograph": {
+      "ok": false,
+      "errors": 38,
+      "warnings": 3,
+      "seconds": 0.8,
+      "first_errors": [
+        "apps/spirograph/src/main.rs:57:36: error[E0433]: failed to resolve: could not find `RawkeysEvent` in `gam`: could not find `RawkeysEvent` in `gam`",
+        "apps/spirograph/src/math.rs:23:5: error[E0308]: mismatched types: expected `i32`, found `i64`",
+        "apps/spirograph/src/ui.rs:17:42: error[E0308]: arguments to this function are incorrect",
+        "apps/spirograph/src/ui.rs:17:9: error[E0308]: arguments to this method are incorrect",
+        "apps/spirograph/src/ui.rs:20:51: error[E0308]: arguments to this function are incorrect"
+      ]
+    },
+    "sqlite": {
+      "ok": false,
+      "errors": 48,
+      "warnings": 0,
+      "seconds": 1.0,
+      "first_errors": [
+        "apps/sqlite/src/main.rs:29:36: error[E0433]: failed to resolve: could not find `RawkeysEvent` in `gam`: could not find `RawkeysEvent` in `gam`",
+        "apps/sqlite/src/ui.rs:16:42: error[E0308]: arguments to this function are incorrect",
+        "apps/sqlite/src/ui.rs:16:9: error[E0308]: arguments to this method are incorrect",
+        "apps/sqlite/src/ui.rs:17:74: error[E0308]: arguments to this function are incorrect",
+        "apps/sqlite/src/ui.rs:17:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied"
+      ]
+    },
+    "timers": {
+      "ok": false,
+      "errors": 1,
+      "warnings": 0,
+      "seconds": 0.8,
+      "first_errors": [
+        "apps/timers/src/main.rs:1209:5: error[E0133]: call to unsafe function `destroy_server` is unsafe and requires unsafe function or block: call to unsafe function"
+      ]
+    },
+    "writer": {
+      "ok": false,
+      "errors": 1,
+      "warnings": 0,
+      "seconds": 0.7,
+      "first_errors": [
+        "apps/writer/src/main.rs:1285:5: error[E0133]: call to unsafe function `destroy_server` is unsafe and requires unsafe function or block: call to unsafe function"
+      ]
+    },
+    "zork": {
+      "ok": false,
+      "errors": 27,
+      "warnings": 0,
+      "seconds": 0.5,
+      "first_errors": [
+        "apps/zork/src/main.rs:29:36: error[E0433]: failed to resolve: could not find `RawkeysEvent` in `gam`: could not find `RawkeysEvent` in `gam`",
+        "apps/zork/src/ui.rs:16:42: error[E0308]: arguments to this function are incorrect",
+        "apps/zork/src/ui.rs:16:9: error[E0308]: arguments to this method are incorrect",
+        "apps/zork/src/ui.rs:17:74: error[E0308]: arguments to this function are incorrect",
+        "apps/zork/src/ui.rs:17:32: error[E0061]: this enum variant takes 1 argument but 2 arguments were supplied"
+      ]
+    }
+  }
+}

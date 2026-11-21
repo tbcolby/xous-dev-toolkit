@@ -1,228 +1,114 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for Claude Code when building Precursor / Xous apps with this toolkit. This file is canonical: if another doc disagrees, this file and the xous-core source win.
 
-## Repository Purpose
+Verified against xous-core at the commit in `XOUS_CORE_ANCHOR`. When in doubt, read the source in `$XOUS_ROOT` (`services/gam`, `services/pddb`, `apps/hello`, `apps/ball`, `apps/vault`), not memory.
 
-This is the **Xous Development Toolkit** — automation tools and specialized agents for developing Precursor/Xous apps. It provides:
+## Definition of done
 
-- **Multi-agent system** for full development lifecycle
-- **Python automation** for headless Renode testing on macOS ARM64
-- **Domain specialists** for ideation, architecture, graphics, storage, networking, build, testing, review, and system/hardware
+An app is not done until all of these are true. Don't mark anything shipped on assertion alone.
 
-## Agent System
+1. `bin/integrate --check <repo>` passes with 0 errors at the anchor commit.
+2. Pure logic (parsers, game rules, encoders, math) has host unit tests that pass.
+3. A Renode capture run (`scripts/renode_capture.py`) exits 0 and its screenshots show the app, not Shellchat.
+4. The README's claims match what the code does (no "secure", "production-ready", "network" features that aren't there).
 
-This toolkit uses a **supervisor/specialist agent model** for comprehensive app development. See `agents/README.md` for full documentation.
-
-### Quick Reference
-
-| Agent | Invoke When... |
-|-------|----------------|
-| **Supervisor** | Starting a new task, need routing |
-| **Ideation** | Conceiving apps, designing UX, prioritizing features |
-| **Architecture** | Designing state machines, opcodes, module structure |
-| **Graphics** | Implementing UI, text rendering, drawing |
-| **Storage** | PDDB persistence, serialization, key management |
-| **Networking** | TCP/UDP, HTTP, TLS, background sync |
-| **System** | COM service, battery, sensors, WiFi hardware, backlight, power |
-| **Build** | Cargo.toml, manifest.json, workspace, deployment |
-| **Testing** | Renode automation, screenshots, validation |
-| **Review** | Code review, patterns, performance, pitfalls |
-
-### Development Flow
-```
-User Request → Supervisor → Ideation → Architecture
-                              ↓
-                    Graphics / Storage / Networking
-                              ↓
-                    Build → Testing → Review → Ship
-```
-
-Load an agent's context by reading `agents/<name>.md` when working in that domain.
-
----
-
-## Python Automation
-
-The toolkit includes Python scripts for headless Renode testing:
-
-## Repository Structure
-
-```
-xous-dev-toolkit/
-├── agents/                  # Specialist agent definitions
-│   ├── README.md            # Agent system overview
-│   ├── supervisor.md        # Task routing and orchestration
-│   ├── ideation.md          # App concepts and UX design
-│   ├── architecture.md      # Code structure and patterns
-│   ├── graphics.md          # GAM API and UI implementation
-│   ├── storage.md           # PDDB persistence patterns
-│   ├── networking.md        # TCP/UDP, HTTP, TLS
-│   ├── system.md            # COM service, battery, sensors, WiFi hardware, power
-│   ├── build.md             # Cargo, manifest, deployment
-│   ├── testing.md           # Renode automation and QA
-│   └── review.md            # Code review and quality
-├── scripts/
-│   ├── renode_lib.py        # Shared RenodeController library (import this)
-│   ├── renode_capture.py    # Full automation: boot, PDDB init, app launch, screenshots
-│   ├── capture_calc.py      # Standalone calculator capture
-│   ├── renode_interact.py   # DEPRECATED — use renode_lib.py instead
-│   └── usb_log_monitor.py   # USB serial log viewer for hardware debugging
-├── CLAUDE.md                # This file (toolkit-specific guidance)
-├── README.md                # User documentation
-└── discoveries.md           # Debugging notes and API discoveries
-```
-
-## Common Commands
-
-### Screenshot Capture (Primary Use Case)
+## Start here
 
 ```bash
-cd scripts
-
-# Full PDDB init (blank flash) + app capture:
-python3 renode_capture.py --init --app flashcards --screenshots ../output
-
-# Quick capture (PDDB already formatted with PIN 'a'):
-python3 renode_capture.py --app flashcards --screenshots ../output
-
-# Custom app index (if app isn't first in submenu):
-python3 renode_capture.py --app othello --app-index 2 --screenshots ../output
+bin/new-app <name> "<Display Name>"      # scaffold; builds on first try
+bin/integrate --check <repo>            # hosted build at the anchor
 ```
 
-### USB Log Monitoring (Hardware)
+Build new apps on `precursor-appkit` (`appkit/`). Only drop to raw GAM/PDDB APIs for things the kit doesn't cover, and follow the rules below when you do.
 
-```bash
-# First, on the Precursor: open shellchat, type "usb console"
-# Then on your Mac:
-python3 scripts/usb_log_monitor.py                    # Auto-detect
-python3 scripts/usb_log_monitor.py --filter myapp     # Filter by keyword
-python3 scripts/usb_log_monitor.py --save debug.log   # Save to file
+## Hard rules (each one has broken real apps)
+
+**Names**
+- Two names per app. The xous-names server name (`"_Mines_"`) is any unique string. The GAM app name **must** be `gam::APP_NAME_<KEY>`, where `<KEY>` is the app's `apps/manifest.json` key, which must equal the Cargo package name (uppercased, `-` → `_`). Anything else and `register_ux` returns `Ok(None)`.
+- Don't name a package after a crate already in the xous-core dependency graph (`cipher`, `regex`, `json`, …). `cargo -p` becomes ambiguous. `bin/new-app` rejects known collisions.
+
+**Keys** (`services/keyboard/src/mappings/qwerty.rs`, `services/gam/src/contexts.rs:741`)
+
+| Key | Char | Notes |
+|---|---|---|
+| ← ↑ → ↓ | U+2190 U+2191 U+2192 U+2193 | Never Apple PUA U+F700–F703 |
+| Enter | `'\r'` (0x0D) | |
+| Backspace | 0x08 | Use as Back on non-text screens |
+| F1–F4 | 0x11–0x14 | Not U+F001… |
+| `∴` menu / D-pad centre | U+2234 | **GAM consumes it. Apps never receive it.** Never bind Back/Quit/Menu to it |
+| Escape | — | Doesn't exist on the device or in Renode |
+
+Every screen needs an exit reachable with Backspace or F4.
+
+**Lifecycle**
+- Use `UxType::Framebuffer` + `rawkeys_id` for games and tools; `Chat` reserves an IME input line.
+- Size from `gam.get_canvas_bounds(gid)`. The canvas is below the status bar; never assume 336×536.
+- Handle `focuschange_id`: stop pumps/timers on `Background`, redraw on `Foreground`. Nothing should tick while another app is in front.
+- Leave with `gam.relinquish_focus()`. Don't `terminate_process` on a user quit: apps start at boot and aren't respawned.
+- `xous::destroy_server` is `unsafe`; wrap it with a safety comment.
+
+**Drawing**
+- `TextView::invert` is ignored for app canvases (trust level). Show selection with a border or marker.
+- Call `gam.redraw()` once per frame, after drawing.
+
+**Storage (PDDB)**
+- There is no `PddbKey::set_len` or truncate. To replace a value: `delete_key` in the key's basis (from `attributes().basis`), recreate, write, `sync()`. `appkit::store::Store::save` does this.
+- `basis = None`: reads see the union of open bases; *new* keys go to the most recently opened basis. Rewrite existing keys in their own basis.
+- Reload cached data when the basis set changes (`appkit::store::watch_bases` / `pddb.monitor_basis()`). Never rewrite cached data unconditionally on focus loss: save only when dirty.
+- Errors are `std::io::Error`. Treat `NotFound` as "no data yet"; treat a parse failure as "don't overwrite".
+- Put a `version` field in stored JSON.
+
+**Randomness**
+- Fail closed. Never `get_u32().unwrap_or(0)`. Use `appkit::rng::Trng` (panics on TRNG error) and its unbiased `below`/`shuffle`.
+
+**Build**
+- Add apps to workspace `members` only, never `default-members` (`bin/integrate` does this).
+- Crate versions match `apps/hello/Cargo.toml` at the anchor (xous 0.9.71, xous-ipc 0.10.11, xous-api-log 0.1.70, xous-api-names 0.9.72, xous-api-ticktimer 0.9.71).
+- Path deps are `../../services/<svc>` / `../../libs/<lib>`. A repo-local library goes in `libs/<crate>/` in the app repo; `bin/integrate` copies it to `xous-core/libs/`.
+
+## APIs that do not exist
+
+Agents have repeatedly invented these. If you're about to type one, stop and read the source:
+
+`graphics_server::*` in an app · `gam::RawkeysEvent` · `gam.clear()` · `gam.draw_textview()` · `Canvas` as an app type · `Ticktimer::set_alarm` · `xous::String::from_str` · `PddbKey::set_len` · `pddb::PddbError` · `net::Net` (it's `net::NetManager`)
+
+## Specialist docs
+
+Read `agents/<name>.md` when working in that area. `agents/README.md` has the full roster and routing.
+
+| Area | File |
+|---|---|
+| Routing a task | `agents/supervisor.md` |
+| App concept, UX | `agents/ideation.md` |
+| State machines, opcodes, threads, IPC | `agents/architecture.md` |
+| GAM, text, drawing, modals | `agents/graphics.md` |
+| PDDB | `agents/storage.md` |
+| TCP/HTTP/TLS | `agents/networking.md` |
+| COM, battery, sensors, WiFi, power | `agents/system.md` |
+| TRNG use | `agents/randomness.md` |
+| QR / barcodes / encodings | `agents/encoding.md` |
+| Cargo, manifest, xtask | `agents/build.md` |
+| Renode, screenshots, tests | `agents/testing.md` |
+| Review checklist | `agents/review.md` |
+
+## Renode automation
+
+`scripts/renode_lib.py` (`RenodeSession`, `RenodeController`) and `scripts/renode_capture.py`. Details and exit codes: `scripts/README.md`. Key facts:
+- The keyboard has a 500 ms hold threshold. Use `timed_key()` for navigation, `inject_line()` for text and Enter.
+- Renode scancodes: `Enter` (not `Return`), `BackSpace`, `ShiftL`/`ShiftR`, `Up`/`Down`/`Left`/`Right`, `F1`–`F4`, `Home` (= `∴`). No `Escape`.
+- Per-app capture sequences live in the app repo as `capture.py` with `run(ctl, outdir) -> failures`.
+- Default PDDB PIN for test images is `a`.
+
+## Repository layout
+
 ```
-
-### Low-Level Renode Interaction (Deprecated)
-
-> **Note**: `renode_interact.py` is deprecated. Use `renode_lib.py` directly or `renode_capture.py` instead.
-
-```bash
-# Take a screenshot (requires Renode already running on port 4567)
-python3 scripts/renode_interact.py screenshot output.png
-
-# Press a key
-python3 scripts/renode_interact.py press-key Home
-
-# Full init sequence
-python3 scripts/renode_interact.py full-init 90
+bin/            new-app, integrate
+appkit/         precursor-appkit crate
+templates/app/  app template
+scripts/        Renode + USB tooling (Python)
+agents/         specialist docs
+ecosystem/      STANDARDS, PIPELINE, TRACKER
+tests/          pytest + doc-snippets compile check
+XOUS_CORE_ANCHOR  verified xous-core commit
 ```
-
-## Architecture
-
-### RenodeController Class (`renode_lib.py`)
-
-The core automation class lives in `scripts/renode_lib.py` and communicates with Renode via telnet:
-
-```python
-class RenodeController:
-    def connect(retries=3, delay=2.0)          # Connect with retry/reconnect
-    def timed_key(key, hold_ms=1, after=1.0)   # Safe key press with timing control
-    def inject_line(text)                       # Direct text injection + CR (bypasses timing)
-    def inject_string(text)                     # Direct text injection, no CR
-    def inject_key(char)                        # Single character injection
-    def screenshot(filepath)                    # Capture LCD as PNG (with validation)
-    def screenshot_hash()                       # MD5 hash of current screen
-    def wait_for_screen_change(timeout, interval)  # Wait until screen changes
-    def init_pddb(pin)                          # Full PDDB format sequence
-    def unlock_pddb(pin)                        # Unlock already-formatted PDDB
-    def launch_app(app_index)                   # Navigate menu to launch app
-    def confirm_radio_dialog()                  # Confirm a radio button dialog
-    def quit()                                  # Clean disconnect
-
-# Utility functions
-start_renode(xous_root=None, extra_args=None)   # Launch Renode process
-reset_flash(xous_root=None)                     # Reset flash backing file
-```
-
-Both `renode_capture.py` and `capture_calc.py` import from `renode_lib.py`.
-
-### Key Timing Problem & Solutions
-
-The Xous keyboard has a **500ms hold threshold**. Keys held longer produce hold variants or are dropped entirely. Two solutions:
-
-1. **`timed_key()`** — Pauses emulation, presses key, advances exactly 1ms, releases. Use for navigation keys.
-2. **`inject_line()`** — Injects text directly into keyboard buffer. Use for PIN entry and text input.
-
-### Adding Support for New Apps
-
-1. Create a `capture_<appname>()` function in `renode_capture.py`:
-
-```python
-def capture_myapp(ctl, screenshot_dir):
-    """Capture all myapp screenshots."""
-    def ss(name):
-        return ctl.screenshot(os.path.join(screenshot_dir, name))
-
-    def enter(after=3.0):
-        ctl.inject_line("")
-        time.sleep(after)
-
-    print("\n=== MyApp Screenshots ===", flush=True)
-
-    # Initial state
-    ss("initial.png")
-
-    # Navigate and capture
-    ctl.timed_key('Down', after=2.0)
-    enter()
-    ss("next_screen.png")
-
-    print("=== Done! ===", flush=True)
-```
-
-2. Add the app to the dispatch in `main()`:
-
-```python
-elif args.app == 'myapp':
-    capture_myapp(ctl, screenshot_dir)
-```
-
-## Configuration
-
-Configuration is centralized in `renode_lib.py` with environment variable overrides:
-
-```python
-# Environment variables (override defaults):
-RENODE_PORT=4567                                          # Renode telnet port
-XOUS_ROOT="/Volumes/PlexLaCie/Dev/Precursor/xous-core"   # Path to xous-core
-RENODE_PATH="/Applications/Renode.app/Contents/MacOS/renode"  # Renode binary
-
-# Example: use a different port
-RENODE_PORT=5678 python3 renode_capture.py --app flashcards
-```
-
-Default PIN for test images: `a` (single character).
-
-## Dependencies
-
-- Python 3.x (standard library only for renode scripts)
-- `pyserial` (only for usb_log_monitor.py): `pip install pyserial`
-- Renode emulator with ARM64 support
-
-## Key Scan Codes Reference
-
-| Key | Code | Notes |
-|-----|------|-------|
-| Letters | `A`-`Z` | Uppercase scan codes |
-| Numbers | `Number0`-`Number9` | |
-| Navigation | `Up`, `Down`, `Left`, `Right` | Timing-critical (use `timed_key`) |
-| Menu/Select | `Home` | Opens menu AND selects items |
-| Enter | `Return` | |
-| Function | `F1`, `F2`, `F3`, `F4` | |
-| Shift | `ShiftL`, `ShiftR` | NOT `ShiftLeft`/`ShiftRight` |
-
-## Debugging Tips
-
-- **Keys not working**: Use `timed_key()` instead of bare press/release
-- **Wrong characters**: Key held too long; reduce `after` parameter or use `inject_line()`
-- **App not launching**: Check app index in menu; Shellchat is index 0
-- **PIN mismatch**: Use `--init` flag to reset and reformat PDDB
-- **Screenshot shows wrong state**: Increase `time.sleep()` delays for slower operations

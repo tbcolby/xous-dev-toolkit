@@ -1,0 +1,60 @@
+# Toolkit CI: Python scripts, appkit unit tests, and a scaffolded app that must
+# build against xous-core at the anchor commit. A nightly run against upstream
+# `main` surfaces API drift the day it lands.
+name: ci
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install pytest ruff
+      - run: ruff check scripts tests bin/new-app bin/integrate bin/status
+      - run: python -m pytest -q
+
+  xous:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # anchor = verified commit (must pass); upstream = early warning (may fail)
+        xous: [anchor, upstream]
+    continue-on-error: ${{ matrix.xous == 'upstream' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ubuntu deps (hosted mode)
+        run: sudo apt-get update && sudo apt-get install -y libxkbcommon-dev
+      - run: rustup update stable
+      - name: Checkout xous-core
+        run: |
+          . <(grep -E '^(repo|commit)=' XOUS_CORE_ANCHOR)
+          git clone -q "$repo" ../xous-core
+          if [ "${{ matrix.xous }}" = anchor ]; then git -C ../xous-core checkout -q "$commit"; fi
+          echo "xous-core at $(git -C ../xous-core rev-parse --short HEAD)"
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: ../xous-core
+          key: ${{ matrix.xous }}
+      - name: Scaffold a throwaway app
+        run: bin/new-app ci-smoke "CI Smoke" --dir ../apps
+      - name: Integrate + hosted check (scaffold + appkit)
+        run: bin/integrate --xous-root ../xous-core --check --json integrate.json ../apps/precursor-ci-smoke
+      - name: appkit host unit tests
+        working-directory: ../xous-core
+        run: cargo test -p precursor-appkit --no-default-features
+      - name: Doc snippets compile
+        run: |
+          if [ -d tests/doc-snippets ]; then
+            bin/integrate --xous-root ../xous-core --check tests/doc-snippets
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: "integrate-${{ matrix.xous }}", path: integrate.json }
