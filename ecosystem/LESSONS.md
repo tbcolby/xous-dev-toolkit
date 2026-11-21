@@ -13,7 +13,7 @@ Format: **Lesson** · what happened · what changed in the toolkit.
 6. **Use a private `CARGO_HOME` when `~/.cargo` is locked.** Other sessions on this machine hold the package-cache lock for long stretches; a cargo command then hangs with no output. Seed one per worker with an APFS clone (cheap): `cp -cR ~/.cargo/registry <scratch>/cargo-home-wN/registry && export CARGO_HOME=<scratch>/cargo-home-wN`. A crate with no dependencies needs only an empty `CARGO_HOME` plus `--offline`.
 7. **Every commit should build.** A round-2a commit removed the old shell before the new one landed, so bisecting would hit a broken tree. Order commits core → shell → docs, each compiling, or squash.
 8. **Don't overload the machine.** Two worker builds plus the orchestrator's verification pushed load past 40 on 8 cores (other sessions' jobs too). Orchestrator verification runs one build at a time.
-5. **Run the gate early, not just at the end.** Gate failures found at the end cost a full rebuild cycle each. Run `bin/lint` and `core` tests continuously; run `--grade` after the shell compiles.
+9. **Run the gate early, not just at the end.** Gate failures found at the end cost a full rebuild cycle each. Run `bin/lint` and `core` tests continuously; run `--grade` after the shell compiles.
 
 ## Patterns (use these, don't reinvent)
 
